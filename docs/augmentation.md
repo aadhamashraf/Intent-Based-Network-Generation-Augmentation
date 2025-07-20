@@ -2,11 +2,11 @@
 
 This document provides detailed information about the text augmentation techniques available in the Intent-Based Network Generation Augmentation toolkit.
 
-## 🎯 Overview
+## Overview
 
 The augmentation system provides 11+ sophisticated techniques for enhancing intent-based networking datasets. These techniques are designed to improve dataset diversity, robustness, and size while maintaining semantic meaning and technical accuracy.
 
-## 🔧 Available Techniques
+## Available Techniques
 
 ### 1. T5-Based Paraphrasing (`paraphrase`)
 
@@ -415,7 +415,7 @@ def safe_augment(text, technique, retries=3):
     return text  # Return original if all attempts fail
 ```
 
-## 🔧 Hardware Requirements
+## Hardware Requirements
 
 ### Minimum Requirements
 - **CPU**: 4 cores, 2.0 GHz
@@ -448,7 +448,7 @@ else:
     paraphraser = pipeline("text2text-generation", device=-1)
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -502,23 +502,6 @@ def quality_gate(original, augmented):
         return original  # Reject poor augmentation
     return augmented
 ```
-
-## 🔮 Future Enhancements
-
-### Planned Features
-- [ ] Domain-specific augmentation for 5G/6G
-- [ ] Multi-language support
-- [ ] Custom augmentation pipelines
-- [ ] Real-time quality assessment
-- [ ] Automated parameter tuning
-- [ ] Integration with active learning
-
-### Research Directions
-- [ ] Adversarial training techniques
-- [ ] Semantic consistency preservation
-- [ ] Technical term protection
-- [ ] Context-aware augmentation
-- [ ] Quality-guided augmentation
 
 ## 📚 References
 
