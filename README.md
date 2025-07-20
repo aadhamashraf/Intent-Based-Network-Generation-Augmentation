@@ -2,7 +2,7 @@
 
 A comprehensive toolkit for generating, augmenting, analyzing, and evaluating advanced intent-based networking (IBN) datasets tailored for 5G/3GPP research. The system combines modular data synthesis, extensive augmentation options, expert-grade LLM-driven evaluation, and in-depth dataset analytics.
 
-## 🚀 Features
+## Features
 
 - **Advanced Intent Generation**: Sophisticated 3GPP-compliant network intent generation
 - **Multi-Modal Augmentation**: 11+ augmentation techniques including LLM-based methods
@@ -10,7 +10,7 @@ A comprehensive toolkit for generating, augmenting, analyzing, and evaluating ad
 - **Comprehensive Analytics**: Statistical and linguistic dataset analysis
 - **Research-Grade Quality**: Publication-ready datasets with detailed metadata
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ├── src/                          # Main source code
@@ -24,7 +24,7 @@ A comprehensive toolkit for generating, augmenting, analyzing, and evaluating ad
 └── README.md                     # This file
 ```
 
-## 🛠️ Installation
+## Installation
 
 1. Clone the repository:
 ```bash
@@ -81,7 +81,7 @@ for intent in intents:
 generator.export_to_csv(intents, "dataset.csv")
 ```
 
-## 📊 Evaluation
+## Evaluation
 
 ### LLM-Based Evaluation
 
@@ -100,7 +100,7 @@ python src/Evaluation/evaluation_summarizer.py evaluated_dataset.jsonl
 python src/Evaluation/base_evaluation.py
 ```
 
-## 🔧 Configuration Options
+## Configuration Options
 
 ### Augmentation Techniques
 
@@ -122,7 +122,7 @@ python src/Evaluation/base_evaluation.py
 - **JSONL**: Line-delimited JSON for streaming
 - **JSON**: Complete research dataset with metadata
 
-## 📈 Dataset Quality Metrics
+##  Dataset Quality Metrics
 
 - **Technical Accuracy**: 3GPP compliance and terminology correctness
 - **Realism Score**: Real-world deployment feasibility
@@ -130,44 +130,25 @@ python src/Evaluation/base_evaluation.py
 - **Linguistic Quality**: Grammar, clarity, and naturalness
 - **Diversity Metrics**: Lexical and semantic variety
 
-## 🔬 Research Applications
-
-- Intent-based networking research
-- 5G/6G network automation
-- Natural language processing for telecom
-- Network slice orchestration
-- AI/ML model training for network management
-
-## 📚 Documentation
+## Documentation
 
 Detailed documentation for each module:
 - [Intent Generators](src/Intents_Generators/README.md)
 - [Evaluation Tools](src/Evaluation/README.md)
 - [Augmentation Utilities](docs/augmentation.md)
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👨‍💻 Author
+## Author
 
 **Adham Ashraf Eltholth**
 
 ## 🙏 Acknowledgments
 
+- Dr. Ghada Soliman
 - 3GPP standards community
 - HuggingFace transformers library
 - spaCy NLP library
 - Research community in intent-based networking
-
-## 📞 Support
-
-For questions, issues, or contributions, please open an issue on GitHub or contact the author.
