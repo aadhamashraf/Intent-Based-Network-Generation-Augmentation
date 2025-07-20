@@ -28,7 +28,7 @@ A comprehensive toolkit for generating, augmenting, analyzing, and evaluating ad
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/Intent-Based-Network-Generation-Augmentation.git
+https://github.com/aadhamashraf/Intent-Based-Network-Generation-Augmentation.git
 cd Intent-Based-Network-Generation-Augmentation
 ```
 
