@@ -1,3 +1,7 @@
+import subprocess
+from dataclasses import dataclass
+from typing import Dict, Any, List
+
 @dataclass
 class EvaluationMetrics:
     technical_accuracy: float

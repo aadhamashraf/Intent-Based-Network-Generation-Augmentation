@@ -1,3 +1,7 @@
+import random
+from enum import Enum
+from typing import List, Any
+
 class IntentType(Enum):
     DEPLOYMENT = "Deployment Intent"
     MODIFICATION = "Modification Intent"

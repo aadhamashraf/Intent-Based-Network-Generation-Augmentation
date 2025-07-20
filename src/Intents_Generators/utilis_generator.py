@@ -1,3 +1,9 @@
+import uuid
+import time
+import random
+from datetime import datetime, timedelta
+from typing import List, Any
+
 def generate_unique_id(prefix: str = "IBN") -> str:
     """Generate a unique identifier for intent records."""
     timestamp = int(time.time() * 1000)

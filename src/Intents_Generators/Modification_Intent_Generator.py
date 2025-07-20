@@ -1,3 +1,9 @@
+import uuid
+import random
+from typing import Dict, Any
+from .Parameter_Generator import ParameterGenerator
+from .utilis_generator import current_timestamp, generate_unique_id, random_choice, random_int, random_float
+
 class ModificationIntentGenerator:
     """Generator for modification intent records."""
     
