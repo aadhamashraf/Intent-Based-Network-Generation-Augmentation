@@ -38,28 +38,55 @@ import torch
 import spacy
 from faker import Faker
 from deep_translator import GoogleTranslator
-from transformers import AutoTokenizer, pipeline, T5Tokenizer, GPT2Tokenizer , GPTNeoForCausalLM , BertTokenizer, BertForMaskedLM
+from transformers import AutoTokenizer, pipeline, T5Tokenizer, GPT2Tokenizer, GPTNeoForCausalLM, BertTokenizer, BertForMaskedLM
 from nltk.corpus import wordnet
+import nltk
+
+# Download required NLTK data
+try:
+    nltk.download('wordnet', quiet=True)
+    nltk.download('punkt', quiet=True)
+    nltk.download('averaged_perceptron_tagger', quiet=True)
+except:
+    pass
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 logging.info(f"Device set to use {device}")
 
-bert_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-bert_model = BertForMaskedLM.from_pretrained("bert-base-uncased").to(device)
+# Initialize models with error handling
+try:
+    bert_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    bert_model = BertForMaskedLM.from_pretrained("bert-base-uncased").to(device)
+except Exception as e:
+    logger.warning(f"Failed to load BERT model: {e}")
+    bert_tokenizer = None
+    bert_model = None
 
-nlp = spacy.load("en_core_web_md")
+try:
+    nlp = spacy.load("en_core_web_md")
+except Exception as e:
+    logger.warning(f"Failed to load spaCy model: {e}")
+    nlp = None
 
-gpt2_tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-125M")
-gpt2_tokenizer.pad_token = gpt2_tokenizer.eos_token
+try:
+    gpt2_tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-125M")
+    gpt2_tokenizer.pad_token = gpt2_tokenizer.eos_token
+    gpt2_model = GPTNeoForCausalLM.from_pretrained("EleutherAI/gpt-neo-125M").to(device)
+except Exception as e:
+    logger.warning(f"Failed to load GPT-Neo model: {e}")
+    gpt2_tokenizer = None
+    gpt2_model = None
 
-gpt2_model = GPTNeoForCausalLM.from_pretrained("EleutherAI/gpt-neo-125M").to(device)
-
-paraphraser = pipeline(
-    "text2text-generation",
-    model="Vamsi/T5_Paraphrase_Paws",
-    tokenizer=T5Tokenizer.from_pretrained("Vamsi/T5_Paraphrase_Paws", legacy=False),
-    device=0 if device == "cuda" else -1
-)
+try:
+    paraphraser = pipeline(
+        "text2text-generation",
+        model="Vamsi/T5_Paraphrase_Paws",
+        tokenizer=T5Tokenizer.from_pretrained("Vamsi/T5_Paraphrase_Paws", legacy=False),
+        device=0 if device == "cuda" else -1
+    )
+except Exception as e:
+    logger.warning(f"Failed to load T5 paraphraser: {e}")
+    paraphraser = None
 
 fake = Faker()
 logging.basicConfig(level=logging.INFO)
@@ -103,6 +130,10 @@ def entity_shuffle(text):
     return ' '.join(words)
 
 def gpt2_synthesize(text, max_new_tokens=50):
+    if not gpt2_model or not gpt2_tokenizer:
+        logger.warning("GPT-2 model not available, returning original text")
+        return text
+        
     try:
         prompt = f"Extend this network intent logically: {text}\nIntent:"
 
@@ -136,6 +167,10 @@ def gpt2_synthesize(text, max_new_tokens=50):
 
 def contextual_synonym_augment(text):
     """Replace one word with a contextually similar one using spaCy word vectors."""
+    if not nlp:
+        logger.warning("spaCy model not available, returning original text")
+        return text
+        
     doc = nlp(text)
     words = [token.text for token in doc if token.has_vector and not token.is_stop and token.is_alpha]
     if not words:
@@ -155,6 +190,10 @@ def contextual_synonym_augment(text):
 
 def mask_fill_augment(text):
     """Randomly mask a word and let BERT predict a replacement."""
+    if not bert_model or not bert_tokenizer:
+        logger.warning("BERT model not available, returning original text")
+        return text
+        
     words = text.split()
     if len(words) < 3:
         return text
@@ -193,6 +232,10 @@ def adversarial_noise(text):
 
 def paraphrase(text, retries=2):
     """Paraphrase text using a T5 transformer with retries."""
+    if not paraphraser:
+        logger.warning("T5 paraphraser not available, returning original text")
+        return text
+        
     for attempt in range(retries):
         try:
             result = paraphraser(f"paraphrase: {text}", max_length=256, do_sample=True,

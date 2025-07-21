@@ -17,6 +17,7 @@ from .Report_Request_Intent_Generator import ReportRequestIntentGenerator
 from .Feasibility_Check_Intent_Generator import FeasibilityCheckIntentGenerator
 from .Notification_Request_Intent_Generator import NotificationRequestIntentGenerator
 from .Constraint_Engine import ConstraintEngine
+from ..Evaluation.evaluation_metric import DataEvaluator
 
 class Advanced3GPPIntentGenerator:
     """Main class for generating advanced 3GPP intent records."""

@@ -16,13 +16,17 @@ For command-line options, see config.py
 
 import sys
 import os
+import json
+import random
 from datetime import datetime
+from dataclasses import asdict
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from Intents_Generators.Advanced3GPPIntentGenerator import Advanced3GPPIntentGenerator
 from Intents_Generators.Constants_Enums import IntentType
+from Intents_Generators.utilis_generator import generate_unique_id
 from Evaluation.evaluation_metric import DataEvaluator
 from config import parse_args
 from augmentation_utils import *

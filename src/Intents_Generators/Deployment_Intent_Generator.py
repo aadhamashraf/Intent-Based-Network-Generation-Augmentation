@@ -1,5 +1,6 @@
 import uuid
 import random
+from typing import Dict, Any, List
 from typing import Dict, Any
 from .Constants_Enums import NETWORK_FUNCTIONS
 from .Parameter_Generator import ParameterGenerator
@@ -9,8 +10,15 @@ class DeploymentIntentGenerator:
     """Generator for deployment intent records."""
     
     def __init__(self):
-        from .Constraint_Engine import ConstraintEngine
         self.constraint_engine = ConstraintEngine()
+    
+    def __init__(self):
+        # Import here to avoid circular imports
+        try:
+            from .Constraint_Engine import ConstraintEngine
+            self.constraint_engine = ConstraintEngine()
+        except ImportError:
+            self.constraint_engine = None
     
     @staticmethod
     def generate_parameters() -> Dict[str, Any]:

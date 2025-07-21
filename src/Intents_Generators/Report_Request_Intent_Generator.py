@@ -8,6 +8,30 @@ from .utilis_generator import current_timestamp, generate_unique_id, random_choi
 class ReportRequestIntentGenerator:
     """Generator for report request intent records."""
     
+    def __init__(self):
+        # Import here to avoid circular imports
+        try:
+            from .Constraint_Engine import ConstraintEngine
+            self.constraint_engine = ConstraintEngine()
+        except ImportError:
+            self.constraint_engine = None
+    
+    def generate_constrained_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
+        """Generate report request parameters with realistic constraints."""
+        base_params = self.generate_parameters()
+        
+        # Apply constraints if constraint engine is available
+        if self.constraint_engine:
+            # Override with constrained parameters
+            base_params["qos_parameters"] = self.constraint_engine.generate_constrained_qos_parameters(
+                slice_type, priority, location
+            )
+            base_params["resource_allocation"] = self.constraint_engine.generate_constrained_resource_allocation(
+                complexity, slice_type, priority
+            )
+        
+        return base_params
+    
     @staticmethod
     def generate_parameters() -> Dict[str, Any]:
         """Generate report request-specific parameters."""

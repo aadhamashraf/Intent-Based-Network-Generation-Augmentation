@@ -6,12 +6,23 @@ from collections import Counter
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.cluster import DBSCAN
 from sklearn.metrics.pairwise import cosine_similarity
-from sentence_transformers import SentenceTransformer, util
 import textstat
 import nltk
 
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
+# Download required NLTK data
+try:
+    nltk.download('punkt', quiet=True)
+    nltk.download('averaged_perceptron_tagger', quiet=True)
+except:
+    pass
+
+# Try to import sentence transformers
+try:
+    from sentence_transformers import SentenceTransformer, util
+    SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMERS_AVAILABLE = False
+    print("Warning: sentence-transformers not available. Some features will be disabled.")
 
 # ---- Config ----
 DATA_PATH = "3gpp_research_intents_2025-07-15.csv"
@@ -101,6 +112,9 @@ def readability_measures(texts):
 
 # ---- Semantic Similarity ----
 def semantic_similarity_labelwise(df, text_col, label_col):
+    if not SENTENCE_TRANSFORMERS_AVAILABLE:
+        return {"error": "sentence-transformers not available"}
+        
     model = SentenceTransformer("all-MiniLM-L6-v2")
     results = {}
     labels = df[label_col].unique()
@@ -121,6 +135,9 @@ def semantic_similarity_labelwise(df, text_col, label_col):
 
 # ---- Clustering ----
 def intent_cluster_count(texts):
+    if not SENTENCE_TRANSFORMERS_AVAILABLE:
+        return {"n_clusters": 0, "noise_points": 0, "cluster_entropy": 0}
+        
     model = SentenceTransformer("all-MiniLM-L6-v2")
     emb = model.encode(list(texts), show_progress_bar=False)
     clustering = DBSCAN(eps=0.45, min_samples=10, metric='cosine').fit(emb)
@@ -193,10 +210,13 @@ def main():
 
     md_header("Semantic Similarity (per Label)")
     sem_by_label = semantic_similarity_labelwise(df, TEXT_COLUMN, LABEL_COLUMN)
-    for l, metrics in sem_by_label.items():
-        md_line(f"### Label: `{l}`")
-        for mk, mv in metrics.items():
-            md_line(f"- **{mk}**: `{mv:.4f}`")
+    if "error" not in sem_by_label:
+        for l, metrics in sem_by_label.items():
+            md_line(f"### Label: `{l}`")
+            for mk, mv in metrics.items():
+                md_line(f"- **{mk}**: `{mv:.4f}`")
+    else:
+        md_line("- **Error**: Semantic similarity analysis not available")
 
     md_header("Clustering Metrics")
     clusters = intent_cluster_count(df[TEXT_COLUMN])

@@ -12,7 +12,6 @@ Components:
 - evaluation_summarizer: Automated report generation and insights
 """
 
-from .base_evaluation import *
 from .evaluation_metric import EvaluationMetrics, DataEvaluator
 
 __all__ = [

@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  ibn-toolkit:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ibn-generation-toolkit
+    volumes:
+      - ../data:/app/data
+      - ../output:/app/output
+      - ../logs:/app/logs
+      - ../cache:/app/cache
+    environment:
+      - PYTHONPATH=/app/src
+      - TOKENIZERS_PARALLELISM=false
+    command: python src/main.py --num_records 100 --output_file /app/output/docker_generated.csv
+    
+  ibn-jupyter:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ibn-jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - ../:/app
+      - ../notebooks:/app/notebooks
+    environment:
+      - PYTHONPATH=/app/src
+      - TOKENIZERS_PARALLELISM=false
+    command: >
+      bash -c "pip install jupyter &&
+               jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --notebook-dir=/app"
+    
+  ibn-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ibn-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../data:/app/data
+      - ../output:/app/output
+    environment:
+      - PYTHONPATH=/app/src
+      - TOKENIZERS_PARALLELISM=false
+    command: >
+      bash -c "pip install fastapi uvicorn &&
+               python -c 'from scripts.api_server import app; import uvicorn; uvicorn.run(app, host=\"0.0.0.0\", port=8000)'"
+
+networks:
+  default:
+    name: ibn-network
