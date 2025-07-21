@@ -46,3 +46,43 @@
 | 10   | Resource Allocation/Optimization Simulation    | Efficiency, cost reduction                    |
 
 Let me know if you’d like **sample code, workflows, or references** for any specific item from this list!
+
+---- 
+
+# **NLP & LLM Applications**
+
+1. Intent Understanding & Classification
+Goal: Automatically categorize freeform network intent statements (e.g., “Establish advanced performance assurance...”).
+Methods:
+* Fine-tune transformer models (e.g., BERT, RoBERTa) or use few-shot LLM prompting to classify text into intent categories.
+* Explore hierarchical or multi-label intent taxonomies.
+
+2. Intent Extraction & Slot Filling
+Goal: Parse complex intent descriptions into structured data (e.g., extract KPIs, service tiers, locations from text).
+Methods:
+* Named Entity Recognition (NER) for network parameters, locations, and service levels.
+* Sequence-to-sequence models or zero-shot/few-shot LLMs for information extraction.
+
+3. SLA & KPI Relationship Mining
+Goal: Discover connections between stated intents and underlying SLAs/KPIs automatically from both documentation and intent text.
+Methods:
+* Use LLMs for relation extraction and entity linking.
+* Apply prompt-based semantic matching to associate intent phrases with KPI or SLA fields.
+
+4. Semantic Search & Retrieval
+Goal: Enable operators to “search by intent”—finding similar intents, SLA contracts, or configuration patterns.
+Methods:
+* Embed intent texts and metadata using Sentence Transformers or LLM embedding APIs.
+* Implement semantic similarity or nearest neighbor search across a catalog of intents.
+
+5. Intent Quality & Drift Detection
+Goal: Detect ambiguous, inconsistent, or evolving intent statements as vocabularies and practices change.
+Methods:
+* LLM-based uncertainty estimation and intent paraphrase detection.
+* Unsupervised clustering to flag novel or drifting intent types.
+
+6. Natural Language SLA Querying & Explanation
+Goal: Build agents that answer natural language questions about network policy, SLA compliance, or KPI status, grounded in both structured records and free-text intents.
+Methods:
+* Fine-tune retrieval-augmented generation LLMs to “read” both JSON data and intent texts.
+* Integrate with structured data sources via LLM-chained retrieval.
