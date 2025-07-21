@@ -16,6 +16,7 @@ from .Performance_Assurance_Intent_Generator import PerformanceAssuranceIntentGe
 from .Report_Request_Intent_Generator import ReportRequestIntentGenerator
 from .Feasibility_Check_Intent_Generator import FeasibilityCheckIntentGenerator
 from .Notification_Request_Intent_Generator import NotificationRequestIntentGenerator
+from .Constraint_Engine import ConstraintEngine
 
 class Advanced3GPPIntentGenerator:
     """Main class for generating advanced 3GPP intent records."""
@@ -25,8 +26,7 @@ class Advanced3GPPIntentGenerator:
         self.used_ids = set()
         self.intent_counter = 0
         self.research_session_id = f"RESEARCH_{int(time.time())}_{uuid.uuid4().hex[:12]}"
-        self.llm_synthesizer = LLMDataSynthesizer()
-        self.data_evaluator = DataEvaluator()
+        self.constraint_engine = ConstraintEngine()
         
         # Intent generators
         self.generators = {
@@ -60,45 +60,130 @@ class Advanced3GPPIntentGenerator:
     def generate_intent(self) -> NetworkIntent:
         """Generate a single intent record."""
         intent_type = random_choice(list(IntentType))
+        
+        # First, select slice type and location to establish context
+        slice_type = random_choice(ADVANCED_SLICE_TYPES)
+        location = random_choice(ADVANCED_LOCATIONS)
+        
+        # Generate constrained parameters based on context
+        priority = self.constraint_engine.generate_constrained_priority(
+            slice_type, location, intent_type.value
+        )
+        
+        complexity = self.constraint_engine.generate_constrained_complexity(
+            slice_type, priority, intent_type.value
+        )
+        
+        research_context = self.constraint_engine.generate_constrained_research_context(
+            slice_type, complexity, priority
+        )
+        
+        compliance_standards = self.constraint_engine.generate_constrained_compliance_standards(
+            slice_type, intent_type.value, "CORE"
+        )
+        
         generator = self.generators[intent_type]
         
-        # Generate base parameters
-        parameters = generator.generate_parameters()
+        # Generate constrained parameters
+        parameters = generator.generate_constrained_parameters(
+            slice_type, priority, location, complexity
+        )
         
-        # Apply LLM synthesis if enabled
-        llm_metadata = None
-        if self.use_llm_synthesis:
-            synthesis_result = self.llm_synthesizer.synthesize_intent_data(
-                intent_type.value, parameters
-            )
-            parameters = synthesis_result.synthesized_data
-            llm_metadata = {
-                "evaluation_score": synthesis_result.evaluation_score,
-                "validation_results": [asdict(vr) for vr in synthesis_result.validation_results],
-                "improvements": synthesis_result.improvements,
-                "synthesized": True
-            }
+        # Override QoS parameters with constrained ones
+        parameters["qos_parameters"] = self.constraint_engine.generate_constrained_qos_parameters(
+            slice_type, priority, location
+        )
+        
+        # Override resource allocation with constrained ones
+        parameters["resource_allocation"] = self.constraint_engine.generate_constrained_resource_allocation(
+            complexity, slice_type, priority
+        )
         
         # Generate description
-        location = random_choice(ADVANCED_LOCATIONS)
-        slice_type = random_choice(ADVANCED_SLICE_TYPES)
         description = generator.generate_description(parameters, location, slice_type)
         
-        # Generate metadata
-        metadata = self.generate_metadata(intent_type.value)
+        # Generate constrained metadata
+        metadata = {
+            "version": f"{random_int(1, 3)}.{random_int(0, 9)}.{random_int(0, 99)}",
+            "standard": "3GPP_Release_17",
+            "compliance": compliance_standards,
+            "research_context": research_context,
+            "technical_complexity": complexity,
+            "generation_timestamp": current_timestamp(),
+            "generator_version": "2.0.0_Research_Edition",
+            "data_classification": random_choice(['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'RESTRICTED']),
+            "quality_score": self._calculate_quality_score(complexity, priority, slice_type),
+            "validation_status": random_choice(['VALIDATED', 'PENDING_VALIDATION']),
+            "research_relevance": self._determine_research_relevance(complexity, priority),
+            "industry_vertical": self._determine_industry_vertical(slice_type, location)
+        }
         
         return NetworkIntent(
             id=generate_unique_id(),
             intent_type=intent_type.value,
             description=description,
             timestamp=current_timestamp(),
-            priority=random_choice(list(Priority)).value,
+            priority=priority,
             network_slice=slice_type,
             location=location,
             parameters=parameters,
-            metadata=metadata,
-            llm_metadata=llm_metadata
+            metadata=metadata
         )
+    
+    def _calculate_quality_score(self, complexity: int, priority: str, slice_type: str) -> float:
+        """Calculate quality score based on realistic factors."""
+        base_score = 7.0
+        
+        # Complexity contributes to quality
+        complexity_bonus = (complexity / 10) * 2.0  # 0 to 2.0
+        
+        # Priority contributes to quality
+        priority_bonus = {
+            'EMERGENCY': 1.0,
+            'CRITICAL': 0.8,
+            'HIGH': 0.5,
+            'MEDIUM': 0.2,
+            'LOW': 0.0
+        }.get(priority, 0.0)
+        
+        # Slice type contributes to quality
+        slice_category = self.constraint_engine.categorize_slice_type(slice_type)
+        slice_bonus = {
+            'V2X': 0.8,
+            'URLLC': 0.6,
+            'eMBB': 0.4,
+            'mMTC': 0.2
+        }.get(slice_category, 0.0)
+        
+        total_score = base_score + complexity_bonus + priority_bonus + slice_bonus
+        return min(10.0, total_score)
+    
+    def _determine_research_relevance(self, complexity: int, priority: str) -> str:
+        """Determine research relevance based on parameters."""
+        if complexity >= 8 and priority in ['CRITICAL', 'EMERGENCY']:
+            return 'HIGH'
+        elif complexity >= 6 or priority in ['HIGH', 'CRITICAL']:
+            return 'MEDIUM'
+        else:
+            return 'LOW'
+    
+    def _determine_industry_vertical(self, slice_type: str, location: str) -> str:
+        """Determine industry vertical based on slice type and location."""
+        slice_lower = slice_type.lower()
+        location_lower = location.lower()
+        
+        if any(keyword in slice_lower for keyword in ['vehicle', 'autonomous', 'v2x']):
+            return 'AUTOMOTIVE'
+        elif any(keyword in slice_lower for keyword in ['industrial', 'manufacturing', 'automation']):
+            return 'MANUFACTURING'
+        elif any(keyword in slice_lower for keyword in ['health', 'medical', 'surgery']):
+            return 'HEALTHCARE'
+        elif any(keyword in slice_lower for keyword in ['agriculture', 'farm', 'crop']):
+            return 'AGRICULTURE'
+        elif any(keyword in location_lower for keyword in ['smart', 'city', 'urban']):
+            return 'SMART_CITIES'
+        else:
+            return 'TELECOMMUNICATIONS'
     
     def generate_batch(self, count: int, progress_callback=None) -> List[NetworkIntent]:
         """Generate a batch of intent records."""
