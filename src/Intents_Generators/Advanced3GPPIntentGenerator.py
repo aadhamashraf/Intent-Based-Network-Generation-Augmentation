@@ -27,6 +27,7 @@ class Advanced3GPPIntentGenerator:
         self.intent_counter = 0
         self.research_session_id = f"RESEARCH_{int(time.time())}_{uuid.uuid4().hex[:12]}"
         self.constraint_engine = ConstraintEngine()
+        self.data_evaluator = DataEvaluator()
         
         # Intent generators
         self.generators = {
