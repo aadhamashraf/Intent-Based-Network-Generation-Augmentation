@@ -10,9 +10,6 @@ Main Components:
 - Augmentation: Multiple text augmentation techniques
 - Evaluation: LLM-based and statistical evaluation tools
 - Analysis: Comprehensive dataset analytics
-
-Author: Adham Ashraf Eltholth
-License: MIT
 """
 
 __version__ = "2.0.0"
