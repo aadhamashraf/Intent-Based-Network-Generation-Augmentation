@@ -322,4 +322,3 @@ class Advanced3GPPIntentGenerator:
         
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(research_data, f, indent=2, ensure_ascii=False)
-
