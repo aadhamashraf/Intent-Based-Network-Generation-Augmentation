@@ -15,62 +15,49 @@ RETRY_ATTEMPTS = 2
 
 def build_evaluation_prompt(intent_json_string: str) -> str:
     """
-    Constructs the detailed, multi-faceted evaluation prompt for the LLM.
-    This prompt instructs the model to act as a 5G network architect.
+    Constructs the new detailed evaluation prompt for the LLM.
+    This prompt uses the updated evaluation criteria.
     """
-    return f"""
-You are a senior 5G network architect and AI researcher specializing in Intent-Based Networking (IBN) and 3GPP standards.
-Your task is to conduct a meticulous, multi-faceted evaluation of the following generated network intent record.
-The record is provided as a complete JSON object.
+    # Extract the description from the JSON for evaluation
+    try:
+        intent_data = json.loads(intent_json_string)
+        text = intent_data.get('description', 'No description available')
+        label = intent_data.get('intent_type', 'Unknown')
+    except:
+        text = intent_json_string
+        label = 'Unknown'
+    
+    return f"""You are an expert in both telecommunications (5G networking) and computational linguistics.
+Your task is to critically evaluate the following intent sample and score it across multiple expert criteria.
 
-Critically analyze all fields: the high-level description, the intent type, and especially the deeply nested `parameters`.
-Assess the record for technical accuracy, realism, compliance, and internal consistency.
+--- TEXT: "{text}" LABEL: "{label}" ---
 
----
-INTENT_JSON: "{intent_json_string}"
----
+Please evaluate and respond with a JSON object containing these fields:
 
-Respond ONLY in a single, well-formed JSON format with the following structure.
-Provide scores on a 1-10 scale where 1 is poor and 10 is excellent.
+1. grammar_score (1-5): Rate grammar and sentence construction.
+2. intent_clarity (1-5): Is the intent of the request unambiguous?
+3. domain_relevance (1-5): How appropriate is this text for a 5G intent dataset?
+4. linguistic_naturalness (1-5): How human-like and natural is the phrasing?
+5. terminology_accuracy (1-5): Are technical terms used correctly (e.g., slices, URLLC, gNB)?
+6. hallucination_risk: "None", "Low", "Medium", or "High"
+7. label_confidence: How confident are you that the label is correct? (1-5)
+8. is_confusing (true/false): Would a model likely misclassify this input?
+9. issues_detected: List of critical issues (e.g., "ambiguous phrasing", "domain mismatch", "grammar errors")
+10. expert_feedback: Suggest improvement if any.
 
+Respond ONLY with a valid JSON object in this format:
 {{
-  "overall_assessment": {{
-    "overall_quality_score": "A numerical score from 1-10, representing your holistic evaluation of the sample.",
-    "executive_summary": "A brief, one-sentence summary of the intent's quality and primary strengths or weaknesses."
-  }},
-  "core_technical_evaluation": {{
-    "technical_accuracy_score": "1-10. How correct are the technologies, parameters, and values from a 5G architecture perspective?",
-    "realism_and_implementability_score": "1-10. Does this intent represent a realistic, real-world operational scenario?",
-    "3gpp_compliance_score": "1-10. How well does the intent align with relevant 3GPP (e.g., Rel-16/17) and ETSI NFV standards?",
-    "internal_consistency_score": "1-10. Are the parameters within the intent logically consistent?",
-    "research_value_score": "1-10. How novel, complex, or insightful is this generated sample for research?"
-  }},
-  "linguistic_evaluation": {{
-    "intent_clarity_score": "1-10. How clear and unambiguous is the intent's 'description' field?",
-    "terminology_accuracy_score": "1-10. Is the technical terminology in the 'description' used correctly?",
-    "linguistic_naturalness_score": "1-10. How human-like is the phrasing in the 'description'?"
-  }},
-  "weakness_analysis": {{
-    "primary_weakness_category": "Select one from: 'Technical Inaccuracy', 'Lack of Realism', 'Internal Inconsistency', 'Vague Description', 'None'.",
-    "detailed_issues_detected": [
-      {{
-        "issue": "A concise description of a specific problem found.",
-        "location": "The JSON path to the problematic field (e.g., 'parameters.qos_parameters.packet_delay_budget').",
-        "severity": "High, Medium, or Low"
-      }}
-    ]
-  }},
-  "enhancement_recommendations": {{
-    "suggested_modifications": [
-      {{
-        "location": "The JSON path to the field that needs changing.",
-        "recommendation": "A specific, actionable suggestion for improvement."
-      }}
-    ],
-    "generator_logic_feedback": "Broader advice on how the data generation logic itself could be improved."
-  }}
-}}
-"""
+  "grammar_score": 4.5,
+  "intent_clarity": 4.0,
+  "domain_relevance": 5.0,
+  "linguistic_naturalness": 4.2,
+  "terminology_accuracy": 4.8,
+  "hallucination_risk": "Low",
+  "label_confidence": 4.5,
+  "is_confusing": false,
+  "issues_detected": ["minor grammar issue"],
+  "expert_feedback": "Consider rephrasing for better clarity"
+}}"""
 
 def evaluate_with_ollama(prompt: str, retries: int = 2) -> dict:
     """
@@ -183,5 +170,3 @@ with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
 print("\n--- Evaluation Complete ---")
 print(f"Successfully evaluated and saved {len(evaluated_records)} records to: {OUTPUT_PATH}")
 print(f"Errors and failed attempts (if any) are logged in: {LOG_PATH}")
-
-
