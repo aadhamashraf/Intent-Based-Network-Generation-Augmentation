@@ -2,18 +2,16 @@
 """
 Example scripts for Intent-Based Network Generation Augmentation toolkit.
 """
-
 import sys
 import os
 import json
 from datetime import datetime
 
-# Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from Intents_Generators.Advanced3GPPIntentGenerator import Advanced3GPPIntentGenerator
 from Evaluation.evaluation_metric import DataEvaluator
-from augmentation_utils import paraphrase, back_translate, synonym_augment
+from augmentation_utils import paraphrase, back_translate, synonym_augment, typo_augment, entity_shuffle_augment
 
 
 def example_basic_generation():
@@ -21,10 +19,8 @@ def example_basic_generation():
     print("Example 1: Basic Intent Generation")
     print("-" * 40)
     
-    # Create generator
     generator = Advanced3GPPIntentGenerator(use_llm_synthesis=False)
     
-    # Generate a few intents
     intents = generator.generate_batch(5)
     
     print(f"Generated {len(intents)} intents:")
@@ -46,12 +42,13 @@ def example_augmentation():
     
     print(f"Original: {original_text}")
     
-    # Try different augmentation techniques
-    augmentations = [
-        ("Synonym", synonym_augment),
-        # Note: Other augmentations may require models to be loaded
-    ]
-    
+  augmentations = [
+    ("Synonym", synonym_augment),
+    ("Paraphrasing", paraphrasing_augment),
+    ("Backtranslation", backtranslation_augment),
+    ("Typo Simulation", typo_augment),
+    ("Entity Shuffling", entity_shuffle_augment)] 
+
     for name, func in augmentations:
         try:
             result = func(original_text)
@@ -65,7 +62,6 @@ def example_evaluation():
     print("\nExample 3: Dataset Evaluation")
     print("-" * 40)
     
-    # Sample intent descriptions
     sample_intents = [
         "Deploy AMF network function with high availability requirements",
         "Configure network slice for eMBB service with enhanced performance",
@@ -76,7 +72,6 @@ def example_evaluation():
     for i, intent in enumerate(sample_intents, 1):
         print(f"{i}. {intent}")
     
-    # Try evaluation (may not work without LLM setup)
     try:
         evaluator = DataEvaluator()
         result = evaluator.evaluate_batch(sample_intents)
@@ -94,23 +89,19 @@ def example_export_formats():
     print("\nExample 4: Export Formats")
     print("-" * 40)
     
-    # Generate sample data
     generator = Advanced3GPPIntentGenerator(use_llm_synthesis=False)
     intents = generator.generate_batch(3)
     
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
-    # Export to CSV
     csv_file = f"example_output_{timestamp}.csv"
     generator.export_to_csv(intents, csv_file)
     print(f"✓ Exported to CSV: {csv_file}")
     
-    # Export to JSON
     json_file = f"example_output_{timestamp}.json"
     generator.export_to_json(intents, json_file)
     print(f"✓ Exported to JSON: {json_file}")
     
-    # Export research dataset
     research_file = f"example_research_{timestamp}.json"
     generator.export_research_dataset(intents, research_file)
     print(f"✓ Exported research dataset: {research_file}")
@@ -123,10 +114,8 @@ def example_custom_configuration():
     print("\nExample 5: Custom Configuration")
     print("-" * 40)
     
-    # Create generator with custom settings
     generator = Advanced3GPPIntentGenerator(use_llm_synthesis=False)
     
-    # Generate intents with progress tracking
     def progress_callback(current, total):
         if current % 2 == 0:  # Print every 2nd update
             print(f"Progress: {current}/{total} ({current/total*100:.1f}%)")
@@ -134,7 +123,6 @@ def example_custom_configuration():
     print("Generating 10 intents with progress tracking:")
     intents = generator.generate_batch(10, progress_callback)
     
-    # Analyze the generated data
     intent_types = {}
     priorities = {}
     
@@ -159,7 +147,6 @@ def main():
     print("=" * 60)
     
     try:
-        # Run examples
         intents = example_basic_generation()
         example_augmentation()
         example_evaluation()

@@ -2,7 +2,6 @@
 """
 Environment setup script for Intent-Based Network Generation Augmentation toolkit.
 """
-
 import os
 import sys
 import subprocess
@@ -33,14 +32,12 @@ def download_models():
     """Download required models."""
     print("Downloading required models...")
     
-    # Download spaCy model
     try:
         subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_md"])
         print("✓ spaCy model downloaded")
     except subprocess.CalledProcessError:
         print("⚠ Failed to download spaCy model. Some features may not work.")
     
-    # Download NLTK data
     try:
         import nltk
         nltk.download('punkt', quiet=True)
@@ -89,16 +86,13 @@ def test_installation():
     print("Testing installation...")
     
     try:
-        # Test basic imports
         sys.path.insert(0, 'src')
         from Intents_Generators.Advanced3GPPIntentGenerator import Advanced3GPPIntentGenerator
         from config import parse_args
         
-        # Test generator creation
         generator = Advanced3GPPIntentGenerator(use_llm_synthesis=False)
         print("✓ Generator creation successful")
         
-        # Test single intent generation
         intent = generator.generate_intent()
         print("✓ Intent generation successful")
         
@@ -115,24 +109,18 @@ def main():
     print("Setting up Intent-Based Network Generation Augmentation toolkit...")
     print("=" * 60)
     
-    # Check Python version
     check_python_version()
     
-    # Install requirements
     if not install_requirements():
         print("Setup failed. Please check the error messages above.")
         sys.exit(1)
     
-    # Download models
     download_models()
     
-    # Check optional dependencies
     check_optional_dependencies()
     
-    # Create directories
     create_directories()
     
-    # Test installation
     if test_installation():
         print("\n" + "=" * 60)
         print("✓ Setup completed successfully!")

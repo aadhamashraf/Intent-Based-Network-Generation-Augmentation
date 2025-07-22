@@ -9,14 +9,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 import textstat
 import nltk
 
-# Download required NLTK data
 try:
     nltk.download('punkt', quiet=True)
     nltk.download('averaged_perceptron_tagger', quiet=True)
 except:
     pass
 
-# Try to import sentence transformers
 try:
     from sentence_transformers import SentenceTransformer, util
     SENTENCE_TRANSFORMERS_AVAILABLE = True

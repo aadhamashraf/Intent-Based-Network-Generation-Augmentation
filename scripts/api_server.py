@@ -2,14 +2,11 @@
 """
 FastAPI server for Intent-Based Network Generation Augmentation toolkit.
 """
-
 import sys
 import os
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import json
-
-# Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 try:
@@ -32,11 +29,9 @@ if FASTAPI_AVAILABLE:
         version="2.0.0"
     )
 
-    # Global generator instance
     generator = Advanced3GPPIntentGenerator(use_llm_synthesis=False)
     evaluator = DataEvaluator()
 
-    # Request/Response models
     class GenerationRequest(BaseModel):
         num_records: int = 10
         use_llm_synthesis: bool = False
@@ -86,13 +81,10 @@ if FASTAPI_AVAILABLE:
                 import random
                 random.seed(request.seed)
             
-            # Update generator settings
             generator.use_llm_synthesis = request.use_llm_synthesis
             
-            # Generate intents
             intents = generator.generate_batch(request.num_records)
             
-            # Convert to serializable format
             intent_data = []
             for intent in intents:
                 intent_dict = {
@@ -107,7 +99,6 @@ if FASTAPI_AVAILABLE:
                 }
                 intent_data.append(intent_dict)
             
-            # Save to file in background
             filename = f"api_generated_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
             background_tasks.add_task(save_intents_to_file, intents, filename)
             
@@ -153,7 +144,6 @@ if FASTAPI_AVAILABLE:
     async def evaluate_intents(request: EvaluationRequest):
         """Evaluate intent quality."""
         try:
-            # Note: This may not work without LLM setup
             result = evaluator.evaluate_batch(request.intents)
             
             return {
@@ -194,7 +184,6 @@ if FASTAPI_AVAILABLE:
             print(f"Error saving file: {e}")
 
 else:
-    # Dummy app if FastAPI is not available
     class DummyApp:
         def __init__(self):
             print("FastAPI not available. Please install with: pip install fastapi uvicorn")
