@@ -21,11 +21,8 @@ import random
 from datetime import datetime
 from dataclasses import asdict
 
-# Add project root to path for imports
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
-
-# Add src to path for imports
 src_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, src_path)
 
@@ -48,23 +45,18 @@ def main():
     print(f"  - Output CSV: {args.output_file}")
     print(f"  - Output JSONL: {args.jsonl_file}")
     
-    # Set random seed for reproducibility
     random.seed(args.random_seed)
-    
-    # Initialize generator
     generator = Advanced3GPPIntentGenerator(use_llm_synthesis=True)
     
-    # Generate dataset
     print(f"\nGenerating {args.num_records} sophisticated intent records...")
     
     def progress_callback(current, total):
-        progress = (current / total) * 100
+        progress = 
         print(f"Progress: {progress:.1f}% ({current}/{total})")
     
     intents = generator.generate_batch(args.num_records, progress_callback)
     print(f"Generated {len(intents)} intent records")
     
-    # Apply augmentations if requested
     augmented_intents = []
     if any([args.use_paraphrasing, args.use_backtranslation, args.use_synonym_aug, 
             args.use_gpt2_aug, args.use_contextual_synonym_aug, args.use_bert_fill_aug, 
@@ -73,74 +65,93 @@ def main():
         print("\nApplying augmentation techniques...")
         
         for intent in intents:
-            # Original intent
             augmented_intents.append(intent)
             
-            # Apply augmentations based on ratios
             if args.use_paraphrasing and random.random() < args.paraphrase_ratio:
                 augmented_intent = intent.__class__(**intent.__dict__)
                 augmented_intent.description = paraphrase(intent.description)
                 augmented_intent.id = generate_unique_id("AUG_PARA")
                 augmented_intents.append(augmented_intent)
-            
+
             if args.use_backtranslation and random.random() < args.backtranslate_ratio:
                 augmented_intent = intent.__class__(**intent.__dict__)
                 augmented_intent.description = back_translate(intent.description)
                 augmented_intent.id = generate_unique_id("AUG_BT")
                 augmented_intents.append(augmented_intent)
-            
+
             if args.use_synonym_aug and random.random() < args.synonym_ratio:
                 augmented_intent = intent.__class__(**intent.__dict__)
                 augmented_intent.description = synonym_augment(intent.description)
                 augmented_intent.id = generate_unique_id("AUG_SYN")
                 augmented_intents.append(augmented_intent)
-            
-            
+
+            if args.use_gpt2_aug and random.random() < args.gpt2_ratio:
+                augmented_intent = intent.__class__(**intent.__dict__)
+                augmented_intent.description = gpt2_augment(intent.description)
+                augmented_intent.id = generate_unique_id("AUG_GPT2")
+                augmented_intents.append(augmented_intent)
+
+            if args.use_contextual_synonym_aug and random.random() < args.contextual_synonym_ratio:
+                augmented_intent = intent.__class__(**intent.__dict__)
+                augmented_intent.description = contextual_synonym_augment(intent.description)
+                augmented_intent.id = generate_unique_id("AUG_CTX_SYN")
+                augmented_intents.append(augmented_intent)
+
+            if args.use_bert_fill_aug and random.random() < args.bert_fill_ratio:
+                augmented_intent = intent.__class__(**intent.__dict__)
+                augmented_intent.description = bert_fill_augment(intent.description)
+                augmented_intent.id = generate_unique_id("AUG_BERT_FILL")
+                augmented_intents.append(augmented_intent)
+
+            if args.use_adversarial_aug and random.random() < args.adversarial_ratio:
+                augmented_intent = intent.__class__(**intent.__dict__)
+                augmented_intent.description = adversarial_augment(intent.description)
+                augmented_intent.id = generate_unique_id("AUG_ADV")
+                augmented_intents.append(augmented_intent)
+
         print(f"Augmented dataset size: {len(augmented_intents)} records")
         intents = augmented_intents
     
-    # Evaluate dataset
-    print("\nEvaluating dataset quality...")
-    try:
-        evaluator = DataEvaluator()
-        # Use the new detailed evaluation
-        descriptions = [intent.description for intent in intents[:5]]
-        labels = [intent.intent_type for intent in intents[:5]]
-        evaluation_results = evaluator.evaluate_batch(descriptions, labels)
-    except Exception as e:
-        print(f"Evaluation failed: {e}")
-        # Create dummy evaluation results
-        from Evaluation.evaluation_metric import EvaluationMetrics
-        dummy_metrics = EvaluationMetrics(8.0, 8.0, 8.0, 8.0, 8.0, 8.0)
-        evaluation_results = {
-            'overall_metrics': dummy_metrics,
-            'detailed_evaluations': [],
-            'batch_insights': ['Evaluation system unavailable - using dummy metrics']
-        }
-    
-    print("Dataset Quality Metrics:")
-    metrics = evaluation_results['overall_metrics']
-    print(f"  - Overall Quality: {metrics.overall_quality:.2f}/5")
-    print(f"  - Technical Accuracy: {metrics.technical_accuracy:.2f}/5")
-    print(f"  - Domain Relevance: {metrics.realism_score:.2f}/5")
-    print(f"  - Research Value: {metrics.research_value:.2f}/5")
-    
-    # Show detailed evaluation results if available
-    if 'evaluation_summary' in evaluation_results:
-        summary = evaluation_results['evaluation_summary']
-        print("\nDetailed Evaluation Summary:")
-        if 'score_averages' in summary:
-            averages = summary['score_averages']
-            print(f"  - Grammar Score: {averages.get('grammar_score', 0):.2f}/5")
-            print(f"  - Intent Clarity: {averages.get('intent_clarity', 0):.2f}/5")
-            print(f"  - Terminology Accuracy: {averages.get('terminology_accuracy', 0):.2f}/5")
+    needEvaluation = input("Do you need evaluation for the generated dataset ? ").lower().strip()
+    if needEvaluation == "y":
         
-        if 'common_issues' in summary and summary['common_issues']:
-            print("  - Common Issues:")
-            for issue, count in list(summary['common_issues'].items())[:3]:
-                print(f"    • {issue}: {count} occurrences")
+        print("\nEvaluating dataset quality...")
+        try:
+            evaluator = DataEvaluator()
+            descriptions = [intent.description for intent in intents[:5]]
+            labels = [intent.intent_type for intent in intents[:5]]
+            evaluation_results = evaluator.evaluate_batch(descriptions, labels)
+        except Exception as e:
+            from Evaluation.evaluation_metric import EvaluationMetrics
+            print(f"Evaluation failed: {e}")
+            dummy_metrics = EvaluationMetrics(0, 0, 0, 0, 0, 0)
+            evaluation_results = {
+                'overall_metrics': dummy_metrics,
+                'detailed_evaluations': [],
+                'batch_insights': ['Evaluation system unavailable - using dummy metrics']
+            }
+        
+        print("Dataset Quality Metrics:")
+        metrics = evaluation_results['overall_metrics']
+        print(f"  - Overall Quality: {metrics.overall_quality:.2f}/5")
+        print(f"  - Technical Accuracy: {metrics.technical_accuracy:.2f}/5")
+        print(f"  - Domain Relevance: {metrics.realism_score:.2f}/5")
+        print(f"  - Research Value: {metrics.research_value:.2f}/5")
+        
+        if 'evaluation_summary' in evaluation_results:
+            summary = evaluation_results['evaluation_summary']
+            print("\nDetailed Evaluation Summary:")
+            if 'score_averages' in summary:
+                averages = summary['score_averages']
+                print(f"  - Grammar Score: {averages.get('grammar_score', 0):.2f}/5")
+                print(f"  - Intent Clarity: {averages.get('intent_clarity', 0):.2f}/5")
+                print(f"  - Terminology Accuracy: {averages.get('terminology_accuracy', 0):.2f}/5")
+            
+            if 'common_issues' in summary and summary['common_issues']:
+                print("  - Common Issues:")
+                for issue, count in list(summary['common_issues'].items())[:3]:
+                    print(f"    • {issue}: {count} occurrences")
     
-    # Export data
     print("\nExporting datasets...")
     timestamp = datetime.now().strftime("%Y-%m-%d")
     
@@ -173,11 +184,11 @@ def main():
             "research_value": metrics.research_value
         }
     }
-    
+    '''
     with open(args.metadata_file, 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
     print(f"  - Metadata: {args.metadata_file}")
-    
+    '''
     print("\nGeneration complete!")
     print("\nDataset Statistics:")
     print(f"  - Total Records: {len(intents)}")
