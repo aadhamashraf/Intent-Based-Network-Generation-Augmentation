@@ -51,16 +51,13 @@ def main():
     print(f"\nGenerating {args.num_records} sophisticated intent records...")
     
     def progress_callback(current, total):
-        progress = 
-        print(f"Progress: {progress:.1f}% ({current}/{total})")
+        print(f"Progress: {(current / total) * 100:.1f}% ({current}/{total})")
     
     intents = generator.generate_batch(args.num_records, progress_callback)
     print(f"Generated {len(intents)} intent records")
     
     augmented_intents = []
-    if any([args.use_paraphrasing, args.use_backtranslation, args.use_synonym_aug, 
-            args.use_gpt2_aug, args.use_contextual_synonym_aug, args.use_bert_fill_aug, 
-            args.use_adversarial_aug]):
+    if any([args.use_paraphrasing, args.use_backtranslation, args.use_synonym_aug, args.use_gpt2_aug, args.use_contextual_synonym_aug, args.use_bert_fill_aug,args.use_adversarial_aug]):
         
         print("\nApplying augmentation techniques...")
         
@@ -113,8 +110,7 @@ def main():
         intents = augmented_intents
     
     needEvaluation = input("Do you need evaluation for the generated dataset ? ").lower().strip()
-    if needEvaluation == "y":
-        
+    if needEvaluation == "y": 
         print("\nEvaluating dataset quality...")
         try:
             evaluator = DataEvaluator()
@@ -155,24 +151,20 @@ def main():
     print("\nExporting datasets...")
     timestamp = datetime.now().strftime("%Y-%m-%d")
     
-    # Export CSV
     csv_filename = args.output_file.replace('.csv', f'_{timestamp}.csv')
     generator.export_to_csv(intents, csv_filename)
     print(f"  - CSV: {csv_filename}")
     
-    # Export JSONL
     jsonl_filename = args.jsonl_file.replace('.jsonl', f'_{timestamp}.jsonl')
     with open(jsonl_filename, 'w', encoding='utf-8') as f:
         for intent in intents:
             f.write(json.dumps(asdict(intent), ensure_ascii=False) + '\n')
     print(f"  - JSONL: {jsonl_filename}")
     
-    # Export research dataset
     research_filename = f"3gpp_research_dataset_{timestamp}.json"
     generator.export_research_dataset(intents, research_filename, evaluation_results)
     print(f"  - Research Dataset: {research_filename}")
     
-    # Export metadata
     metadata = {
         "generation_timestamp": datetime.now().isoformat(),
         "total_records": len(intents),
@@ -193,14 +185,12 @@ def main():
     print("\nDataset Statistics:")
     print(f"  - Total Records: {len(intents)}")
     
-    # Intent type distribution
     intent_stats = {}
     for intent_type in IntentType:
         count = len([i for i in intents if i.intent_type == intent_type.value])
         intent_stats[intent_type.value] = count
         print(f"  - {intent_type.value}: {count}")
     
-    # Complexity distribution
     complexity_stats = {'LOW': 0, 'MEDIUM': 0, 'HIGH': 0}
     for intent in intents:
         complexity = intent.metadata.get('technical_complexity', 5)

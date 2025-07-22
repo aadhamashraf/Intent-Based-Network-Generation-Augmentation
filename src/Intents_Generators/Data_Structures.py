@@ -42,4 +42,4 @@ class SynthesisResult:
     synthesized_data: Dict[str, Any]
     evaluation_score: float
     validation_results: List[ValidationResult]
-    improvements: List[str]
+    improvements: List[str] 

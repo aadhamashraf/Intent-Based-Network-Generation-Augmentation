@@ -18,14 +18,12 @@ from .Feasibility_Check_Intent_Generator import FeasibilityCheckIntentGenerator
 from .Notification_Request_Intent_Generator import NotificationRequestIntentGenerator
 from .Constraint_Engine import ConstraintEngine
 
-# Handle evaluation import with fallback
 try:
     from ..Evaluation.evaluation_metric import DataEvaluator
 except ImportError:
     try:
         from Evaluation.evaluation_metric import DataEvaluator
     except ImportError:
-        # Fallback if evaluation module is not available
         DataEvaluator = None
 
 class Advanced3GPPIntentGenerator:
@@ -39,7 +37,6 @@ class Advanced3GPPIntentGenerator:
         self.constraint_engine = ConstraintEngine()
         self.data_evaluator = DataEvaluator() if DataEvaluator else None
         
-        # Intent generators
         self.generators = {
             IntentType.DEPLOYMENT: DeploymentIntentGenerator(),
             IntentType.MODIFICATION: ModificationIntentGenerator(),
@@ -72,11 +69,9 @@ class Advanced3GPPIntentGenerator:
         """Generate a single intent record."""
         intent_type = random_choice(list(IntentType))
         
-        # First, select slice type and location to establish context
         slice_type = random_choice(ADVANCED_SLICE_TYPES)
         location = random_choice(ADVANCED_LOCATIONS)
         
-        # Generate constrained parameters based on context
         priority = self.constraint_engine.generate_constrained_priority(
             slice_type, location, intent_type.value
         )
@@ -95,25 +90,20 @@ class Advanced3GPPIntentGenerator:
         
         generator = self.generators[intent_type]
         
-        # Generate constrained parameters
         parameters = generator.generate_constrained_parameters(
             slice_type, priority, location, complexity
         )
         
-        # Override QoS parameters with constrained ones
         parameters["qos_parameters"] = self.constraint_engine.generate_constrained_qos_parameters(
             slice_type, priority, location
         )
         
-        # Override resource allocation with constrained ones
         parameters["resource_allocation"] = self.constraint_engine.generate_constrained_resource_allocation(
             complexity, slice_type, priority
         )
         
-        # Generate description
         description = generator.generate_description(parameters, location, slice_type)
         
-        # Generate constrained metadata
         metadata = {
             "version": f"{random_int(1, 3)}.{random_int(0, 9)}.{random_int(0, 99)}",
             "standard": "3GPP_Release_17",
@@ -145,10 +135,8 @@ class Advanced3GPPIntentGenerator:
         """Calculate quality score based on realistic factors."""
         base_score = 7.0
         
-        # Complexity contributes to quality
         complexity_bonus = (complexity / 10) * 2.0  # 0 to 2.0
         
-        # Priority contributes to quality
         priority_bonus = {
             'EMERGENCY': 1.0,
             'CRITICAL': 0.8,
@@ -157,7 +145,6 @@ class Advanced3GPPIntentGenerator:
             'LOW': 0.0
         }.get(priority, 0.0)
         
-        # Slice type contributes to quality
         slice_category = self.constraint_engine.categorize_slice_type(slice_type)
         slice_bonus = {
             'V2X': 0.8,
@@ -207,7 +194,6 @@ class Advanced3GPPIntentGenerator:
             if progress_callback and i % 100 == 0:
                 progress_callback(i, count)
             
-            # Brief pause every 50 records for timestamp uniqueness
             if i % 50 == 0:
                 time.sleep(0.001)
         
@@ -218,15 +204,14 @@ class Advanced3GPPIntentGenerator:
         if self.data_evaluator:
             return self.data_evaluator.evaluate_batch(intents)
         else:
-            # Return dummy evaluation if evaluator is not available
             from .Data_Structures import EvaluationMetrics
             dummy_metrics = EvaluationMetrics(
-                technical_accuracy=8.0,
-                realism_score=8.0,
-                compliance_level=8.0,
-                research_value=8.0,
-                implementability=8.0,
-                overall_quality=8.0
+                technical_accuracy=0,
+                realism_score=0,
+                compliance_level=0,
+                research_value=0,
+                implementability=0,
+                overall_quality=0
             )
             return {
                 'overall_metrics': dummy_metrics,
@@ -245,14 +230,12 @@ class Advanced3GPPIntentGenerator:
         with open(filename, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             
-            # Write header
             writer.writerow([
                 'ID', 'Intent Type', 'Description', 'Timestamp', 'Priority',
                 'Network Slice', 'Location', 'Technical Complexity',
                 'Research Context', 'Compliance Standards', 'Parameters'
             ])
             
-            # Write data
             for intent in intents:
                 writer.writerow([
                     intent.id,
@@ -271,7 +254,6 @@ class Advanced3GPPIntentGenerator:
     def export_research_dataset(self, intents: List[NetworkIntent], filename: str, evaluation_results=None):
         """Export comprehensive research dataset."""
         
-        # Helper function to convert dataclass objects to dictionaries
         def serialize_evaluation_results(eval_results):
             if eval_results is None:
                 return None
@@ -279,10 +261,8 @@ class Advanced3GPPIntentGenerator:
             serialized = {}
             for key, value in eval_results.items():
                 if hasattr(value, '__dict__'):
-                    # Convert dataclass to dict
                     serialized[key] = asdict(value)
                 elif isinstance(value, list):
-                    # Handle list of objects
                     serialized[key] = []
                     for item in value:
                         if hasattr(item, '__dict__'):

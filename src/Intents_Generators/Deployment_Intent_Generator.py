@@ -10,7 +10,6 @@ class DeploymentIntentGenerator:
     """Generator for deployment intent records."""
     
     def __init__(self):
-        # Import here to avoid circular imports
         try:
             from .Constraint_Engine import ConstraintEngine
             self.constraint_engine = ConstraintEngine()

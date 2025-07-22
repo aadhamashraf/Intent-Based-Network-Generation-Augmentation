@@ -2,12 +2,10 @@
 """
 Test suite for intent generators.
 """
-
 import unittest
 import sys
 import os
 
-# Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from Intents_Generators.Advanced3GPPIntentGenerator import Advanced3GPPIntentGenerator
@@ -68,13 +66,10 @@ class TestIntentGenerators(unittest.TestCase):
         """Test priority level generation."""
         intents = self.generator.generate_batch(20)
         
-        # Get all generated priorities
         generated_priorities = set(intent.priority for intent in intents)
         
-        # Should have multiple priority levels
         self.assertGreater(len(generated_priorities), 1)
         
-        # All priorities should be valid
         valid_priorities = {p.value for p in Priority}
         for priority in generated_priorities:
             self.assertIn(priority, valid_priorities)
@@ -83,10 +78,7 @@ class TestIntentGenerators(unittest.TestCase):
         """Test metadata structure."""
         intent = self.generator.generate_intent()
         
-        required_metadata_fields = [
-            'version', 'standard', 'compliance', 'research_context',
-            'technical_complexity', 'generation_timestamp'
-        ]
+        required_metadata_fields = ['version', 'standard', 'compliance', 'research_context','technical_complexity', 'generation_timestamp']
         
         for field in required_metadata_fields:
             self.assertIn(field, intent.metadata)
@@ -95,11 +87,9 @@ class TestIntentGenerators(unittest.TestCase):
         """Test parameters structure."""
         intent = self.generator.generate_intent()
         
-        # Should have basic parameter structure
         self.assertIsInstance(intent.parameters, dict)
         self.assertGreater(len(intent.parameters), 0)
         
-        # Should have timestamp and request_id
         self.assertIn('timestamp', intent.parameters)
         self.assertIn('request_id', intent.parameters)
 

@@ -15,7 +15,6 @@ Main Components:
 __version__ = "2.0.0"
 __author__ = "Adham Ashraf Eltholth"
 
-# Import main classes for easy access
 from .Intents_Generators.Advanced3GPPIntentGenerator import Advanced3GPPIntentGenerator
 from .Intents_Generators.Data_Structures import NetworkIntent, EvaluationMetrics
 from .augmentation_utils import *

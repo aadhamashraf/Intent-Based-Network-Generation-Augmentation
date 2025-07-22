@@ -2,12 +2,10 @@
 """
 Test suite for evaluation components.
 """
-
 import unittest
 import sys
 import os
 
-# Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from Evaluation.evaluation_metric import DataEvaluator, EvaluationMetrics
@@ -51,31 +49,21 @@ class TestEvaluation(unittest.TestCase):
     
     def test_batch_evaluation_structure(self):
         """Test batch evaluation structure."""
-        # Note: This test may not work without Ollama/LLM setup
-        # We'll test the structure instead
         try:
-            result = self.evaluator.evaluate_batch(self.sample_intents)
-            
-            # Check result structure
+            result = self.evaluator.evaluate_batch(self.sample_intents)        
             self.assertIn('overall_metrics', result)
             self.assertIn('detailed_evaluations', result)
             self.assertIn('batch_insights', result)
-            
-            # Check metrics type
             self.assertIsInstance(result['overall_metrics'], EvaluationMetrics)
             
         except Exception as e:
-            # If LLM is not available, that's expected
             self.assertIn('ollama', str(e).lower())
     
     def test_quality_thresholds(self):
         """Test quality thresholds."""
         thresholds = self.evaluator.quality_thresholds
         
-        required_thresholds = [
-            'technical_accuracy', 'realism_score', 'compliance_level',
-            'research_value', 'implementability', 'overall_quality'
-        ]
+        required_thresholds = ['technical_accuracy', 'realism_score', 'compliance_level','research_value', 'implementability', 'overall_quality']
         
         for threshold in required_thresholds:
             self.assertIn(threshold, thresholds)

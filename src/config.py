@@ -69,10 +69,8 @@ def parse_args():
     parser.add_argument("--gpt2_ratio", type=float, default=0.2, help="Ratio for GPT-2 synthesis (0-1)")
     parser.add_argument("--use_contextual_synonym_aug", action="store_true", help="Enable contextual synonym augmentation")
     parser.add_argument("--contextual_syn_ratio", type=float, default=0.2)
-
     parser.add_argument("--use_bert_fill_aug", action="store_true", help="Enable BERT mask filling")
     parser.add_argument("--bert_fill_ratio", type=float, default=0.2)
-
     parser.add_argument("--use_adversarial_aug", action="store_true", help="Enable character-level noise")
     parser.add_argument("--adversarial_ratio", type=float, default=0.2)
 

@@ -42,7 +42,6 @@ from transformers import AutoTokenizer, pipeline, T5Tokenizer, GPT2Tokenizer, GP
 from nltk.corpus import wordnet
 import nltk
 
-# Download required NLTK data
 try:
     nltk.download('wordnet', quiet=True)
     nltk.download('punkt', quiet=True)
@@ -53,7 +52,6 @@ except:
 device = "cuda" if torch.cuda.is_available() else "cpu"
 logging.info(f"Device set to use {device}")
 
-# Initialize models with error handling
 try:
     bert_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
     bert_model = BertForMaskedLM.from_pretrained("bert-base-uncased").to(device)

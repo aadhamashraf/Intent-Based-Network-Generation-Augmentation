@@ -251,24 +251,7 @@ def run_statistical_report(jsonl_path):
     except Exception as e:
         print(f"Error in statistical analysis: {e}")
         print("Creating sample visualizations...")
-        
-        # Create sample data
-        sample_data = {
-            "grammar_score": np.random.uniform(3, 5, 100),
-            "intent_clarity": np.random.uniform(3, 5, 100),
-            "domain_relevance": np.random.uniform(3, 5, 100),
-            "linguistic_naturalness": np.random.uniform(3, 5, 100),
-            "terminology_accuracy": np.random.uniform(3, 5, 100),
-            "label_confidence": np.random.uniform(3, 5, 100),
-            "issues_detected": [["Technical Inaccuracy", "Vague Description"] for _ in range(100)],
-            "Intent Type": ["Deployment Intent", "Performance Assurance Intent"] * 50
-        }
-        
-        df = pd.DataFrame(sample_data)
-        plot_score_statistics(df)
-        plot_top_issues(df)
-        plot_intent_wise_heatmap(df)
-  
+        pass
 
 # ===============================
 # ENTRY POINT

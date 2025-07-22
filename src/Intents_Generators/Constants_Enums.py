@@ -91,5 +91,4 @@ PROTOCOL_PARAMETERS = [
 PERFORMANCE_METRICS = [
     'End_to_End_Latency', 'Jitter_Variation', 'Packet_Loss_Rate',
     'Throughput_Capacity', 'Connection_Density', 'Mobility_Success_Rate',
-    'Service_Availability', 'Network_Efficiency', 'Resource_Utilization'
-]
+    'Service_Availability', 'Network_Efficiency', 'Resource_Utilization']

@@ -2,15 +2,12 @@
 """
 Setup script for Intent-Based Network Generation Augmentation toolkit.
 """
-
 from setuptools import setup, find_packages
 import os
 
-# Read README file
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-# Read requirements
 with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
