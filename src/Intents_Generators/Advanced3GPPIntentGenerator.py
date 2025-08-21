@@ -75,7 +75,7 @@ class Advanced3GPPIntentGenerator:
         priority = self.constraint_engine.generate_constrained_priority(
             slice_type, location, intent_type.value
         )
-        
+
         complexity = self.constraint_engine.generate_constrained_complexity(
             slice_type, priority, intent_type.value
         )
