@@ -12,6 +12,8 @@ Components:
 """
 
 from .Advanced3GPPIntentGenerator import Advanced3GPPIntentGenerator
+from .Template_Engine import AdvancedTemplateEngine, TemplateContext
+from .Enhanced_Constraint_Engine import EnhancedConstraintEngine
 from .Data_Structures import NetworkIntent, EvaluationMetrics, ValidationResult, SynthesisResult
 from .Constants_Enums import IntentType, Priority, NETWORK_FUNCTIONS, ADVANCED_SLICE_TYPES
 from .Parameter_Generator import ParameterGenerator
@@ -22,10 +24,12 @@ from .Performance_Assurance_Intent_Generator import PerformanceAssuranceIntentGe
 from .Report_Request_Intent_Generator import ReportRequestIntentGenerator
 from .Feasibility_Check_Intent_Generator import FeasibilityCheckIntentGenerator
 from .Notification_Request_Intent_Generator import NotificationRequestIntentGenerator
-from .Constraint_Engine import ConstraintEngine
 
 __all__ = [
     'Advanced3GPPIntentGenerator',
+    'AdvancedTemplateEngine',
+    'TemplateContext',
+    'EnhancedConstraintEngine',
     'NetworkIntent',
     'EvaluationMetrics', 
     'ValidationResult',
@@ -41,5 +45,4 @@ __all__ = [
     'ReportRequestIntentGenerator',
     'FeasibilityCheckIntentGenerator',
     'NotificationRequestIntentGenerator',
-    'ConstraintEngine'
 ]
