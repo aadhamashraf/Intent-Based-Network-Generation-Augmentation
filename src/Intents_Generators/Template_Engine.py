@@ -1,17 +1,19 @@
 """
-Advanced Template Engine for Intent Description Generation
+Advanced Template Engine for Intent-Based Network Generation
 
-This module provides sophisticated template-based generation of natural language
-descriptions for network intents, ensuring consistency, realism, and technical accuracy.
-Enhanced with 15 research-grade templates per intent type for maximum sophistication.
+This module provides sophisticated template generation that heavily leverages
+all generated parameters to create realistic, interconnected network intent
+descriptions with concrete values and cross-referenced components.
 """
+
 import random
-from typing import Dict, Any, List
+import re
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 
 @dataclass
 class TemplateContext:
-    """Context information for template generation."""
+    """Context for template generation with comprehensive parameter integration."""
     intent_type: str
     complexity: int
     priority: str
@@ -21,627 +23,463 @@ class TemplateContext:
     metadata: Dict[str, Any]
 
 class AdvancedTemplateEngine:
-    """Advanced template engine for generating sophisticated intent descriptions."""
+    """Advanced template engine with deep parameter integration."""
     
     def __init__(self):
-        self.templates = self._initialize_templates()
-        self.modifiers = self._initialize_modifiers()
-        self.technical_terms = self._initialize_technical_terms()
-        self.parameter_extractors = self._initialize_parameter_extractors()
+        self.deployment_templates = self._initialize_deployment_templates()
+        self.modification_templates = self._initialize_modification_templates()
+        self.performance_templates = self._initialize_performance_templates()
+        self.report_templates = self._initialize_report_templates()
+        self.feasibility_templates = self._initialize_feasibility_templates()
+        self.notification_templates = self._initialize_notification_templates()
         
-    def _initialize_templates(self) -> Dict[str, List[str]]:
-        """Initialize 15 sophisticated intent description templates per type."""
-        return {
-            'DEPLOYMENT': [
-                "Execute {complexity_modifier} deployment of {network_function} network function with {deployment_flavor} configuration at {location} supporting {slice_description} service requirements featuring {orchestration_capabilities}, {security_hardening}, {resource_optimization}, and {performance_analytics} for {research_context}",
-                
-                "Orchestrate {complexity_modifier} instantiation of {network_function} utilizing {vnf_specifications} with {deployment_flavor} architecture at {location} enabling {slice_description} through {cloud_native_orchestration}, {zero_trust_security}, {ai_driven_optimization}, and {predictive_scaling} delivering {sla_guarantees}",
-                
-                "Provision {complexity_modifier} {network_function} deployment incorporating {microservices_architecture} with {deployment_flavor} configuration at {location} for {slice_description} leveraging {edge_computing_capabilities}, {comprehensive_security_hardening}, {intelligent_resource_allocation}, and {real_time_analytics} ensuring {compliance_standards}",
-                
-                "Implement {complexity_modifier} network function virtualization of {network_function} featuring {advanced_vnf_capabilities} with {deployment_flavor} at {location} supporting {slice_description} through {multi_vendor_orchestration}, {defense_in_depth_security}, {machine_learning_optimization}, and {autonomous_lifecycle_management} for {industry_vertical} applications",
-                
-                "Deploy {complexity_modifier} containerized {network_function} instance with {kubernetes_orchestration} utilizing {deployment_flavor} at {location} enabling {slice_description} via {service_mesh_integration}, {policy_driven_security}, {dynamic_resource_scaling}, and {telemetry_driven_insights} achieving {performance_targets}",
-                
-                "Establish {complexity_modifier} {network_function} service deployment featuring {intent_driven_automation} with {deployment_flavor} configuration at {location} for {slice_description} incorporating {closed_loop_orchestration}, {adaptive_security_posture}, {cognitive_resource_management}, and {multi_dimensional_analytics} ensuring {operational_excellence}",
-                
-                "Instantiate {complexity_modifier} {network_function} network element with {cloud_agnostic_deployment} utilizing {deployment_flavor} architecture at {location} supporting {slice_description} through {declarative_orchestration}, {continuous_security_validation}, {predictive_resource_optimization}, and {behavioral_performance_analysis} for {mission_critical_operations}",
-                
-                "Configure {complexity_modifier} {network_function} deployment leveraging {infrastructure_as_code} with {deployment_flavor} specifications at {location} enabling {slice_description} via {gitops_orchestration}, {immutable_security_infrastructure}, {elastic_resource_provisioning}, and {observability_driven_optimization} maintaining {carrier_grade_reliability}",
-                
-                "Activate {complexity_modifier} {network_function} service instantiation featuring {event_driven_architecture} with {deployment_flavor} configuration at {location} for {slice_description} utilizing {reactive_orchestration}, {context_aware_security}, {intent_based_resource_allocation}, and {prescriptive_analytics} delivering {ultra_low_latency_performance}",
-                
-                "Initialize {complexity_modifier} {network_function} deployment incorporating {serverless_architecture} with {deployment_flavor} framework at {location} supporting {slice_description} through {function_as_a_service_orchestration}, {runtime_security_enforcement}, {demand_driven_scaling}, and {edge_intelligence_analytics} ensuring {sustainable_operations}",
-                
-                "Launch {complexity_modifier} {network_function} network service featuring {mesh_native_deployment} with {deployment_flavor} topology at {location} enabling {slice_description} via {distributed_orchestration}, {mutual_tls_security}, {workload_aware_optimization}, and {distributed_tracing_analytics} achieving {global_scale_performance}",
-                
-                "Materialize {complexity_modifier} {network_function} instantiation leveraging {quantum_ready_architecture} with {deployment_flavor} configuration at {location} for {slice_description} incorporating {autonomous_orchestration}, {post_quantum_cryptography}, {neuromorphic_optimization}, and {quantum_enhanced_analytics} for {next_generation_networks}",
-                
-                "Operationalize {complexity_modifier} {network_function} deployment utilizing {digital_twin_architecture} with {deployment_flavor} modeling at {location} supporting {slice_description} through {simulation_driven_orchestration}, {predictive_security_modeling}, {twin_synchronized_optimization}, and {virtual_reality_analytics} ensuring {research_grade_accuracy}",
-                
-                "Realize {complexity_modifier} {network_function} service deployment featuring {blockchain_enabled_architecture} with {deployment_flavor} consensus at {location} enabling {slice_description} via {decentralized_orchestration}, {cryptographic_security_validation}, {tokenized_resource_allocation}, and {distributed_ledger_analytics} maintaining {trustless_operations}",
-                
-                "Synthesize {complexity_modifier} {network_function} network instantiation incorporating {neuromorphic_computing_architecture} with {deployment_flavor} processing at {location} for {slice_description} leveraging {bio_inspired_orchestration}, {adaptive_immune_security}, {synaptic_resource_optimization}, and {cognitive_behavioral_analytics} delivering {brain_inspired_intelligence}"
-            ],
-            
-            'MODIFICATION': [
-                "Execute {complexity_modifier} modification of {target_resource} implementing {change_pattern} strategy at {location} for {slice_description} utilizing {impact_analysis_engine}, {intelligent_rollback_mechanisms}, {comprehensive_validation_procedures}, and {predictive_risk_mitigation} ensuring {service_continuity} with {zero_downtime_guarantee}",
-                
-                "Orchestrate {complexity_modifier} reconfiguration of {target_resource} through {advanced_modification_operations} at {location} supporting {slice_description} featuring {ai_driven_change_management}, {automated_regression_testing}, {real_time_impact_assessment}, and {adaptive_deployment_strategies} maintaining {operational_excellence}",
-                
-                "Implement {complexity_modifier} transformation of {target_resource} via {blue_green_deployment_methodology} at {location} enabling {slice_description} with {dependency_graph_analysis}, {cascading_change_orchestration}, {continuous_health_monitoring}, and {self_healing_rollback_automation} preserving {sla_compliance}",
-                
-                "Deploy {complexity_modifier} update to {target_resource} utilizing {canary_release_framework} at {location} for {slice_description} incorporating {feature_flag_management}, {progressive_traffic_shifting}, {anomaly_detection_validation}, and {automated_remediation_workflows} ensuring {business_continuity}",
-                
-                "Execute {complexity_modifier} enhancement of {target_resource} through {machine_learning_driven_modifications} at {location} supporting {slice_description} with {predictive_change_validation}, {intelligent_testing_orchestration}, {adaptive_performance_optimization}, and {autonomous_quality_assurance} delivering {enhanced_service_delivery}",
-                
-                "Orchestrate {complexity_modifier} evolution of {target_resource} implementing {immutable_infrastructure_patterns} at {location} enabling {slice_description} via {declarative_configuration_management}, {cryptographic_change_verification}, {atomic_deployment_transactions}, and {distributed_consensus_validation} maintaining {infrastructure_integrity}",
-                
-                "Configure {complexity_modifier} adaptation of {target_resource} leveraging {chaos_engineering_principles} at {location} for {slice_description} utilizing {fault_injection_testing}, {resilience_pattern_validation}, {failure_mode_analysis}, and {antifragility_enhancement} ensuring {system_robustness}",
-                
-                "Implement {complexity_modifier} metamorphosis of {target_resource} through {event_sourcing_architecture} at {location} supporting {slice_description} featuring {immutable_event_logs}, {temporal_state_reconstruction}, {distributed_transaction_coordination}, and {eventual_consistency_management} achieving {audit_trail_completeness}",
-                
-                "Execute {complexity_modifier} refinement of {target_resource} utilizing {microservices_decomposition_strategy} at {location} enabling {slice_description} with {service_boundary_optimization}, {inter_service_communication_enhancement}, {distributed_data_consistency}, and {polyglot_persistence_management} delivering {architectural_modularity}",
-                
-                "Deploy {complexity_modifier} modernization of {target_resource} incorporating {cloud_native_transformation} at {location} for {slice_description} leveraging {containerization_optimization}, {kubernetes_native_patterns}, {observability_instrumentation}, and {gitops_workflow_integration} ensuring {devops_excellence}",
-                
-                "Orchestrate {complexity_modifier} optimization of {target_resource} through {performance_engineering_methodologies} at {location} supporting {slice_description} featuring {load_testing_automation}, {capacity_planning_algorithms}, {bottleneck_identification_systems}, and {performance_regression_prevention} maintaining {scalability_targets}",
-                
-                "Implement {complexity_modifier} hardening of {target_resource} via {security_by_design_principles} at {location} enabling {slice_description} with {threat_modeling_integration}, {vulnerability_assessment_automation}, {penetration_testing_workflows}, and {security_posture_validation} achieving {zero_trust_architecture}",
-                
-                "Execute {complexity_modifier} intelligence_augmentation of {target_resource} utilizing {artificial_intelligence_integration} at {location} for {slice_description} incorporating {machine_learning_model_deployment}, {natural_language_processing_capabilities}, {computer_vision_integration}, and {reinforcement_learning_optimization} delivering {cognitive_automation}",
-                
-                "Deploy {complexity_modifier} sustainability_enhancement of {target_resource} through {green_computing_optimization} at {location} supporting {slice_description} featuring {energy_efficiency_algorithms}, {carbon_footprint_minimization}, {renewable_energy_integration}, and {circular_economy_principles} ensuring {environmental_responsibility}",
-                
-                "Orchestrate {complexity_modifier} quantum_readiness_upgrade of {target_resource} implementing {post_quantum_cryptography_migration} at {location} enabling {slice_description} via {quantum_resistant_algorithms}, {cryptographic_agility_frameworks}, {quantum_key_distribution_integration}, and {quantum_safe_communication_protocols} maintaining {future_proof_security}"
-            ],
-            
-            'PERFORMANCE_ASSURANCE': [
-                "Establish {complexity_modifier} performance assurance framework for {slice_description} at {location} implementing {sla_tier} guarantees through {multi_dimensional_kpi_monitoring}, {predictive_analytics_engine}, {autonomous_remediation_workflows}, and {cognitive_optimization_algorithms} ensuring {availability_targets} with {proactive_assurance_mechanisms}",
-                
-                "Deploy {complexity_modifier} service level management ecosystem for {slice_description} at {location} featuring {dynamic_sla_adaptation} with {real_time_telemetry_processing}, {machine_learning_anomaly_detection}, {self_healing_infrastructure}, and {intent_driven_resource_orchestration} maintaining {carrier_grade_performance_excellence}",
-                
-                "Implement {complexity_modifier} assurance orchestration platform for {slice_description} at {location} utilizing {closed_loop_automation_framework} with {behavioral_pattern_recognition}, {root_cause_analysis_engine}, {predictive_capacity_scaling}, and {intelligent_load_distribution} achieving {ultra_reliable_service_delivery}",
-                
-                "Configure {complexity_modifier} performance management constellation for {slice_description} at {location} incorporating {ai_driven_assurance_intelligence} with {deep_learning_performance_modeling}, {reinforcement_learning_optimization}, {adaptive_threshold_management}, and {autonomous_quality_enhancement} delivering {zero_touch_operations}",
-                
-                "Activate {complexity_modifier} service excellence framework for {slice_description} at {location} leveraging {digital_twin_performance_modeling} with {simulation_driven_optimization}, {virtual_network_testing}, {predictive_failure_analysis}, and {proactive_maintenance_scheduling} ensuring {mission_critical_reliability}",
-                
-                "Initialize {complexity_modifier} assurance intelligence platform for {slice_description} at {location} featuring {quantum_enhanced_monitoring} with {quantum_sensor_networks}, {entanglement_based_measurements}, {quantum_machine_learning_analytics}, and {quantum_error_correction_assurance} maintaining {theoretical_performance_limits}",
-                
-                "Orchestrate {complexity_modifier} performance optimization ecosystem for {slice_description} at {location} utilizing {neuromorphic_assurance_processing} with {spike_based_monitoring}, {synaptic_adaptation_algorithms}, {brain_inspired_pattern_recognition}, and {cognitive_performance_enhancement} achieving {biological_efficiency_levels}",
-                
-                "Deploy {complexity_modifier} service quality management framework for {slice_description} at {location} incorporating {blockchain_verified_sla_enforcement} with {smart_contract_automation}, {decentralized_performance_validation}, {cryptographic_quality_proofs}, and {distributed_consensus_assurance} ensuring {trustless_service_guarantees}",
-                
-                "Establish {complexity_modifier} assurance orchestration matrix for {slice_description} at {location} featuring {edge_intelligence_optimization} with {distributed_ai_processing}, {federated_learning_enhancement}, {edge_native_analytics}, and {latency_aware_decision_making} delivering {ultra_low_latency_assurance}",
-                
-                "Implement {complexity_modifier} performance excellence architecture for {slice_description} at {location} leveraging {intent_based_autonomous_assurance} with {natural_language_sla_interpretation}, {conversational_performance_management}, {voice_activated_optimization}, and {human_ai_collaborative_enhancement} maintaining {intuitive_operations}",
-                
-                "Configure {complexity_modifier} service reliability constellation for {slice_description} at {location} utilizing {chaos_engineering_assurance} with {controlled_failure_injection}, {resilience_pattern_validation}, {antifragility_enhancement}, and {adaptive_fault_tolerance} achieving {unbreakable_service_continuity}",
-                
-                "Activate {complexity_modifier} performance intelligence framework for {slice_description} at {location} incorporating {augmented_reality_visualization} with {immersive_performance_dashboards}, {3d_network_topology_rendering}, {gesture_based_optimization_control}, and {mixed_reality_troubleshooting} ensuring {intuitive_performance_management}",
-                
-                "Deploy {complexity_modifier} assurance automation platform for {slice_description} at {location} featuring {robotic_process_automation_integration} with {intelligent_workflow_orchestration}, {cognitive_task_automation}, {natural_language_incident_processing}, and {automated_knowledge_base_evolution} delivering {human_augmented_operations}",
-                
-                "Orchestrate {complexity_modifier} service optimization ecosystem for {slice_description} at {location} leveraging {sustainable_performance_engineering} with {green_sla_optimization}, {carbon_aware_resource_allocation}, {renewable_energy_performance_correlation}, and {circular_economy_assurance_principles} maintaining {environmentally_conscious_excellence}",
-                
-                "Establish {complexity_modifier} performance transcendence framework for {slice_description} at {location} utilizing {consciousness_inspired_assurance} with {emergent_behavior_optimization}, {collective_intelligence_enhancement}, {swarm_based_performance_coordination}, and {evolutionary_algorithm_adaptation} achieving {self_transcending_service_quality}"
-            ],
-            
-            'REPORT_REQUEST': [
-                "Generate {complexity_modifier} {report_type} analytics report for {slice_description} at {location} encompassing {comprehensive_report_scope} through {multi_dimensional_data_correlation}, {advanced_statistical_modeling}, {predictive_trend_analysis}, and {actionable_intelligence_synthesis} delivering {executive_decision_support} with {real_time_insights}",
-                
-                "Produce {complexity_modifier} {report_type} intelligence assessment for {slice_description} at {location} featuring {holistic_performance_evaluation} via {machine_learning_pattern_recognition}, {anomaly_detection_algorithms}, {root_cause_correlation_analysis}, and {prescriptive_recommendation_engine} ensuring {strategic_operational_guidance}",
-                
-                "Compile {complexity_modifier} {report_type} analytical synthesis for {slice_description} at {location} incorporating {temporal_performance_modeling} with {time_series_forecasting}, {seasonal_pattern_identification}, {trend_decomposition_analysis}, and {predictive_capacity_planning} providing {forward_looking_strategic_insights}",
-                
-                "Create {complexity_modifier} {report_type} intelligence dashboard for {slice_description} at {location} leveraging {interactive_data_visualization} through {augmented_analytics_processing}, {natural_language_query_interface}, {automated_insight_generation}, and {collaborative_analysis_workflows} enabling {self_service_business_intelligence}",
-                
-                "Deliver {complexity_modifier} {report_type} performance observatory for {slice_description} at {location} utilizing {digital_twin_analytics} with {simulation_based_scenario_modeling}, {what_if_analysis_capabilities}, {optimization_recommendation_algorithms}, and {virtual_experimentation_frameworks} supporting {risk_free_decision_validation}",
-                
-                "Synthesize {complexity_modifier} {report_type} cognitive assessment for {slice_description} at {location} featuring {artificial_intelligence_driven_analysis} via {deep_learning_insight_extraction}, {neural_network_pattern_discovery}, {reinforcement_learning_optimization_suggestions}, and {explainable_ai_reasoning} delivering {transparent_intelligent_recommendations}",
-                
-                "Orchestrate {complexity_modifier} {report_type} blockchain_verified_analytics for {slice_description} at {location} incorporating {immutable_data_provenance} through {cryptographic_audit_trails}, {decentralized_validation_consensus}, {smart_contract_automated_reporting}, and {distributed_trust_verification} ensuring {tamper_proof_analytical_integrity}",
-                
-                "Generate {complexity_modifier} {report_type} quantum_enhanced_intelligence for {slice_description} at {location} leveraging {quantum_computing_analytics} with {quantum_algorithm_optimization}, {superposition_based_scenario_analysis}, {entanglement_correlation_discovery}, and {quantum_machine_learning_insights} achieving {exponential_analytical_acceleration}",
-                
-                "Produce {complexity_modifier} {report_type} neuromorphic_analytics_report for {slice_description} at {location} utilizing {brain_inspired_processing} through {spike_based_data_analysis}, {synaptic_pattern_learning}, {neural_plasticity_adaptation}, and {cognitive_insight_emergence} delivering {biologically_inspired_intelligence}",
-                
-                "Compile {complexity_modifier} {report_type} edge_intelligence_synthesis for {slice_description} at {location} featuring {distributed_analytics_processing} via {federated_learning_insights}, {edge_native_computation}, {latency_optimized_analysis}, and {bandwidth_efficient_reporting} ensuring {real_time_distributed_intelligence}",
-                
-                "Create {complexity_modifier} {report_type} conversational_analytics_interface for {slice_description} at {location} incorporating {natural_language_processing} with {voice_activated_querying}, {contextual_dialogue_management}, {intent_recognition_analytics}, and {multimodal_interaction_support} enabling {human_centric_data_exploration}",
-                
-                "Deliver {complexity_modifier} {report_type} immersive_analytics_experience for {slice_description} at {location} leveraging {virtual_reality_visualization} through {3d_data_immersion}, {gesture_based_navigation}, {haptic_feedback_interaction}, and {collaborative_virtual_workspaces} providing {experiential_data_understanding}",
-                
-                "Synthesize {complexity_modifier} {report_type} autonomous_intelligence_report for {slice_description} at {location} featuring {self_evolving_analytics} via {automated_hypothesis_generation}, {experimental_design_optimization}, {continuous_learning_adaptation}, and {autonomous_insight_discovery} achieving {self_improving_analytical_capabilities}",
-                
-                "Orchestrate {complexity_modifier} {report_type} sustainable_analytics_framework for {slice_description} at {location} utilizing {green_computing_optimization} with {energy_efficient_processing}, {carbon_footprint_analysis}, {renewable_energy_correlation}, and {circular_economy_metrics} delivering {environmentally_conscious_intelligence}",
-                
-                "Generate {complexity_modifier} {report_type} consciousness_inspired_analytics for {slice_description} at {location} incorporating {emergent_intelligence_patterns} through {collective_behavior_analysis}, {swarm_intelligence_processing}, {evolutionary_insight_development}, and {transcendent_pattern_recognition} enabling {next_level_analytical_consciousness}"
-            ],
-            
-            'FEASIBILITY_CHECK': [
-                "Conduct {complexity_modifier} feasibility analysis for {slice_description} at {location} evaluating {comprehensive_assessment_scope} through {multi_criteria_decision_analysis}, {risk_probability_modeling}, {resource_constraint_optimization}, and {stakeholder_impact_assessment} providing {evidence_based_viability_determination} with {confidence_interval_quantification}",
-                
-                "Perform {complexity_modifier} viability assessment for {slice_description} at {location} incorporating {holistic_readiness_evaluation} via {technical_maturity_analysis}, {economic_feasibility_modeling}, {operational_capability_assessment}, and {strategic_alignment_validation} delivering {comprehensive_go_no_go_recommendations}",
-                
-                "Execute {complexity_modifier} capability evaluation for {slice_description} at {location} leveraging {digital_twin_simulation} with {virtual_deployment_testing}, {scenario_based_stress_analysis}, {performance_boundary_exploration}, and {failure_mode_identification} ensuring {risk_mitigated_implementation_planning}",
-                
-                "Undertake {complexity_modifier} readiness assessment for {slice_description} at {location} utilizing {machine_learning_prediction_models} through {historical_pattern_analysis}, {success_probability_estimation}, {resource_availability_forecasting}, and {timeline_optimization_algorithms} providing {data_driven_feasibility_insights}",
-                
-                "Complete {complexity_modifier} implementation_viability_study for {slice_description} at {location} featuring {blockchain_verified_assessment} via {immutable_evaluation_criteria}, {decentralized_expert_consensus}, {cryptographic_validation_proofs}, and {distributed_decision_transparency} ensuring {trustworthy_feasibility_determination}",
-                
-                "Orchestrate {complexity_modifier} quantum_enhanced_feasibility_analysis for {slice_description} at {location} incorporating {quantum_computing_optimization} with {superposition_scenario_evaluation}, {entanglement_correlation_analysis}, {quantum_algorithm_assessment}, and {exponential_complexity_resolution} achieving {unprecedented_analytical_depth}",
-                
-                "Deploy {complexity_modifier} neuromorphic_feasibility_processing for {slice_description} at {location} leveraging {brain_inspired_evaluation} through {synaptic_learning_assessment}, {neural_network_viability_modeling}, {cognitive_pattern_recognition}, and {adaptive_decision_making} delivering {biologically_optimized_feasibility_intelligence}",
-                
-                "Implement {complexity_modifier} edge_intelligence_feasibility_framework for {slice_description} at {location} utilizing {distributed_assessment_processing} via {federated_evaluation_algorithms}, {edge_native_analysis}, {latency_optimized_decision_making}, and {bandwidth_efficient_validation} ensuring {real_time_feasibility_determination}",
-                
-                "Configure {complexity_modifier} conversational_feasibility_interface for {slice_description} at {location} featuring {natural_language_assessment} with {voice_activated_evaluation_queries}, {contextual_dialogue_analysis}, {intent_driven_feasibility_exploration}, and {multimodal_assessment_interaction} enabling {human_centric_viability_evaluation}",
-                
-                "Activate {complexity_modifier} immersive_feasibility_experience for {slice_description} at {location} incorporating {virtual_reality_assessment} through {3d_constraint_visualization}, {gesture_based_scenario_manipulation}, {haptic_feedback_validation}, and {collaborative_virtual_evaluation} providing {experiential_feasibility_understanding}",
-                
-                "Establish {complexity_modifier} autonomous_feasibility_intelligence for {slice_description} at {location} leveraging {self_evolving_assessment} via {automated_criteria_generation}, {experimental_validation_design}, {continuous_learning_refinement}, and {autonomous_recommendation_evolution} achieving {self_improving_feasibility_capabilities}",
-                
-                "Initialize {complexity_modifier} chaos_engineering_feasibility_testing for {slice_description} at {location} utilizing {controlled_failure_simulation} with {resilience_boundary_exploration}, {antifragility_assessment}, {adaptive_recovery_validation}, and {stress_induced_capability_discovery} ensuring {robust_implementation_readiness}",
-                
-                "Deploy {complexity_modifier} sustainable_feasibility_framework for {slice_description} at {location} featuring {green_assessment_optimization} through {environmental_impact_analysis}, {carbon_footprint_feasibility}, {renewable_energy_compatibility}, and {circular_economy_viability} delivering {environmentally_responsible_implementation_guidance}",
-                
-                "Orchestrate {complexity_modifier} swarm_intelligence_feasibility_evaluation for {slice_description} at {location} incorporating {collective_assessment_processing} via {distributed_expert_consensus}, {emergent_evaluation_patterns}, {collaborative_decision_emergence}, and {evolutionary_feasibility_optimization} enabling {crowd_sourced_viability_intelligence}",
-                
-                "Synthesize {complexity_modifier} consciousness_inspired_feasibility_analysis for {slice_description} at {location} leveraging {transcendent_assessment_capabilities} through {emergent_viability_recognition}, {collective_intelligence_evaluation}, {evolutionary_feasibility_adaptation}, and {self_aware_recommendation_systems} achieving {next_level_implementation_consciousness}"
-            ],
-            
-            'NOTIFICATION_REQUEST': [
-                "Configure {complexity_modifier} notification orchestration system for {slice_description} at {location} implementing {intelligent_alerting_framework} through {context_aware_event_processing}, {adaptive_notification_routing}, {multi_channel_delivery_optimization}, and {recipient_preference_learning} ensuring {personalized_communication_excellence} with {zero_notification_fatigue}",
-                
-                "Establish {complexity_modifier} event management ecosystem for {slice_description} at {location} featuring {real_time_streaming_architecture} via {high_throughput_event_ingestion}, {complex_event_pattern_recognition}, {distributed_notification_processing}, and {guaranteed_delivery_mechanisms} maintaining {mission_critical_alerting_reliability}",
-                
-                "Deploy {complexity_modifier} intelligent_alerting_platform for {slice_description} at {location} leveraging {machine_learning_notification_optimization} with {behavioral_pattern_analysis}, {notification_timing_prediction}, {content_personalization_algorithms}, and {engagement_optimization_models} delivering {hyper_personalized_communication_experiences}",
-                
-                "Implement {complexity_modifier} notification_intelligence_framework for {slice_description} at {location} utilizing {natural_language_processing} through {semantic_alert_generation}, {contextual_message_enrichment}, {sentiment_aware_communication}, and {conversational_notification_interfaces} enabling {human_centric_alerting_experiences}",
-                
-                "Activate {complexity_modifier} event_driven_communication_architecture for {slice_description} at {location} incorporating {blockchain_verified_notifications} via {immutable_alert_provenance}, {cryptographic_message_integrity}, {decentralized_delivery_consensus}, and {smart_contract_notification_automation} ensuring {trustworthy_communication_infrastructure}",
-                
-                "Orchestrate {complexity_modifier} quantum_enhanced_notification_system for {slice_description} at {location} featuring {quantum_encrypted_messaging} with {quantum_key_distribution_security}, {entanglement_based_authentication}, {quantum_random_notification_scheduling}, and {post_quantum_cryptographic_protection} achieving {theoretically_secure_communications}",
-                
-                "Configure {complexity_modifier} neuromorphic_alerting_processor for {slice_description} at {location} leveraging {brain_inspired_notification_processing} through {spike_based_event_detection}, {synaptic_learning_personalization}, {neural_network_priority_classification}, and {cognitive_attention_optimization} delivering {biologically_optimized_alerting_intelligence}",
-                
-                "Deploy {complexity_modifier} edge_intelligence_notification_framework for {slice_description} at {location} utilizing {distributed_alerting_processing} via {federated_notification_learning}, {edge_native_event_analysis}, {latency_optimized_delivery}, and {bandwidth_efficient_messaging} ensuring {real_time_distributed_communication}",
-                
-                "Establish {complexity_modifier} conversational_notification_interface for {slice_description} at {location} incorporating {voice_activated_alerting} with {natural_language_alert_queries}, {contextual_dialogue_notifications}, {intent_driven_communication_management}, and {multimodal_interaction_support} enabling {intuitive_notification_control}",
-                
-                "Implement {complexity_modifier} immersive_alerting_experience for {slice_description} at {location} featuring {augmented_reality_notifications} through {spatial_alert_visualization}, {gesture_based_notification_management}, {haptic_feedback_alerting}, and {mixed_reality_communication_workspaces} providing {experiential_notification_interaction}",
-                
-                "Activate {complexity_modifier} autonomous_notification_intelligence for {slice_description} at {location} leveraging {self_evolving_alerting} via {automated_notification_pattern_discovery}, {experimental_communication_optimization}, {continuous_engagement_learning}, and {autonomous_personalization_evolution} achieving {self_improving_communication_capabilities}",
-                
-                "Configure {complexity_modifier} chaos_resilient_notification_architecture for {slice_description} at {location} utilizing {fault_tolerant_alerting} with {redundant_delivery_pathways}, {adaptive_failure_recovery}, {notification_circuit_breakers}, and {antifragile_communication_enhancement} ensuring {unbreakable_alerting_continuity}",
-                
-                "Deploy {complexity_modifier} sustainable_notification_framework for {slice_description} at {location} featuring {green_communication_optimization} through {energy_efficient_alerting}, {carbon_aware_notification_scheduling}, {renewable_energy_powered_messaging}, and {circular_economy_communication_principles} delivering {environmentally_conscious_alerting}",
-                
-                "Orchestrate {complexity_modifier} swarm_intelligence_notification_system for {slice_description} at {location} incorporating {collective_alerting_optimization} via {distributed_notification_consensus}, {emergent_communication_patterns}, {collaborative_alert_prioritization}, and {evolutionary_messaging_adaptation} enabling {crowd_sourced_notification_intelligence}",
-                
-                "Synthesize {complexity_modifier} consciousness_inspired_notification_architecture for {slice_description} at {location} leveraging {transcendent_communication_capabilities} through {emergent_alerting_awareness}, {collective_notification_intelligence}, {evolutionary_communication_adaptation}, and {self_aware_messaging_systems} achieving {next_level_notification_consciousness}"
-            ]
-        }
-    
-    def _initialize_modifiers(self) -> Dict[str, List[str]]:
-        """Initialize sophisticated complexity and quality modifiers."""
-        return {
-            'complexity_low': [
-                'foundational', 'essential', 'fundamental', 'baseline', 'standard',
-                'conventional', 'traditional', 'established', 'proven', 'reliable'
-            ],
-            'complexity_medium': [
-                'advanced', 'sophisticated', 'enhanced', 'comprehensive', 'robust',
-                'intelligent', 'adaptive', 'optimized', 'integrated', 'scalable',
-                'resilient', 'efficient', 'dynamic', 'flexible', 'modular'
-            ],
-            'complexity_high': [
-                'cutting-edge', 'state-of-the-art', 'revolutionary', 'next-generation', 'ultra-advanced',
-                'breakthrough', 'pioneering', 'transformative', 'disruptive', 'paradigm-shifting',
-                'quantum-enhanced', 'neuromorphic', 'consciousness-inspired', 'transcendent', 'evolutionary'
-            ],
-            'technical_quality': [
-                'research-grade', 'enterprise-class', 'carrier-grade', 'mission-critical', 'production-ready',
-                'industrial-strength', 'military-grade', 'space-qualified', 'quantum-resistant', 'future-proof'
-            ],
-            'performance_focus': [
-                'high-performance', 'ultra-low-latency', 'massively-scalable', 'hyper-efficient', 'ultra-reliable',
-                'lightning-fast', 'infinitely-scalable', 'zero-downtime', 'real-time', 'instantaneous'
-            ],
-            'innovation_level': [
-                'innovative', 'pioneering', 'breakthrough', 'transformative', 'disruptive',
-                'revolutionary', 'paradigm-shifting', 'game-changing', 'industry-defining', 'future-shaping'
-            ]
-        }
-    
-    def _initialize_technical_terms(self) -> Dict[str, List[str]]:
-        """Initialize advanced technical terminology for different contexts."""
-        return {
-            'orchestration': [
-                'intent-driven orchestration', 'autonomous lifecycle management', 'closed-loop automation',
-                'declarative orchestration', 'event-driven orchestration', 'reactive orchestration',
-                'cognitive orchestration', 'self-healing orchestration', 'predictive orchestration'
-            ],
-            'security': [
-                'zero-trust security architecture', 'defense-in-depth security', 'adaptive security posture',
-                'continuous security validation', 'policy-driven security', 'context-aware security',
-                'post-quantum cryptography', 'homomorphic encryption', 'quantum-resistant security'
-            ],
-            'optimization': [
-                'machine learning optimization', 'cognitive resource management', 'predictive optimization',
-                'intent-based optimization', 'neuromorphic optimization', 'quantum optimization',
-                'bio-inspired optimization', 'swarm intelligence optimization', 'evolutionary optimization'
-            ],
-            'analytics': [
-                'prescriptive analytics', 'behavioral analytics', 'predictive analytics',
-                'real-time analytics', 'edge intelligence analytics', 'quantum-enhanced analytics',
-                'neuromorphic analytics', 'consciousness-inspired analytics', 'transcendent analytics'
-            ],
-            'architecture': [
-                'microservices architecture', 'serverless architecture', 'event-driven architecture',
-                'mesh-native architecture', 'quantum-ready architecture', 'neuromorphic architecture',
-                'blockchain-enabled architecture', 'consciousness-inspired architecture', 'bio-inspired architecture'
-            ]
-        }
-    
-    def _initialize_parameter_extractors(self) -> Dict[str, callable]:
-        """Initialize parameter extraction functions."""
-        return {
-            'network_function': self._extract_network_function,
-            'deployment_flavor': self._extract_deployment_flavor,
-            'vnf_specifications': self._extract_vnf_specifications,
-            'orchestration_capabilities': self._extract_orchestration_capabilities,
-            'security_hardening': self._extract_security_features,
-            'resource_optimization': self._extract_resource_optimization,
-            'performance_analytics': self._extract_performance_analytics,
-            'sla_guarantees': self._extract_sla_guarantees,
-            'compliance_standards': self._extract_compliance_standards,
-            'research_context': self._extract_research_context,
-            'target_resource': self._extract_target_resource,
-            'change_pattern': self._extract_change_pattern,
-            'modification_operations': self._extract_modification_operations,
-            'impact_analysis_engine': self._extract_impact_analysis,
-            'sla_tier': self._extract_sla_tier,
-            'availability_targets': self._extract_availability_targets,
-            'report_type': self._extract_report_type,
-            'report_scope': self._extract_report_scope,
-            'assessment_scope': self._extract_assessment_scope,
-            'notification_type': self._extract_notification_type
+        self.template_registry = {
+            'Deployment Intent': self.deployment_templates,
+            'Modification Intent': self.modification_templates,
+            'Performance Assurance Intent': self.performance_templates,
+            'Intent Report Request': self.report_templates,
+            'Intent Feasibility Check': self.feasibility_templates,
+            'Regular Notification Request': self.notification_templates
         }
     
     def generate_description(self, context: TemplateContext) -> str:
-        """Generate sophisticated intent description using templates."""
-        # Select appropriate template
-        templates = self.templates.get(context.intent_type, self.templates['DEPLOYMENT'])
-        template = random.choice(templates)
+        """Generate sophisticated description using context and parameters."""
+        templates = self.template_registry.get(context.intent_type, self.deployment_templates)
         
-        # Generate template variables
-        variables = self._generate_template_variables(context)
+        # Select template based on complexity and priority
+        template_category = self._select_template_category(context)
+        selected_templates = templates.get(template_category, templates['deployment_focused'])
         
-        # Fill template with variables
-        try:
-            description = template.format(**variables)
-        except KeyError as e:
-            # Fallback if template variable is missing
-            description = self._generate_fallback_description(context)
+        template = random.choice(selected_templates)
+        
+        # Replace placeholders with actual parameter values
+        description = self._populate_template(template, context)
         
         return description
     
-    def _generate_template_variables(self, context: TemplateContext) -> Dict[str, str]:
-        """Generate sophisticated variables for template filling."""
-        variables = {
-            'complexity_modifier': self._get_complexity_modifier(context.complexity),
-            'location': self._format_location(context.location_category),
-            'slice_description': self._format_slice_description(context.slice_category),
-            'network_function': self._extract_network_function(context),
-            'deployment_flavor': self._extract_deployment_flavor(context),
-            'vnf_specifications': self._extract_vnf_specifications(context),
-            'orchestration_capabilities': self._extract_orchestration_capabilities(context),
-            'security_hardening': self._extract_security_features(context),
-            'resource_optimization': self._extract_resource_optimization(context),
-            'performance_analytics': self._extract_performance_analytics(context),
-            'sla_guarantees': self._extract_sla_guarantees(context),
-            'compliance_standards': self._extract_compliance_standards(context),
-            'research_context': self._extract_research_context(context),
-            'target_resource': self._extract_target_resource(context),
-            'change_pattern': self._extract_change_pattern(context),
-            'modification_operations': self._extract_modification_operations(context),
-            'impact_analysis_engine': self._extract_impact_analysis(context),
-            'sla_tier': self._extract_sla_tier(context),
-            'availability_targets': self._extract_availability_targets(context),
-            'report_type': self._extract_report_type(context),
-            'report_scope': self._extract_report_scope(context),
-            'assessment_scope': self._extract_assessment_scope(context),
-            'notification_type': self._extract_notification_type(context),
-            
-            # Advanced architectural patterns
-            'microservices_architecture': 'cloud-native microservices architecture',
-            'kubernetes_orchestration': 'Kubernetes-native orchestration framework',
-            'service_mesh_integration': 'intelligent service mesh integration',
-            'cloud_native_orchestration': 'cloud-native orchestration capabilities',
-            'zero_trust_security': 'zero-trust security architecture',
-            'ai_driven_optimization': 'AI-driven resource optimization',
-            'predictive_scaling': 'predictive auto-scaling mechanisms',
-            'edge_computing_capabilities': 'edge computing integration capabilities',
-            'comprehensive_security_hardening': 'comprehensive security hardening protocols',
-            'intelligent_resource_allocation': 'intelligent resource allocation algorithms',
-            'real_time_analytics': 'real-time performance analytics',
-            'multi_vendor_orchestration': 'multi-vendor orchestration framework',
-            'defense_in_depth_security': 'defense-in-depth security architecture',
-            'machine_learning_optimization': 'machine learning-driven optimization',
-            'autonomous_lifecycle_management': 'autonomous lifecycle management',
-            'intent_driven_automation': 'intent-driven automation framework',
-            'closed_loop_orchestration': 'closed-loop orchestration system',
-            'adaptive_security_posture': 'adaptive security posture management',
-            'cognitive_resource_management': 'cognitive resource management system',
-            'multi_dimensional_analytics': 'multi-dimensional analytics platform',
-            'operational_excellence': '99.999% operational excellence standards',
-            'cloud_agnostic_deployment': 'cloud-agnostic deployment architecture',
-            'declarative_orchestration': 'declarative orchestration framework',
-            'continuous_security_validation': 'continuous security validation pipeline',
-            'predictive_resource_optimization': 'predictive resource optimization engine',
-            'behavioral_performance_analysis': 'behavioral performance analysis system',
-            'mission_critical_operations': 'mission-critical operational requirements',
-            'infrastructure_as_code': 'infrastructure-as-code deployment methodology',
-            'gitops_orchestration': 'GitOps-driven orchestration workflow',
-            'immutable_security_infrastructure': 'immutable security infrastructure patterns',
-            'elastic_resource_provisioning': 'elastic resource provisioning capabilities',
-            'observability_driven_optimization': 'observability-driven optimization framework',
-            'carrier_grade_reliability': '99.9999% carrier-grade reliability standards',
-            'event_driven_architecture': 'event-driven architecture patterns',
-            'reactive_orchestration': 'reactive orchestration framework',
-            'context_aware_security': 'context-aware security enforcement',
-            'intent_based_resource_allocation': 'intent-based resource allocation system',
-            'prescriptive_analytics': 'prescriptive analytics engine',
-            'ultra_low_latency_performance': 'ultra-low latency performance guarantees',
-            'serverless_architecture': 'serverless computing architecture',
-            'function_as_a_service_orchestration': 'Function-as-a-Service orchestration platform',
-            'runtime_security_enforcement': 'runtime security enforcement mechanisms',
-            'demand_driven_scaling': 'demand-driven auto-scaling algorithms',
-            'edge_intelligence_analytics': 'edge intelligence analytics processing',
-            'sustainable_operations': 'sustainable operational practices',
-            'mesh_native_deployment': 'service mesh-native deployment patterns',
-            'distributed_orchestration': 'distributed orchestration framework',
-            'mutual_tls_security': 'mutual TLS security enforcement',
-            'workload_aware_optimization': 'workload-aware optimization algorithms',
-            'distributed_tracing_analytics': 'distributed tracing analytics system',
-            'global_scale_performance': 'global-scale performance optimization',
-            'quantum_ready_architecture': 'quantum-ready computing architecture',
-            'autonomous_orchestration': 'autonomous orchestration intelligence',
-            'post_quantum_cryptography': 'post-quantum cryptographic protection',
-            'neuromorphic_optimization': 'neuromorphic computing optimization',
-            'quantum_enhanced_analytics': 'quantum-enhanced analytics processing',
-            'next_generation_networks': 'next-generation network infrastructure',
-            'digital_twin_architecture': 'digital twin architecture framework',
-            'simulation_driven_orchestration': 'simulation-driven orchestration system',
-            'predictive_security_modeling': 'predictive security modeling engine',
-            'twin_synchronized_optimization': 'digital twin-synchronized optimization',
-            'virtual_reality_analytics': 'virtual reality analytics visualization',
-            'research_grade_accuracy': 'research-grade analytical accuracy',
-            'blockchain_enabled_architecture': 'blockchain-enabled architecture framework',
-            'decentralized_orchestration': 'decentralized orchestration consensus',
-            'cryptographic_security_validation': 'cryptographic security validation protocols',
-            'tokenized_resource_allocation': 'tokenized resource allocation mechanisms',
-            'distributed_ledger_analytics': 'distributed ledger analytics system',
-            'trustless_operations': 'trustless operational framework',
-            'neuromorphic_computing_architecture': 'neuromorphic computing architecture',
-            'bio_inspired_orchestration': 'bio-inspired orchestration algorithms',
-            'adaptive_immune_security': 'adaptive immune security system',
-            'synaptic_resource_optimization': 'synaptic resource optimization mechanisms',
-            'cognitive_behavioral_analytics': 'cognitive behavioral analytics engine',
-            'brain_inspired_intelligence': 'brain-inspired artificial intelligence',
-            
-            # Performance and SLA terms
-            'zero_downtime_guarantee': 'zero-downtime service guarantee',
-            'service_continuity': '99.999% service continuity assurance',
-            'business_continuity': 'business continuity protection',
-            'enhanced_service_delivery': 'enhanced service delivery optimization',
-            'infrastructure_integrity': 'infrastructure integrity validation',
-            'system_robustness': 'system robustness enhancement',
-            'audit_trail_completeness': 'complete audit trail compliance',
-            'architectural_modularity': 'architectural modularity optimization',
-            'devops_excellence': 'DevOps operational excellence',
-            'scalability_targets': '10x scalability performance targets',
-            'zero_trust_architecture': 'zero-trust architecture implementation',
-            'cognitive_automation': 'cognitive automation capabilities',
-            'environmental_responsibility': 'environmental responsibility standards',
-            'future_proof_security': 'future-proof security architecture',
-            'carrier_grade_performance_excellence': 'carrier-grade performance excellence',
-            'ultra_reliable_service_delivery': 'ultra-reliable service delivery',
-            'zero_touch_operations': 'zero-touch operational automation',
-            'theoretical_performance_limits': 'theoretical performance limit achievement',
-            'biological_efficiency_levels': 'biological efficiency optimization levels',
-            'trustless_service_guarantees': 'trustless service guarantee framework',
-            'ultra_low_latency_assurance': 'ultra-low latency assurance mechanisms',
-            'intuitive_operations': 'intuitive operational interfaces',
-            'unbreakable_service_continuity': 'unbreakable service continuity framework',
-            'intuitive_performance_management': 'intuitive performance management interface',
-            'human_augmented_operations': 'human-augmented operational intelligence',
-            'environmentally_conscious_excellence': 'environmentally conscious operational excellence',
-            'self_transcending_service_quality': 'self-transcending service quality evolution'
-        }
-        
-        return variables
-    
-    def _get_complexity_modifier(self, complexity: int) -> str:
-        """Get sophisticated complexity modifier based on complexity level."""
-        if complexity <= 3:
-            return random.choice(self.modifiers['complexity_low'])
-        elif complexity <= 7:
-            return random.choice(self.modifiers['complexity_medium'])
+    def _select_template_category(self, context: TemplateContext) -> str:
+        """Select appropriate template category based on context."""
+        if context.complexity >= 8:
+            categories = ['orchestration_focused', 'security_focused', 'performance_focused']
+        elif context.complexity >= 6:
+            categories = ['deployment_focused', 'performance_focused', 'orchestration_focused']
         else:
-            return random.choice(self.modifiers['complexity_high'])
-    
-    def _format_location(self, location_category: str) -> str:
-        """Format location with sophisticated descriptions."""
-        location_descriptions = {
-            'urban': 'high-density urban deployment environment',
-            'rural': 'extended rural coverage territory',
-            'industrial': 'mission-critical industrial facility',
-            'highway': 'high-mobility highway corridor infrastructure'
-        }
-        return location_descriptions.get(location_category, 'advanced network deployment zone')
-    
-    def _format_slice_description(self, slice_category: str) -> str:
-        """Format slice description with advanced terminology."""
-        slice_descriptions = {
-            'eMBB': 'enhanced mobile broadband service orchestration',
-            'URLLC': 'ultra-reliable low-latency communication infrastructure',
-            'mMTC': 'massive machine-type communication ecosystem',
-            'V2X': 'vehicle-to-everything connectivity framework'
-        }
-        return slice_descriptions.get(slice_category, 'advanced network slice services')
-    
-    # Parameter extraction methods
-    def _extract_network_function(self, context: TemplateContext) -> str:
-        """Extract network function from parameters."""
-        deployment_spec = context.parameters.get('deployment_specification', {})
-        nf = deployment_spec.get('network_function', 'UPF')
-        return f"{nf} (5G Core Network Function)"
-    
-    def _extract_deployment_flavor(self, context: TemplateContext) -> str:
-        """Extract deployment flavor from parameters."""
-        deployment_spec = context.parameters.get('deployment_specification', {})
-        flavor = deployment_spec.get('deployment_flavor', {}).get('description', 'high-performance')
-        return flavor.lower().replace('_', ' ')
-    
-    def _extract_vnf_specifications(self, context: TemplateContext) -> str:
-        """Extract VNF specifications from parameters."""
-        deployment_spec = context.parameters.get('deployment_specification', {})
-        vnf_desc = deployment_spec.get('vnf_descriptor', {})
-        provider = vnf_desc.get('vnf_provider', 'Enterprise')
-        version = vnf_desc.get('vnf_software_version', 'v2.0')
-        return f"{provider} {version} VNF specifications"
-    
-    def _extract_orchestration_capabilities(self, context: TemplateContext) -> str:
-        """Extract orchestration capabilities from parameters."""
-        orch_params = context.parameters.get('orchestration_parameters', {})
-        workflow = orch_params.get('orchestration_workflow', {})
-        strategy = workflow.get('rollback_strategy', 'intelligent')
-        return f"{strategy} orchestration capabilities with automated lifecycle management"
-    
-    def _extract_security_features(self, context: TemplateContext) -> str:
-        """Extract security features from parameters."""
-        security = context.parameters.get('security_parameters', {})
-        auth_method = security.get('authentication_method', '5G_AKA')
-        encryption = security.get('encryption_algorithm', '256_NEA2')
-        return f"{auth_method} authentication with {encryption} encryption hardening"
-    
-    def _extract_resource_optimization(self, context: TemplateContext) -> str:
-        """Extract resource optimization from parameters."""
-        resources = context.parameters.get('resource_allocation', {})
-        compute = resources.get('compute_resources', {})
-        cpu_cores = compute.get('cpu_cores', 8)
-        return f"intelligent resource optimization algorithms managing {cpu_cores}-core compute infrastructure"
-    
-    def _extract_performance_analytics(self, context: TemplateContext) -> str:
-        """Extract performance analytics from parameters."""
-        monitoring = context.parameters.get('monitoring_parameters', {})
-        analytics = monitoring.get('analytics_configuration', {})
-        ml_models = analytics.get('ml_models', {})
-        anomaly_detection = ml_models.get('anomaly_detection', 'advanced')
-        return f"{anomaly_detection} performance analytics with predictive modeling"
-    
-    def _extract_sla_guarantees(self, context: TemplateContext) -> str:
-        """Extract SLA guarantees from parameters."""
-        perf_req = context.parameters.get('performance_requirements', {})
-        availability = perf_req.get('availability_requirement', '99.9%')
-        latency = perf_req.get('latency_requirement', '10ms')
-        return f"{availability} availability with {latency} latency guarantees"
-    
-    def _extract_compliance_standards(self, context: TemplateContext) -> str:
-        """Extract compliance standards from parameters."""
-        compliance = context.metadata.get('compliance', [])
-        if compliance:
-            return f"{', '.join(compliance[:2])} compliance standards"
-        return "3GPP Release 17 compliance standards"
-    
-    def _extract_research_context(self, context: TemplateContext) -> str:
-        """Extract research context from parameters."""
-        research_context = context.metadata.get('research_context', 'advanced network research')
-        return f"{research_context.lower().replace('_', ' ')} applications"
-    
-    def _extract_target_resource(self, context: TemplateContext) -> str:
-        """Extract target resource for modification."""
-        mod_spec = context.parameters.get('modification_specification', {})
-        target = mod_spec.get('target_resource', {})
-        resource_type = target.get('resource_type', 'VNF_INSTANCE')
-        return resource_type.lower().replace('_', ' ')
-    
-    def _extract_change_pattern(self, context: TemplateContext) -> str:
-        """Extract change pattern from parameters."""
-        mod_spec = context.parameters.get('modification_specification', {})
-        pattern = mod_spec.get('change_pattern', 'rolling_update')
-        return pattern.lower().replace('_', ' ')
-    
-    def _extract_modification_operations(self, context: TemplateContext) -> str:
-        """Extract modification operations from parameters."""
-        mod_spec = context.parameters.get('modification_specification', {})
-        operations = mod_spec.get('modification_operations', [])
-        if operations:
-            op_type = operations[0].get('operation_type', 'modify_info')
-            return f"{op_type.lower().replace('_', ' ')} operations"
-        return "intelligent configuration operations"
-    
-    def _extract_impact_analysis(self, context: TemplateContext) -> str:
-        """Extract impact analysis from parameters."""
-        impact = context.parameters.get('impact_analysis', {})
-        risk = impact.get('risk_assessment', {})
-        tech_risk = risk.get('technical_risk', 'medium')
-        return f"{tech_risk}-risk impact analysis engine"
-    
-    def _extract_sla_tier(self, context: TemplateContext) -> str:
-        """Extract SLA tier from parameters."""
-        perf_obj = context.parameters.get('performance_objectives', {})
-        sla = perf_obj.get('service_level', {})
-        sla_type = sla.get('sla_type', 'gold_tier')
-        return sla_type.lower().replace('_', ' ')
-    
-    def _extract_availability_targets(self, context: TemplateContext) -> str:
-        """Extract availability targets from parameters."""
-        perf_obj = context.parameters.get('performance_objectives', {})
-        sla = perf_obj.get('service_level', {})
-        commitments = sla.get('commitments', {})
-        availability = commitments.get('availability', '99.9%')
-        return f"{availability} availability targets"
-    
-    def _extract_report_type(self, context: TemplateContext) -> str:
-        """Extract report type from parameters."""
-        report_spec = context.parameters.get('report_specification', {})
-        report_type = report_spec.get('report_type', 'performance_analytics')
-        return report_type.lower().replace('_', ' ')
-    
-    def _extract_report_scope(self, context: TemplateContext) -> str:
-        """Extract report scope from parameters."""
-        report_spec = context.parameters.get('report_specification', {})
-        scope = report_spec.get('report_scope', {})
-        functional = scope.get('functional_scope', {})
-        domains = functional.get('domains', 'core')
-        aspects = functional.get('aspects', 'performance')
-        return f"{domains.lower()} domain {aspects.lower()} analysis"
-    
-    def _extract_assessment_scope(self, context: TemplateContext) -> str:
-        """Extract assessment scope from parameters."""
-        feasibility = context.parameters.get('feasibility_assessment', {})
-        scope = feasibility.get('assessment_scope', 'comprehensive')
-        return f"{scope.lower()} feasibility assessment"
-    
-    def _extract_notification_type(self, context: TemplateContext) -> str:
-        """Extract notification type from parameters."""
-        notif_config = context.parameters.get('notification_configuration', {})
-        subscription = notif_config.get('subscription_details', {})
-        sub_type = subscription.get('subscription_type', 'event_based')
-        return f"{sub_type.lower().replace('_', ' ')} notification delivery"
-    
-    def _generate_fallback_description(self, context: TemplateContext) -> str:
-        """Generate sophisticated fallback description if template fails."""
-        complexity_mod = self._get_complexity_modifier(context.complexity)
-        slice_desc = self._format_slice_description(context.slice_category)
-        location = self._format_location(context.location_category)
+            categories = ['deployment_focused', 'qos_focused']
         
-        return (f"Execute {complexity_mod} {context.intent_type.lower().replace('_', ' ')} "
-                f"for {slice_desc} at {location} featuring advanced orchestration capabilities, "
-                f"comprehensive security hardening, intelligent resource optimization algorithms, "
-                f"and research-grade network performance analytics with autonomous lifecycle management")
+        if context.priority in ['CRITICAL', 'EMERGENCY']:
+            categories = ['security_focused', 'performance_focused'] + categories
+        
+        return random.choice(categories)
+    
+    def _populate_template(self, template: str, context: TemplateContext) -> str:
+        """Populate template with actual parameter values."""
+        description = template
+        
+        # Extract parameter values for substitution
+        params = context.parameters
+        
+        # Basic substitutions
+        substitutions = {
+            '{location}': self._get_location_description(context),
+            '{slice_type}': self._get_slice_description(context),
+            '{priority_level}': context.priority.lower(),
+            '{complexity_level}': self._get_complexity_description(context.complexity),
+        }
+        
+        # Network Function substitutions
+        if 'deployment_specification' in params:
+            deploy_spec = params['deployment_specification']
+            substitutions.update({
+                '{network_function}': deploy_spec.get('network_function', 'AMF'),
+                '{vnf_provider}': deploy_spec.get('vnf_descriptor', {}).get('vnf_provider', 'Ericsson'),
+                '{vnf_version}': deploy_spec.get('vnf_descriptor', {}).get('vnf_software_version', 'SW_2.1.0'),
+                '{deployment_flavor}': deploy_spec.get('deployment_flavor', {}).get('description', 'High_Performance_Compute_Optimized'),
+                '{min_instances}': str(deploy_spec.get('deployment_flavor', {}).get('vdu_profile', {}).get('min_number_of_instances', 2)),
+                '{max_instances}': str(deploy_spec.get('deployment_flavor', {}).get('vdu_profile', {}).get('max_number_of_instances', 20)),
+                '{instantiation_level}': deploy_spec.get('instantiation_level_id', 'level_3'),
+            })
+        
+        # QoS parameter substitutions
+        if 'qos_parameters' in params:
+            qos = params['qos_parameters']
+            substitutions.update({
+                '{guaranteed_bitrate}': qos.get('guaranteed_bit_rate', '100Mbps'),
+                '{maximum_bitrate}': qos.get('maximum_bit_rate', '1000Mbps'),
+                '{packet_delay_budget}': qos.get('packet_delay_budget', '10ms'),
+                '{packet_error_rate}': qos.get('packet_error_rate', '1e-5'),
+                '{priority_level_num}': str(qos.get('priority_level', 15)),
+                '{qos_flow_id}': qos.get('qos_flow_identifier', '5QI_7_Voice_Video_Gaming'),
+                '{jitter_tolerance}': qos.get('jitter_tolerance', '2ms'),
+            })
+        
+        # Resource allocation substitutions
+        if 'resource_allocation' in params:
+            resources = params['resource_allocation']
+            compute = resources.get('compute_resources', {})
+            network = resources.get('network_resources', {})
+            substitutions.update({
+                '{cpu_cores}': str(compute.get('cpu_cores', 8)),
+                '{cpu_frequency}': compute.get('cpu_frequency', '3.2GHz'),
+                '{memory_size}': compute.get('memory_size', '32GB'),
+                '{storage_capacity}': compute.get('storage_capacity', '500GB'),
+                '{storage_type}': compute.get('storage_type', 'NVMe_SSD'),
+                '{bandwidth_allocation}': network.get('bandwidth_allocation', '1000Mbps'),
+                '{latency_requirement}': network.get('latency_requirement', '5ms'),
+                '{connection_density}': network.get('connection_density', '100000_devices_per_km2'),
+            })
+        
+        # Security parameter substitutions
+        if 'security_parameters' in params:
+            security = params['security_parameters']
+            key_mgmt = security.get('key_management', {})
+            substitutions.update({
+                '{auth_method}': security.get('authentication_method', '5G_AKA'),
+                '{encryption_algorithm}': security.get('encryption_algorithm', '256_NEA2'),
+                '{integrity_protection}': security.get('integrity_protection', '256_NIA2'),
+                '{key_length}': key_mgmt.get('key_length', '256_bit'),
+                '{key_rotation_interval}': key_mgmt.get('key_rotation_interval', '12hours'),
+                '{kdf_algorithm}': key_mgmt.get('kdf', 'HMAC_SHA256'),
+            })
+        
+        # Orchestration parameter substitutions
+        if 'orchestration_parameters' in params:
+            orch = params['orchestration_parameters']
+            workflow = orch.get('orchestration_workflow', {})
+            substitutions.update({
+                '{nfvo_id}': orch.get('nfvo_id', 'nfvo_primary_001'),
+                '{vnfm_id}': orch.get('vnfm_id', 'vnfm_advanced_002'),
+                '{workflow_version}': workflow.get('workflow_version', '2.1'),
+                '{execution_timeout}': workflow.get('execution_timeout', '1800seconds'),
+                '{rollback_strategy}': workflow.get('rollback_strategy', 'AUTOMATIC'),
+            })
+        
+        # Performance requirement substitutions
+        if 'performance_requirements' in params:
+            perf = params['performance_requirements']
+            scaling = perf.get('scalability_requirement', {})
+            substitutions.update({
+                '{throughput_requirement}': perf.get('throughput_requirement', '1000Mbps'),
+                '{latency_requirement_perf}': perf.get('latency_requirement', '5ms'),
+                '{availability_requirement}': perf.get('availability_requirement', '99.99%'),
+                '{reliability_requirement}': perf.get('reliability_requirement', '99.9%'),
+                '{horizontal_scaling}': scaling.get('horizontal_scaling', '50instances'),
+                '{vertical_scaling}': scaling.get('vertical_scaling', '32cores'),
+                '{auto_scaling_policy}': scaling.get('auto_scaling_policy', 'CPU_BASED'),
+            })
+        
+        # Network topology substitutions
+        if 'network_topology' in params:
+            topology = params['network_topology']
+            spectrum = topology.get('spectrum_bands', {})
+            antenna = topology.get('antenna_configuration', {})
+            backhaul = topology.get('backhaul', {})
+            substitutions.update({
+                '{network_architecture}': topology.get('network_architecture', 'Standalone_5G'),
+                '{deployment_scenario}': topology.get('deployment_scenario', 'Urban_Macro'),
+                '{mid_band_spectrum}': spectrum.get('mid_band', '3.5GHz'),
+                '{high_band_spectrum}': spectrum.get('high_band', '28GHz'),
+                '{antenna_type}': antenna.get('type', 'Massive_MIMO_32T32R'),
+                '{beamforming_capability}': antenna.get('beamforming_capability', '3D_Beamforming'),
+                '{backhaul_type}': backhaul.get('type', 'Fiber_Optic'),
+                '{backhaul_capacity}': backhaul.get('capacity', '10Gbps'),
+                '{backhaul_latency}': backhaul.get('latency', '0.5ms'),
+            })
+        
+        # Monitoring parameter substitutions
+        if 'monitoring_parameters' in params:
+            monitoring = params['monitoring_parameters']
+            kpi = monitoring.get('kpi_metrics', {})
+            alerting = monitoring.get('alerting_configuration', {})
+            analytics = monitoring.get('analytics_configuration', {})
+            data_collection = analytics.get('data_collection', {})
+            substitutions.update({
+                '{sampling_rate}': kpi.get('sampling_rate', '95%'),
+                '{aggregation_interval}': data_collection.get('aggregation_interval', '30seconds'),
+                '{retention_period}': data_collection.get('retention_period', '90days'),
+                '{escalation_level1}': alerting.get('escalation_policy', {}).get('level1', '2minutes'),
+                '{escalation_level2}': alerting.get('escalation_policy', {}).get('level2', '10minutes'),
+                '{ml_anomaly_model}': analytics.get('ml_models', {}).get('anomaly_detection', 'Isolation_Forest'),
+                '{optimization_algorithm}': analytics.get('ml_models', {}).get('optimization_algorithm', 'Genetic_Algorithm'),
+            })
+        
+        # Apply all substitutions
+        for placeholder, value in substitutions.items():
+            description = description.replace(placeholder, str(value))
+        
+        # Clean up any remaining placeholders
+        description = re.sub(r'\{[^}]+\}', 'advanced', description)
+        
+        return description
+    
+    def _get_location_description(self, context: TemplateContext) -> str:
+        """Get sophisticated location description."""
+        location_map = {
+            'urban': 'high-density metropolitan deployment zone',
+            'rural': 'extended coverage rural service area',
+            'highway': 'high-mobility corridor infrastructure',
+            'industrial': 'mission-critical industrial automation facility'
+        }
+        return location_map.get(context.location_category, 'advanced network deployment location')
+    
+    def _get_slice_description(self, context: TemplateContext) -> str:
+        """Get sophisticated slice description."""
+        slice_map = {
+            'eMBB': 'enhanced mobile broadband service tier',
+            'URLLC': 'ultra-reliable low-latency communication framework',
+            'mMTC': 'massive machine-type communication infrastructure',
+            'V2X': 'vehicle-to-everything connectivity ecosystem'
+        }
+        return slice_map.get(context.slice_category, 'advanced network slice configuration')
+    
+    def _get_complexity_description(self, complexity: int) -> str:
+        """Get complexity-based description."""
+        if complexity >= 9:
+            return 'research-grade sophisticated'
+        elif complexity >= 7:
+            return 'enterprise-class advanced'
+        elif complexity >= 5:
+            return 'production-ready comprehensive'
+        else:
+            return 'standard optimized'
+    
+    def _initialize_deployment_templates(self) -> Dict[str, List[str]]:
+        """Initialize deployment intent templates with deep parameter integration."""
+        return {
+            'deployment_focused': [
+                "Execute {complexity_level} deployment of {network_function} network function utilizing {vnf_provider} {vnf_version} with {deployment_flavor} configuration at {location}, implementing {min_instances} to {max_instances} instance scaling architecture with {cpu_cores}-core {cpu_frequency} compute allocation, {memory_size} memory provisioning, and {storage_type} storage infrastructure supporting {guaranteed_bitrate} guaranteed throughput with {packet_delay_budget} latency budget for {slice_type} optimization",
+                
+                "Orchestrate comprehensive {network_function} deployment leveraging {vnf_provider} virtualization platform with {instantiation_level} instantiation complexity, incorporating {auth_method} authentication, {encryption_algorithm} encryption, and {key_length} cryptographic protection across {bandwidth_allocation} network allocation with {connection_density} device density support at {location} for {priority_level} priority {slice_type} service delivery",
+                
+                "Implement {complexity_level} {network_function} network function instantiation with {deployment_flavor} resource optimization, featuring {horizontal_scaling} horizontal scaling capability, {cpu_cores}-core {memory_size} compute configuration, {backhaul_type} backhaul connectivity at {backhaul_capacity} capacity, and {packet_error_rate} error rate tolerance for mission-critical {slice_type} deployment at {location}",
+                
+                "Deploy advanced {network_function} infrastructure utilizing {vnf_provider} {vnf_version} with {min_instances}-{max_instances} elastic scaling, {storage_capacity} {storage_type} storage provisioning, {guaranteed_bitrate}-{maximum_bitrate} throughput allocation, {jitter_tolerance} jitter tolerance, and {integrity_protection} integrity protection for {priority_level} priority {slice_type} service at {location}",
+                
+                "Establish {complexity_level} {network_function} deployment incorporating {network_architecture} architecture with {antenna_type} antenna configuration, {beamforming_capability} beamforming, {mid_band_spectrum}-{high_band_spectrum} spectrum utilization, {cpu_frequency} processing capability, {latency_requirement} latency optimization, and {auto_scaling_policy} scaling automation for {slice_type} at {location}"
+            ],
+            
+            'orchestration_focused': [
+                "Orchestrate sophisticated {network_function} lifecycle management through {nfvo_id} orchestrator and {vnfm_id} manager, implementing {workflow_version} workflow automation with {execution_timeout} execution window, {rollback_strategy} rollback strategy, {cpu_cores}-core {memory_size} resource allocation, {guaranteed_bitrate} bandwidth provisioning, and {availability_requirement} availability assurance for {slice_type} at {location}",
+                
+                "Execute {complexity_level} multi-domain orchestration of {network_function} utilizing {vnf_provider} platform with {instantiation_level} complexity, featuring {nfvo_id} orchestration engine, {execution_timeout} workflow timeout, {horizontal_scaling} scaling automation, {encryption_algorithm} security integration, and {throughput_requirement} performance optimization for {priority_level} {slice_type} deployment at {location}",
+                
+                "Implement comprehensive {network_function} orchestration framework leveraging {workflow_version} automation engine with {rollback_strategy} recovery mechanisms, {cpu_cores}-core {cpu_frequency} compute orchestration, {bandwidth_allocation} network coordination, {packet_delay_budget} latency orchestration, and {reliability_requirement} reliability management for {slice_type} at {location}",
+                
+                "Deploy intelligent {network_function} orchestration utilizing {nfvo_id} and {vnfm_id} coordination with {execution_timeout} execution control, {min_instances}-{max_instances} instance orchestration, {storage_capacity} storage coordination, {maximum_bitrate} throughput orchestration, {key_rotation_interval} security rotation, and {auto_scaling_policy} scaling orchestration for {slice_type} at {location}",
+                
+                "Establish {complexity_level} end-to-end {network_function} orchestration incorporating {workflow_version} process automation, {backhaul_type} connectivity orchestration at {backhaul_capacity}, {antenna_type} radio orchestration, {latency_requirement} performance coordination, {auth_method} security orchestration, and {availability_requirement} service assurance for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'performance_focused': [
+                "Deploy {complexity_level} {network_function} with stringent performance optimization featuring {throughput_requirement} throughput guarantee, {latency_requirement_perf} latency budget, {availability_requirement} availability commitment, {cpu_cores}-core {cpu_frequency} high-performance computing, {memory_size} memory optimization, {packet_error_rate} error rate control, and {horizontal_scaling} scaling performance for {slice_type} at {location}",
+                
+                "Implement performance-critical {network_function} deployment utilizing {vnf_provider} platform with {guaranteed_bitrate}-{maximum_bitrate} throughput optimization, {packet_delay_budget} latency control, {reliability_requirement} reliability assurance, {storage_type} high-speed storage, {backhaul_capacity} backhaul performance, and {auto_scaling_policy} performance-driven scaling for {priority_level} {slice_type} at {location}",
+                
+                "Execute {complexity_level} {network_function} performance engineering with {cpu_cores}-core {memory_size} optimized allocation, {bandwidth_allocation} network performance, {jitter_tolerance} jitter optimization, {connection_density} density performance, {encryption_algorithm} security performance, and {vertical_scaling} compute scaling for {slice_type} performance at {location}",
+                
+                "Orchestrate high-performance {network_function} deployment featuring {throughput_requirement} sustained throughput, {latency_requirement_perf} guaranteed latency, {availability_requirement} uptime performance, {storage_capacity} {storage_type} I/O optimization, {backhaul_latency} backhaul performance, {packet_error_rate} quality assurance, and {horizontal_scaling} performance scaling for {slice_type} at {location}",
+                
+                "Deploy performance-optimized {network_function} infrastructure with {cpu_frequency} processing performance, {maximum_bitrate} peak throughput capability, {reliability_requirement} performance reliability, {antenna_type} radio performance, {beamforming_capability} signal optimization, {mid_band_spectrum} spectrum performance, and {auto_scaling_policy} adaptive performance scaling for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'security_focused': [
+                "Deploy security-hardened {network_function} utilizing {auth_method} authentication, {encryption_algorithm} encryption, {integrity_protection} integrity protection, {key_length} cryptographic strength, {key_rotation_interval} key lifecycle management, {cpu_cores}-core secure processing, {guaranteed_bitrate} encrypted throughput, and zero-trust architecture for {priority_level} {slice_type} security at {location}",
+                
+                "Implement {complexity_level} secure {network_function} deployment with {vnf_provider} hardened platform, {kdf_algorithm} key derivation, {encryption_algorithm} data protection, {auth_method} identity verification, {bandwidth_allocation} secure networking, {storage_type} encrypted storage, and {availability_requirement} security assurance for {slice_type} at {location}",
+                
+                "Execute security-first {network_function} deployment incorporating {integrity_protection} message integrity, {key_length} cryptographic protection, {key_rotation_interval} security rotation, {cpu_cores}-core secure computing, {memory_size} protected memory, {packet_error_rate} secure transmission, and {horizontal_scaling} secure scaling for {slice_type} at {location}",
+                
+                "Orchestrate comprehensive {network_function} security deployment with {auth_method} multi-factor authentication, {encryption_algorithm} end-to-end encryption, {kdf_algorithm} secure key management, {throughput_requirement} encrypted performance, {latency_requirement} secure latency, {storage_capacity} encrypted storage, and {auto_scaling_policy} secure scaling for {priority_level} {slice_type} at {location}",
+                
+                "Deploy defense-in-depth {network_function} architecture utilizing {encryption_algorithm} quantum-resistant encryption, {integrity_protection} tamper protection, {key_rotation_interval} continuous key rotation, {cpu_frequency} secure processing, {backhaul_type} encrypted connectivity, {antenna_type} secure radio, and {availability_requirement} security resilience for {slice_type} at {location}"
+            ],
+            
+            'qos_focused': [
+                "Deploy QoS-optimized {network_function} with {qos_flow_id} flow classification, {guaranteed_bitrate} guaranteed service rate, {maximum_bitrate} peak capacity, {packet_delay_budget} delay guarantee, {packet_error_rate} quality assurance, {priority_level_num} priority handling, {jitter_tolerance} jitter control, and {cpu_cores}-core QoS processing for {slice_type} at {location}",
+                
+                "Implement {complexity_level} {network_function} QoS framework featuring {qos_flow_id} service differentiation, {guaranteed_bitrate}-{maximum_bitrate} rate management, {packet_delay_budget} latency QoS, {priority_level_num} traffic prioritization, {connection_density} QoS scaling, {bandwidth_allocation} QoS allocation, and {auto_scaling_policy} QoS-aware scaling for {priority_level} {slice_type} at {location}",
+                
+                "Execute advanced {network_function} QoS deployment with {qos_flow_id} flow optimization, {packet_error_rate} error rate QoS, {jitter_tolerance} jitter management, {cpu_cores}-core QoS engine, {memory_size} QoS buffering, {storage_type} QoS storage, and {throughput_requirement} QoS performance for {slice_type} at {location}",
+                
+                "Orchestrate comprehensive {network_function} QoS architecture incorporating {guaranteed_bitrate} service guarantee, {packet_delay_budget} delay budget management, {priority_level_num} multi-tier prioritization, {bandwidth_allocation} QoS bandwidth, {latency_requirement} QoS latency, {reliability_requirement} QoS reliability, and {horizontal_scaling} QoS scaling for {slice_type} at {location}",
+                
+                "Deploy intelligent {network_function} QoS system with {qos_flow_id} adaptive classification, {maximum_bitrate} dynamic rate allocation, {jitter_tolerance} real-time jitter control, {cpu_frequency} QoS processing power, {backhaul_capacity} QoS backhaul, {antenna_type} QoS radio optimization, and {auto_scaling_policy} QoS-driven scaling for {priority_level} {slice_type} at {location}"
+            ]
+        }
+    
+    def _initialize_modification_templates(self) -> Dict[str, List[str]]:
+        """Initialize modification intent templates with parameter integration."""
+        return {
+            'deployment_focused': [
+                "Execute {complexity_level} modification of {network_function} deployment scaling from {min_instances} to {max_instances} instances with {cpu_cores}-core {memory_size} resource reallocation, {storage_capacity} storage expansion, {guaranteed_bitrate} throughput adjustment, {packet_delay_budget} latency optimization, and {rollback_strategy} recovery strategy for {slice_type} at {location}",
+                
+                "Implement comprehensive {network_function} configuration modification incorporating {vnf_version} upgrade, {deployment_flavor} optimization, {bandwidth_allocation} network adjustment, {encryption_algorithm} security enhancement, {auto_scaling_policy} scaling modification, and {availability_requirement} SLA adjustment for {priority_level} {slice_type} at {location}",
+                
+                "Orchestrate {complexity_level} {network_function} infrastructure modification with {cpu_frequency} processing upgrade, {storage_type} storage migration, {maximum_bitrate} capacity enhancement, {key_rotation_interval} security rotation update, {horizontal_scaling} scaling modification, and {execution_timeout} timeout adjustment for {slice_type} at {location}"
+            ],
+            
+            'orchestration_focused': [
+                "Modify {network_function} orchestration workflow utilizing {nfvo_id} orchestrator with {workflow_version} process update, {execution_timeout} timing modification, {rollback_strategy} recovery enhancement, {cpu_cores}-core orchestration scaling, {bandwidth_allocation} network orchestration adjustment, and {reliability_requirement} orchestration SLA modification for {slice_type} at {location}",
+                
+                "Execute {complexity_level} {network_function} orchestration modification through {vnfm_id} manager with {instantiation_level} complexity adjustment, {guaranteed_bitrate} orchestrated throughput modification, {latency_requirement} orchestration latency tuning, {auth_method} orchestration security update, and {auto_scaling_policy} orchestration scaling modification for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'performance_focused': [
+                "Modify {network_function} performance parameters adjusting {throughput_requirement} throughput target, {latency_requirement_perf} latency budget, {availability_requirement} availability commitment, {cpu_cores}-core performance scaling, {memory_size} performance memory, {packet_error_rate} quality modification, and {horizontal_scaling} performance scaling for {slice_type} at {location}",
+                
+                "Execute {complexity_level} {network_function} performance optimization modification with {guaranteed_bitrate}-{maximum_bitrate} rate adjustment, {reliability_requirement} reliability enhancement, {storage_capacity} performance storage modification, {backhaul_capacity} connectivity upgrade, and {auto_scaling_policy} performance-driven scaling update for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'security_focused': [
+                "Modify {network_function} security configuration updating {auth_method} authentication, {encryption_algorithm} encryption upgrade, {key_length} cryptographic enhancement, {key_rotation_interval} rotation policy adjustment, {integrity_protection} integrity modification, {cpu_cores}-core secure processing scaling, and {bandwidth_allocation} secure network modification for {slice_type} at {location}",
+                
+                "Execute {complexity_level} {network_function} security hardening modification with {kdf_algorithm} key derivation update, {encryption_algorithm} cipher enhancement, {auth_method} authentication strengthening, {storage_type} secure storage modification, {throughput_requirement} encrypted performance adjustment, and {availability_requirement} security assurance modification for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'qos_focused': [
+                "Modify {network_function} QoS configuration adjusting {qos_flow_id} flow parameters, {guaranteed_bitrate} service rate modification, {packet_delay_budget} delay budget adjustment, {priority_level_num} priority modification, {jitter_tolerance} jitter control update, {cpu_cores}-core QoS processing scaling, and {connection_density} QoS density modification for {slice_type} at {location}",
+                
+                "Execute {complexity_level} {network_function} QoS optimization modification with {maximum_bitrate} peak rate adjustment, {packet_error_rate} quality modification, {bandwidth_allocation} QoS allocation update, {latency_requirement} QoS latency tuning, {auto_scaling_policy} QoS scaling modification, and {reliability_requirement} QoS reliability adjustment for {priority_level} {slice_type} at {location}"
+            ]
+        }
+    
+    def _initialize_performance_templates(self) -> Dict[str, List[str]]:
+        """Initialize performance assurance templates with parameter integration."""
+        return {
+            'deployment_focused': [
+                "Establish {complexity_level} performance assurance framework for {network_function} deployment monitoring {throughput_requirement} throughput compliance, {latency_requirement_perf} latency adherence, {availability_requirement} uptime assurance, {cpu_cores}-core performance tracking, {memory_size} resource monitoring, {packet_error_rate} quality assurance, and {horizontal_scaling} scaling performance validation for {slice_type} at {location}",
+                
+                "Deploy comprehensive {network_function} performance monitoring utilizing {vnf_provider} telemetry with {guaranteed_bitrate} throughput surveillance, {reliability_requirement} reliability tracking, {storage_capacity} storage performance monitoring, {bandwidth_allocation} network performance assurance, {auto_scaling_policy} scaling performance validation, and {execution_timeout} timeout performance monitoring for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'orchestration_focused': [
+                "Orchestrate {complexity_level} {network_function} performance assurance through {nfvo_id} monitoring orchestration with {workflow_version} performance workflow, {execution_timeout} orchestration performance tracking, {rollback_strategy} performance recovery assurance, {cpu_cores}-core orchestration monitoring, {bandwidth_allocation} orchestrated performance validation, and {availability_requirement} orchestration SLA monitoring for {slice_type} at {location}",
+                
+                "Implement orchestrated {network_function} performance framework utilizing {vnfm_id} performance management with {instantiation_level} complexity monitoring, {throughput_requirement} orchestrated throughput assurance, {latency_requirement} orchestration latency monitoring, {horizontal_scaling} orchestrated scaling performance, and {reliability_requirement} orchestration reliability assurance for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'performance_focused': [
+                "Deploy advanced {network_function} performance assurance system monitoring {throughput_requirement} sustained throughput, {latency_requirement_perf} guaranteed latency, {availability_requirement} service availability, {cpu_frequency} processing performance, {memory_size} memory performance, {storage_type} I/O performance, {packet_error_rate} transmission quality, and {horizontal_scaling} scaling performance for {slice_type} at {location}",
+                
+                "Implement {complexity_level} {network_function} performance monitoring with {guaranteed_bitrate}-{maximum_bitrate} rate assurance, {reliability_requirement} performance reliability, {backhaul_capacity} connectivity performance, {antenna_type} radio performance monitoring, {beamforming_capability} signal performance tracking, and {auto_scaling_policy} performance-driven scaling assurance for {priority_level} {slice_type} at {location}",
+                
+                "Execute comprehensive {network_function} performance validation featuring {sampling_rate} monitoring coverage, {aggregation_interval} data collection, {retention_period} performance history, {escalation_level1}-{escalation_level2} alert escalation, {ml_anomaly_model} anomaly detection, {optimization_algorithm} performance optimization, and {connection_density} density performance monitoring for {slice_type} at {location}"
+            ],
+            
+            'security_focused': [
+                "Establish {complexity_level} {network_function} security performance assurance monitoring {auth_method} authentication performance, {encryption_algorithm} encryption overhead, {key_rotation_interval} security rotation performance, {cpu_cores}-core secure processing performance, {bandwidth_allocation} encrypted throughput assurance, {storage_type} secure storage performance, and {availability_requirement} security availability for {slice_type} at {location}",
+                
+                "Deploy security-aware {network_function} performance monitoring with {integrity_protection} integrity performance tracking, {key_length} cryptographic performance monitoring, {kdf_algorithm} key derivation performance, {throughput_requirement} encrypted performance assurance, {latency_requirement} secure latency monitoring, and {reliability_requirement} security reliability assurance for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'qos_focused': [
+                "Deploy {complexity_level} {network_function} QoS performance assurance monitoring {qos_flow_id} flow performance, {guaranteed_bitrate} service rate compliance, {packet_delay_budget} delay budget adherence, {priority_level_num} priority performance, {jitter_tolerance} jitter performance tracking, {cpu_cores}-core QoS processing performance, and {connection_density} QoS scaling performance for {slice_type} at {location}",
+                
+                "Implement comprehensive {network_function} QoS assurance framework with {maximum_bitrate} peak performance monitoring, {packet_error_rate} quality performance tracking, {bandwidth_allocation} QoS allocation performance, {latency_requirement} QoS latency assurance, {auto_scaling_policy} QoS scaling performance validation, and {reliability_requirement} QoS reliability monitoring for {priority_level} {slice_type} at {location}"
+            ]
+        }
+    
+    def _initialize_report_templates(self) -> Dict[str, List[str]]:
+        """Initialize report request templates with parameter integration."""
+        return {
+            'deployment_focused': [
+                "Generate {complexity_level} {network_function} deployment analytics report covering {cpu_cores}-core {memory_size} resource utilization, {storage_capacity} storage consumption, {guaranteed_bitrate} throughput analysis, {packet_delay_budget} latency statistics, {min_instances}-{max_instances} scaling metrics, {vnf_provider} platform performance, and {availability_requirement} deployment reliability for {slice_type} at {location}",
+                
+                "Compile comprehensive {network_function} deployment intelligence report analyzing {deployment_flavor} configuration efficiency, {instantiation_level} complexity metrics, {bandwidth_allocation} network utilization, {encryption_algorithm} security overhead, {auto_scaling_policy} scaling effectiveness, and {execution_timeout} deployment timing for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'orchestration_focused': [
+                "Generate {complexity_level} {network_function} orchestration analytics report through {nfvo_id} orchestrator covering {workflow_version} process efficiency, {execution_timeout} workflow performance, {rollback_strategy} recovery statistics, {cpu_cores}-core orchestration resource usage, {bandwidth_allocation} orchestrated network metrics, and {reliability_requirement} orchestration reliability for {slice_type} at {location}",
+                
+                "Compile orchestration intelligence report for {network_function} utilizing {vnfm_id} management analytics with {instantiation_level} orchestration complexity analysis, {throughput_requirement} orchestrated performance metrics, {latency_requirement} orchestration latency statistics, {horizontal_scaling} orchestrated scaling analytics, and {availability_requirement} orchestration SLA compliance for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'performance_focused': [
+                "Generate {complexity_level} {network_function} performance analytics report analyzing {throughput_requirement} throughput trends, {latency_requirement_perf} latency distribution, {availability_requirement} uptime statistics, {cpu_frequency} processing utilization, {memory_size} memory efficiency, {packet_error_rate} quality metrics, {horizontal_scaling} scaling performance, and {reliability_requirement} performance reliability for {slice_type} at {location}",
+                
+                "Compile comprehensive {network_function} performance intelligence report with {guaranteed_bitrate}-{maximum_bitrate} rate analysis, {storage_type} I/O performance metrics, {backhaul_capacity} connectivity statistics, {antenna_type} radio performance analytics, {beamforming_capability} signal quality analysis, {auto_scaling_policy} scaling efficiency metrics, and {connection_density} density performance for {priority_level} {slice_type} at {location}",
+                
+                "Generate advanced {network_function} monitoring analytics report featuring {sampling_rate} data coverage analysis, {aggregation_interval} collection efficiency, {retention_period} historical trends, {escalation_level1}-{escalation_level2} alert statistics, {ml_anomaly_model} anomaly detection effectiveness, {optimization_algorithm} optimization results, and performance correlation analysis for {slice_type} at {location}"
+            ],
+            
+            'security_focused': [
+                "Generate {complexity_level} {network_function} security analytics report analyzing {auth_method} authentication statistics, {encryption_algorithm} encryption performance, {key_rotation_interval} key lifecycle metrics, {cpu_cores}-core security processing utilization, {bandwidth_allocation} encrypted traffic analysis, {storage_type} secure storage metrics, and {availability_requirement} security availability for {slice_type} at {location}",
+                
+                "Compile comprehensive {network_function} security intelligence report with {integrity_protection} integrity validation statistics, {key_length} cryptographic strength analysis, {kdf_algorithm} key derivation performance, {throughput_requirement} encrypted throughput metrics, {latency_requirement} secure latency analysis, and {reliability_requirement} security reliability assessment for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'qos_focused': [
+                "Generate {complexity_level} {network_function} QoS analytics report analyzing {qos_flow_id} flow statistics, {guaranteed_bitrate} service rate compliance, {packet_delay_budget} delay budget adherence, {priority_level_num} priority handling efficiency, {jitter_tolerance} jitter performance, {cpu_cores}-core QoS processing metrics, and {connection_density} QoS scaling statistics for {slice_type} at {location}",
+                
+                "Compile comprehensive {network_function} QoS intelligence report with {maximum_bitrate} peak performance analysis, {packet_error_rate} quality statistics, {bandwidth_allocation} QoS allocation efficiency, {latency_requirement} QoS latency metrics, {auto_scaling_policy} QoS scaling effectiveness, and {reliability_requirement} QoS reliability assessment for {priority_level} {slice_type} at {location}"
+            ]
+        }
+    
+    def _initialize_feasibility_templates(self) -> Dict[str, List[str]]:
+        """Initialize feasibility check templates with parameter integration."""
+        return {
+            'deployment_focused': [
+                "Conduct {complexity_level} {network_function} deployment feasibility analysis evaluating {cpu_cores}-core {memory_size} resource requirements, {storage_capacity} storage feasibility, {guaranteed_bitrate} throughput viability, {packet_delay_budget} latency achievability, {min_instances}-{max_instances} scaling feasibility, {vnf_provider} platform compatibility, and {availability_requirement} deployment reliability for {slice_type} at {location}",
+                
+                "Execute comprehensive {network_function} deployment viability assessment analyzing {deployment_flavor} configuration feasibility, {instantiation_level} complexity viability, {bandwidth_allocation} network capacity, {encryption_algorithm} security implementation feasibility, {auto_scaling_policy} scaling viability, and {execution_timeout} deployment timeline for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'orchestration_focused': [
+                "Conduct {complexity_level} {network_function} orchestration feasibility study through {nfvo_id} orchestrator evaluating {workflow_version} process viability, {execution_timeout} workflow feasibility, {rollback_strategy} recovery capability, {cpu_cores}-core orchestration resource feasibility, {bandwidth_allocation} orchestrated network viability, and {reliability_requirement} orchestration achievability for {slice_type} at {location}",
+                
+                "Execute orchestration viability assessment for {network_function} utilizing {vnfm_id} management feasibility with {instantiation_level} orchestration complexity evaluation, {throughput_requirement} orchestrated performance viability, {latency_requirement} orchestration latency feasibility, {horizontal_scaling} orchestrated scaling viability, and {availability_requirement} orchestration SLA achievability for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'performance_focused': [
+                "Conduct {complexity_level} {network_function} performance feasibility analysis evaluating {throughput_requirement} throughput achievability, {latency_requirement_perf} latency feasibility, {availability_requirement} uptime viability, {cpu_frequency} processing capability, {memory_size} memory adequacy, {packet_error_rate} quality achievability, {horizontal_scaling} scaling feasibility, and {reliability_requirement} performance reliability for {slice_type} at {location}",
+                
+                "Execute comprehensive {network_function} performance viability study with {guaranteed_bitrate}-{maximum_bitrate} rate feasibility, {storage_type} I/O capability assessment, {backhaul_capacity} connectivity viability, {antenna_type} radio feasibility, {beamforming_capability} signal achievability, {auto_scaling_policy} scaling viability, and {connection_density} density feasibility for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'security_focused': [
+                "Conduct {complexity_level} {network_function} security feasibility assessment evaluating {auth_method} authentication viability, {encryption_algorithm} encryption feasibility, {key_rotation_interval} key management capability, {cpu_cores}-core security processing feasibility, {bandwidth_allocation} encrypted throughput viability, {storage_type} secure storage capability, and {availability_requirement} security availability for {slice_type} at {location}",
+                
+                "Execute comprehensive {network_function} security viability study with {integrity_protection} integrity implementation feasibility, {key_length} cryptographic capability, {kdf_algorithm} key derivation viability, {throughput_requirement} encrypted performance feasibility, {latency_requirement} secure latency achievability, and {reliability_requirement} security reliability assessment for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'qos_focused': [
+                "Conduct {complexity_level} {network_function} QoS feasibility analysis evaluating {qos_flow_id} flow implementation viability, {guaranteed_bitrate} service rate achievability, {packet_delay_budget} delay budget feasibility, {priority_level_num} priority handling capability, {jitter_tolerance} jitter control viability, {cpu_cores}-core QoS processing feasibility, and {connection_density} QoS scaling capability for {slice_type} at {location}",
+                
+                "Execute comprehensive {network_function} QoS viability assessment with {maximum_bitrate} peak performance feasibility, {packet_error_rate} quality achievability, {bandwidth_allocation} QoS allocation viability, {latency_requirement} QoS latency feasibility, {auto_scaling_policy} QoS scaling capability, and {reliability_requirement} QoS reliability achievability for {priority_level} {slice_type} at {location}"
+            ]
+        }
+    
+    def _initialize_notification_templates(self) -> Dict[str, List[str]]:
+        """Initialize notification request templates with parameter integration."""
+        return {
+            'deployment_focused': [
+                "Configure {complexity_level} {network_function} deployment notification system monitoring {cpu_cores}-core {memory_size} resource alerts, {storage_capacity} storage notifications, {guaranteed_bitrate} throughput alerts, {packet_delay_budget} latency notifications, {min_instances}-{max_instances} scaling alerts, {vnf_provider} platform notifications, and {availability_requirement} deployment availability alerts for {slice_type} at {location}",
+                
+                "Establish comprehensive {network_function} deployment alerting framework with {deployment_flavor} configuration notifications, {instantiation_level} complexity alerts, {bandwidth_allocation} network notifications, {encryption_algorithm} security alerts, {auto_scaling_policy} scaling notifications, and {execution_timeout} deployment timing alerts for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'orchestration_focused': [
+                "Configure {complexity_level} {network_function} orchestration notification system through {nfvo_id} orchestrator with {workflow_version} process alerts, {execution_timeout} workflow notifications, {rollback_strategy} recovery alerts, {cpu_cores}-core orchestration resource notifications, {bandwidth_allocation} orchestrated network alerts, and {reliability_requirement} orchestration reliability notifications for {slice_type} at {location}",
+                
+                "Establish orchestrated {network_function} alerting framework utilizing {vnfm_id} notification management with {instantiation_level} orchestration complexity alerts, {throughput_requirement} orchestrated performance notifications, {latency_requirement} orchestration latency alerts, {horizontal_scaling} orchestrated scaling notifications, and {availability_requirement} orchestration SLA alerts for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'performance_focused': [
+                "Configure {complexity_level} {network_function} performance notification system monitoring {throughput_requirement} throughput alerts, {latency_requirement_perf} latency notifications, {availability_requirement} uptime alerts, {cpu_frequency} processing notifications, {memory_size} memory alerts, {packet_error_rate} quality notifications, {horizontal_scaling} scaling performance alerts, and {reliability_requirement} performance reliability notifications for {slice_type} at {location}",
+                
+                "Establish comprehensive {network_function} performance alerting with {guaranteed_bitrate}-{maximum_bitrate} rate notifications, {storage_type} I/O alerts, {backhaul_capacity} connectivity notifications, {antenna_type} radio alerts, {beamforming_capability} signal notifications, {auto_scaling_policy} scaling alerts, and {connection_density} density notifications for {priority_level} {slice_type} at {location}",
+                
+                "Deploy advanced {network_function} monitoring notification system featuring {sampling_rate} monitoring alerts, {aggregation_interval} collection notifications, {escalation_level1}-{escalation_level2} escalation alerts, {ml_anomaly_model} anomaly notifications, {optimization_algorithm} optimization alerts, and intelligent correlation notifications for {slice_type} at {location}"
+            ],
+            
+            'security_focused': [
+                "Configure {complexity_level} {network_function} security notification system monitoring {auth_method} authentication alerts, {encryption_algorithm} encryption notifications, {key_rotation_interval} key rotation alerts, {cpu_cores}-core security processing notifications, {bandwidth_allocation} encrypted traffic alerts, {storage_type} secure storage notifications, and {availability_requirement} security availability alerts for {slice_type} at {location}",
+                
+                "Establish comprehensive {network_function} security alerting framework with {integrity_protection} integrity notifications, {key_length} cryptographic alerts, {kdf_algorithm} key derivation notifications, {throughput_requirement} encrypted performance alerts, {latency_requirement} secure latency notifications, and {reliability_requirement} security reliability alerts for {priority_level} {slice_type} at {location}"
+            ],
+            
+            'qos_focused': [
+                "Configure {complexity_level} {network_function} QoS notification system monitoring {qos_flow_id} flow alerts, {guaranteed_bitrate} service rate notifications, {packet_delay_budget} delay budget alerts, {priority_level_num} priority notifications, {jitter_tolerance} jitter alerts, {cpu_cores}-core QoS processing notifications, and {connection_density} QoS scaling alerts for {slice_type} at {location}",
+                
+                "Establish comprehensive {network_function} QoS alerting framework with {maximum_bitrate} peak performance notifications, {packet_error_rate} quality alerts, {bandwidth_allocation} QoS allocation notifications, {latency_requirement} QoS latency alerts, {auto_scaling_policy} QoS scaling notifications, and {reliability_requirement} QoS reliability alerts for {priority_level} {slice_type} at {location}"
+            ]
+        }
