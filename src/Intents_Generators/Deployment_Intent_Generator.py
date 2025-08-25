@@ -1,6 +1,7 @@
 import uuid
 import random
 from typing import Dict, Any, List
+from dataclasses import dataclass
 from typing import Dict, Any
 from .Constants_Enums import NETWORK_FUNCTIONS
 from .Parameter_Generator import ParameterGenerator
@@ -10,11 +11,40 @@ class DeploymentIntentGenerator:
     """Generator for deployment intent records."""
     
     def __init__(self):
-        try:
-            from .Constraint_Engine import ConstraintEngine
-            self.constraint_engine = ConstraintEngine()
-        except ImportError:
-            self.constraint_engine = None
+        pass
+    
+    def _extract_extensive_parameters(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract extensive parameters from the comprehensive parameter set."""
+        extracted = {}
+        
+        # Extract from nested parameter structures
+        for key, value in params.items():
+            if isinstance(value, dict):
+                extracted.update(self._flatten_parameters(value, key))
+            else:
+                extracted[key] = value
+        
+        return extracted
+    
+    def _flatten_parameters(self, params: Dict[str, Any], prefix: str = "") -> Dict[str, Any]:
+        """Flatten nested parameter structures for extensive utilization."""
+        flattened = {}
+        
+        for key, value in params.items():
+            new_key = f"{prefix}_{key}" if prefix else key
+            
+            if isinstance(value, dict):
+                flattened.update(self._flatten_parameters(value, new_key))
+            elif isinstance(value, list):
+                for i, item in enumerate(value):
+                    if isinstance(item, dict):
+                        flattened.update(self._flatten_parameters(item, f"{new_key}_{i}"))
+                    else:
+                        flattened[f"{new_key}_{i}"] = item
+            else:
+                flattened[new_key] = value
+        
+        return flattened
     
     @staticmethod
     def generate_parameters() -> Dict[str, Any]:
@@ -103,6 +133,228 @@ class DeploymentIntentGenerator:
         
         return {**base_params, **deployment_params}
     
+    def generate_extensive_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
+        """Generate extensive parameters utilizing much more of the available parameter space."""
+        base_params = self.generate_constrained_parameters(slice_type, priority, location, complexity)
+        
+        # Add extensive additional parameters
+        extensive_params = {
+            "advanced_deployment_specification": {
+                "multi_vendor_support": {
+                    "primary_vendor": random.choice(['Ericsson', 'Nokia', 'Huawei', 'Samsung', 'ZTE']),
+                    "secondary_vendor": random.choice(['Cisco', 'Juniper', 'Dell', 'HPE']),
+                    "vendor_interoperability": random.choice(['FULL', 'PARTIAL', 'LIMITED']),
+                    "vendor_lock_in_mitigation": random.choice(['ENABLED', 'DISABLED']),
+                    "multi_vendor_orchestration": {
+                        "orchestration_complexity": random.choice(['LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH']),
+                        "integration_testing_required": random.choice(['true', 'false']),
+                        "compatibility_matrix": {
+                            "network_functions": random.randint(10, 100),
+                            "tested_combinations": random.randint(50, 500),
+                            "certification_level": random.choice(['BASIC', 'ADVANCED', 'PREMIUM'])
+                        }
+                    }
+                },
+                "deployment_automation": {
+                    "automation_level": random.choice(['MANUAL', 'SEMI_AUTOMATED', 'FULLY_AUTOMATED', 'AI_DRIVEN']),
+                    "ci_cd_integration": {
+                        "pipeline_stages": random.randint(5, 20),
+                        "automated_testing": {
+                            "unit_tests": random.choice(['true', 'false']),
+                            "integration_tests": random.choice(['true', 'false']),
+                            "performance_tests": random.choice(['true', 'false']),
+                            "security_tests": random.choice(['true', 'false']),
+                            "compliance_tests": random.choice(['true', 'false'])
+                        },
+                        "deployment_strategies": {
+                            "blue_green": random.choice(['SUPPORTED', 'NOT_SUPPORTED']),
+                            "canary": random.choice(['SUPPORTED', 'NOT_SUPPORTED']),
+                            "rolling_update": random.choice(['SUPPORTED', 'NOT_SUPPORTED']),
+                            "a_b_testing": random.choice(['SUPPORTED', 'NOT_SUPPORTED'])
+                        }
+                    },
+                    "infrastructure_as_code": {
+                        "iac_tool": random.choice(['Terraform', 'Ansible', 'CloudFormation', 'Pulumi']),
+                        "configuration_management": random.choice(['Puppet', 'Chef', 'SaltStack', 'Ansible']),
+                        "version_control": {
+                            "repository_type": random.choice(['Git', 'SVN', 'Mercurial']),
+                            "branching_strategy": random.choice(['GitFlow', 'GitHub Flow', 'GitLab Flow']),
+                            "code_review_required": random.choice(['true', 'false'])
+                        }
+                    }
+                },
+                "cloud_native_features": {
+                    "containerization": {
+                        "container_runtime": random.choice(['Docker', 'Containerd', 'CRI-O', 'Podman']),
+                        "image_registry": random.choice(['Docker Hub', 'Harbor', 'Quay', 'ECR', 'GCR']),
+                        "image_scanning": {
+                            "vulnerability_scanning": random.choice(['ENABLED', 'DISABLED']),
+                            "compliance_scanning": random.choice(['ENABLED', 'DISABLED']),
+                            "malware_scanning": random.choice(['ENABLED', 'DISABLED'])
+                        },
+                        "container_optimization": {
+                            "multi_stage_builds": random.choice(['true', 'false']),
+                            "distroless_images": random.choice(['true', 'false']),
+                            "image_compression": random.choice(['true', 'false']),
+                            "layer_caching": random.choice(['true', 'false'])
+                        }
+                    },
+                    "service_mesh": {
+                        "mesh_technology": random.choice(['Istio', 'Linkerd', 'Consul Connect', 'Envoy']),
+                        "traffic_management": {
+                            "load_balancing": random.choice(['ROUND_ROBIN', 'LEAST_CONN', 'WEIGHTED', 'CONSISTENT_HASH']),
+                            "circuit_breaker": random.choice(['ENABLED', 'DISABLED']),
+                            "retry_policy": {
+                                "max_retries": random.randint(1, 10),
+                                "retry_timeout": f"{random.randint(1, 30)}s",
+                                "backoff_strategy": random.choice(['EXPONENTIAL', 'LINEAR', 'FIXED'])
+                            },
+                            "timeout_policy": {
+                                "connection_timeout": f"{random.randint(1, 60)}s",
+                                "request_timeout": f"{random.randint(1, 300)}s"
+                            }
+                        },
+                        "security_policies": {
+                            "mtls_enabled": random.choice(['true', 'false']),
+                            "authorization_policies": random.randint(1, 50),
+                            "network_policies": random.randint(1, 20)
+                        },
+                        "observability": {
+                            "distributed_tracing": random.choice(['Jaeger', 'Zipkin', 'AWS X-Ray']),
+                            "metrics_collection": random.choice(['Prometheus', 'DataDog', 'New Relic']),
+                            "logging_aggregation": random.choice(['ELK Stack', 'Fluentd', 'Splunk'])
+                        }
+                    }
+                }
+            },
+            "advanced_orchestration_parameters": {
+                "multi_cloud_orchestration": {
+                    "cloud_providers": random.sample(['AWS', 'Azure', 'GCP', 'IBM Cloud', 'Oracle Cloud'], random.randint(1, 3)),
+                    "hybrid_cloud_strategy": random.choice(['CLOUD_FIRST', 'ON_PREMISE_FIRST', 'BALANCED']),
+                    "cloud_bursting": {
+                        "enabled": random.choice(['true', 'false']),
+                        "burst_threshold": f"{random.randint(70, 90)}%",
+                        "burst_cloud": random.choice(['AWS', 'Azure', 'GCP'])
+                    },
+                    "data_sovereignty": {
+                        "data_residency_requirements": random.choice(['STRICT', 'MODERATE', 'FLEXIBLE']),
+                        "cross_border_data_transfer": random.choice(['ALLOWED', 'RESTRICTED', 'PROHIBITED']),
+                        "compliance_frameworks": random.sample(['GDPR', 'CCPA', 'HIPAA', 'SOX'], random.randint(1, 3))
+                    }
+                },
+                "edge_orchestration": {
+                    "edge_deployment_strategy": random.choice(['CENTRALIZED', 'DISTRIBUTED', 'FEDERATED']),
+                    "edge_node_management": {
+                        "node_discovery": random.choice(['AUTOMATIC', 'MANUAL', 'HYBRID']),
+                        "node_health_monitoring": random.choice(['ENABLED', 'DISABLED']),
+                        "node_failover": random.choice(['AUTOMATIC', 'MANUAL']),
+                        "node_scaling": {
+                            "horizontal_scaling": random.choice(['ENABLED', 'DISABLED']),
+                            "vertical_scaling": random.choice(['ENABLED', 'DISABLED']),
+                            "auto_scaling_triggers": random.sample(['CPU', 'MEMORY', 'NETWORK', 'CUSTOM'], random.randint(1, 3))
+                        }
+                    },
+                    "edge_to_cloud_connectivity": {
+                        "connectivity_type": random.choice(['VPN', 'DIRECT_CONNECT', 'SD_WAN']),
+                        "bandwidth_allocation": f"{random.randint(10, 1000)}Mbps",
+                        "latency_requirements": f"{random.uniform(1, 100)}ms",
+                        "redundancy": random.choice(['ACTIVE_ACTIVE', 'ACTIVE_STANDBY', 'NONE'])
+                    }
+                },
+                "workflow_orchestration": {
+                    "workflow_engine": random.choice(['Airflow', 'Argo Workflows', 'Tekton', 'Jenkins']),
+                    "workflow_complexity": {
+                        "total_steps": random.randint(10, 100),
+                        "parallel_execution": random.choice(['ENABLED', 'DISABLED']),
+                        "conditional_logic": random.choice(['SIMPLE', 'COMPLEX', 'ADVANCED']),
+                        "error_handling": {
+                            "retry_mechanisms": random.choice(['ENABLED', 'DISABLED']),
+                            "fallback_procedures": random.choice(['ENABLED', 'DISABLED']),
+                            "manual_intervention": random.choice(['ALLOWED', 'NOT_ALLOWED'])
+                        }
+                    },
+                    "workflow_optimization": {
+                        "execution_time_optimization": random.choice(['ENABLED', 'DISABLED']),
+                        "resource_optimization": random.choice(['ENABLED', 'DISABLED']),
+                        "cost_optimization": random.choice(['ENABLED', 'DISABLED']),
+                        "performance_monitoring": {
+                            "execution_metrics": random.choice(['BASIC', 'DETAILED', 'COMPREHENSIVE']),
+                            "bottleneck_detection": random.choice(['ENABLED', 'DISABLED']),
+                            "performance_alerts": random.choice(['ENABLED', 'DISABLED'])
+                        }
+                    }
+                }
+            },
+            "comprehensive_performance_requirements": {
+                "detailed_sla_specifications": {
+                    "availability_sla": {
+                        "uptime_percentage": f"{random.uniform(99.0, 99.999)}%",
+                        "planned_downtime": f"{random.randint(1, 24)}hours_per_month",
+                        "unplanned_downtime": f"{random.randint(0, 4)}hours_per_month",
+                        "availability_measurement": random.choice(['CALENDAR_TIME', 'BUSINESS_HOURS', 'CUSTOM']),
+                        "penalty_clauses": {
+                            "penalty_threshold": f"{random.uniform(98.0, 99.0)}%",
+                            "penalty_rate": f"{random.uniform(1, 10)}%_of_monthly_fee",
+                            "maximum_penalty": f"{random.uniform(10, 50)}%_of_monthly_fee"
+                        }
+                    },
+                    "performance_sla": {
+                        "response_time_sla": {
+                            "average_response_time": f"{random.uniform(1, 100)}ms",
+                            "95th_percentile": f"{random.uniform(10, 200)}ms",
+                            "99th_percentile": f"{random.uniform(50, 500)}ms",
+                            "maximum_response_time": f"{random.uniform(100, 1000)}ms"
+                        },
+                        "throughput_sla": {
+                            "minimum_throughput": f"{random.randint(10, 1000)}Mbps",
+                            "average_throughput": f"{random.randint(100, 10000)}Mbps",
+                            "peak_throughput": f"{random.randint(1000, 100000)}Mbps",
+                            "throughput_consistency": f"{random.uniform(90, 99)}%"
+                        },
+                        "scalability_sla": {
+                            "horizontal_scaling_time": f"{random.randint(30, 300)}seconds",
+                            "vertical_scaling_time": f"{random.randint(10, 120)}seconds",
+                            "maximum_scale_out": f"{random.randint(10, 1000)}instances",
+                            "scale_down_time": f"{random.randint(60, 600)}seconds"
+                        }
+                    }
+                },
+                "advanced_monitoring_requirements": {
+                    "real_time_monitoring": {
+                        "monitoring_frequency": f"{random.randint(1, 60)}seconds",
+                        "metric_collection": random.choice(['PUSH', 'PULL', 'HYBRID']),
+                        "data_retention": f"{random.randint(30, 365)}days",
+                        "monitoring_coverage": {
+                            "infrastructure_monitoring": random.choice(['BASIC', 'COMPREHENSIVE', 'ADVANCED']),
+                            "application_monitoring": random.choice(['BASIC', 'COMPREHENSIVE', 'ADVANCED']),
+                            "network_monitoring": random.choice(['BASIC', 'COMPREHENSIVE', 'ADVANCED']),
+                            "security_monitoring": random.choice(['BASIC', 'COMPREHENSIVE', 'ADVANCED'])
+                        }
+                    },
+                    "alerting_system": {
+                        "alert_channels": random.sample(['EMAIL', 'SMS', 'SLACK', 'WEBHOOK', 'PAGERDUTY'], random.randint(2, 4)),
+                        "alert_severity_levels": random.randint(3, 7),
+                        "alert_correlation": random.choice(['ENABLED', 'DISABLED']),
+                        "alert_suppression": {
+                            "duplicate_suppression": random.choice(['ENABLED', 'DISABLED']),
+                            "maintenance_mode": random.choice(['ENABLED', 'DISABLED']),
+                            "intelligent_grouping": random.choice(['ENABLED', 'DISABLED'])
+                        },
+                        "escalation_procedures": {
+                            "escalation_levels": random.randint(2, 5),
+                            "escalation_timeouts": [f"{random.randint(5, 60)}minutes" for _ in range(3)],
+                            "on_call_rotation": random.choice(['ENABLED', 'DISABLED'])
+                        }
+                    }
+                }
+            }
+        }
+        
+        # Merge extensive parameters with base parameters
+        merged_params = {**base_params, **extensive_params}
+        
+        return merged_params
+    
     def generate_constrained_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
         """Generate deployment parameters with realistic constraints."""
         base_params = {
@@ -148,8 +400,8 @@ class DeploymentIntentGenerator:
     
     def _generate_constrained_topology(self, slice_type: str, location: str) -> Dict[str, Any]:
         """Generate network topology based on slice type and location constraints."""
-        slice_category = self.constraint_engine.categorize_slice_type(slice_type)
-        location_category = self.constraint_engine.categorize_location(location)
+        slice_category = self._categorize_slice_type(slice_type)
+        location_category = self._categorize_location(location)
         
         # Select appropriate architecture
         if slice_category in ['URLLC', 'V2X']:
@@ -174,6 +426,30 @@ class DeploymentIntentGenerator:
             "antenna_configuration": self._select_antenna_config(slice_category, location_category),
             "backhaul": self._select_backhaul(location_category, slice_category)
         }
+    
+    def _categorize_slice_type(self, slice_type: str) -> str:
+        """Categorize slice type into main domain categories."""
+        slice_lower = slice_type.lower()
+        if any(keyword in slice_lower for keyword in ['urllc', 'critical', 'autonomous', 'industrial']):
+            if 'v2x' in slice_lower or 'vehicle' in slice_lower or 'autonomous' in slice_lower:
+                return 'V2X'
+            return 'URLLC'
+        elif any(keyword in slice_lower for keyword in ['mmtc', 'iot', 'massive', 'agriculture', 'monitoring']):
+            return 'mMTC'
+        else:
+            return 'eMBB'
+    
+    def _categorize_location(self, location: str) -> str:
+        """Categorize location into main types."""
+        location_lower = location.lower()
+        if any(keyword in location_lower for keyword in ['highway', 'corridor', 'road']):
+            return 'highway'
+        elif any(keyword in location_lower for keyword in ['industrial', 'manufacturing', 'factory']):
+            return 'industrial'
+        elif any(keyword in location_lower for keyword in ['rural', 'farm', 'agriculture']):
+            return 'rural'
+        else:
+            return 'urban'
     
     def _select_spectrum_bands(self, slice_category: str) -> Dict[str, str]:
         """Select appropriate spectrum bands for slice category."""
@@ -239,7 +515,7 @@ class DeploymentIntentGenerator:
     
     def _select_appropriate_nf(self, slice_type: str) -> str:
         """Select appropriate network function based on slice type."""
-        slice_category = self.constraint_engine.categorize_slice_type(slice_type)
+        slice_category = self._categorize_slice_type(slice_type)
         
         nf_preferences = {
             'URLLC': ['UPF', 'SMF', 'PCF', 'NWDAF'],
@@ -350,7 +626,7 @@ class DeploymentIntentGenerator:
     
     def _generate_performance_requirements(self, slice_type: str, priority: str) -> Dict[str, Any]:
         """Generate performance requirements based on slice type and priority."""
-        slice_category = self.constraint_engine.categorize_slice_type(slice_type)
+        slice_category = self._categorize_slice_type(slice_type)
         
         # Base requirements by slice category
         base_requirements = {
@@ -418,7 +694,7 @@ class DeploymentIntentGenerator:
     
     def _generate_constrained_security(self, slice_type: str, priority: str) -> Dict[str, Any]:
         """Generate security parameters based on slice type and priority."""
-        slice_category = self.constraint_engine.categorize_slice_type(slice_type)
+        slice_category = self._categorize_slice_type(slice_type)
         
         # Critical slices and high priority get stronger security
         if slice_category in ['URLLC', 'V2X'] or priority in ['CRITICAL', 'EMERGENCY']:

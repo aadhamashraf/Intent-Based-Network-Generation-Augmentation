@@ -9,26 +9,14 @@ class FeasibilityCheckIntentGenerator:
     """Generator for feasibility check intent records."""
     
     def __init__(self):
-        # Import here to avoid circular imports
-        try:
-            from .Constraint_Engine import ConstraintEngine
-            self.constraint_engine = ConstraintEngine()
-        except ImportError:
-            self.constraint_engine = None
+        # Remove old constraint engine dependency - now handled by main generator
+        pass
     
     def generate_constrained_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
         """Generate feasibility check parameters with realistic constraints."""
         base_params = self.generate_parameters()
         
-        # Apply constraints if constraint engine is available
-        if self.constraint_engine:
-            # Override with constrained parameters
-            base_params["qos_parameters"] = self.constraint_engine.generate_constrained_qos_parameters(
-                slice_type, priority, location
-            )
-            base_params["resource_allocation"] = self.constraint_engine.generate_constrained_resource_allocation(
-                complexity, slice_type, priority
-            )
+        # Note: Constraints now handled by Enhanced Constraint Engine in main generator
         
         return base_params
     

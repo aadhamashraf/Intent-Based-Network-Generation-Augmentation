@@ -10,13 +10,14 @@ from typing import List, Dict, Any
 from .Constants_Enums import IntentType, Priority, ADVANCED_LOCATIONS, ADVANCED_SLICE_TYPES, COMPLIANCE_STANDARDS, RESEARCH_CONTEXTS
 from .Data_Structures import NetworkIntent
 from .utilis_generator import generate_unique_id, random_choice, random_int, random_float, current_timestamp
+from .Template_Engine import AdvancedTemplateEngine, TemplateContext
+from .Enhanced_Constraint_Engine import EnhancedConstraintEngine
 from .Deployment_Intent_Generator import DeploymentIntentGenerator
 from .Modification_Intent_Generator import ModificationIntentGenerator
 from .Performance_Assurance_Intent_Generator import PerformanceAssuranceIntentGenerator
 from .Report_Request_Intent_Generator import ReportRequestIntentGenerator
 from .Feasibility_Check_Intent_Generator import FeasibilityCheckIntentGenerator
 from .Notification_Request_Intent_Generator import NotificationRequestIntentGenerator
-from .Constraint_Engine import ConstraintEngine
 
 try:
     from ..Evaluation.evaluation_metric import DataEvaluator
@@ -34,7 +35,8 @@ class Advanced3GPPIntentGenerator:
         self.used_ids = set()
         self.intent_counter = 0
         self.research_session_id = f"RESEARCH_{int(time.time())}_{uuid.uuid4().hex[:12]}"
-        self.constraint_engine = ConstraintEngine()
+        self.constraint_engine = EnhancedConstraintEngine()
+        self.template_engine = AdvancedTemplateEngine()
         self.data_evaluator = DataEvaluator() if DataEvaluator else None
         
         self.generators = {
@@ -45,6 +47,27 @@ class Advanced3GPPIntentGenerator:
             IntentType.FEASIBILITY_CHECK: FeasibilityCheckIntentGenerator(),
             IntentType.NOTIFICATION_REQUEST: NotificationRequestIntentGenerator()
         }
+    
+    def _create_template_context(self, intent_type: str, complexity: int, priority: str, 
+                                slice_type: str, location: str, parameters: Dict[str, Any], 
+                                metadata: Dict[str, Any]) -> TemplateContext:
+        """Create template context for advanced description generation."""
+        slice_category = self.constraint_engine.categorize_slice_type(slice_type)
+        location_category = self.constraint_engine.categorize_location(location)
+        
+        return TemplateContext(
+            intent_type=intent_type,
+            complexity=complexity,
+            priority=priority,
+            slice_category=slice_category,
+            location_category=location_category,
+            parameters=parameters,
+            metadata=metadata
+        )
+    
+    def _generate_advanced_description(self, context: TemplateContext) -> str:
+        """Generate advanced description using template engine."""
+        return self.template_engine.generate_description(context)
     
     def generate_metadata(self, intent_type: str) -> Dict[str, Any]:
         """Generate metadata for an intent record."""
@@ -69,6 +92,7 @@ class Advanced3GPPIntentGenerator:
         """Generate a single intent record."""
         intent_type = random_choice(list(IntentType))
         
+        # Generate base parameters
         slice_type = random_choice(ADVANCED_SLICE_TYPES)
         location = random_choice(ADVANCED_LOCATIONS)
         
@@ -88,21 +112,32 @@ class Advanced3GPPIntentGenerator:
             slice_type, intent_type.value, "CORE"
         )
         
-        generator = self.generators[intent_type]
+        # Create comprehensive parameter context
+        param_context = {
+            'slice_type': slice_type,
+            'priority': priority,
+            'location': location,
+            'complexity': complexity,
+            'intent_type': intent_type.value,
+            'research_context': research_context,
+            'compliance_standards': compliance_standards
+        }
         
-        parameters = generator.generate_constrained_parameters(
+        # Generate comprehensive constrained parameters using enhanced constraint engine
+        parameters = self.constraint_engine.generate_constrained_parameters(param_context)
+        
+        # Add additional parameters from specific generators
+        generator = self.generators[intent_type]
+        additional_params = generator.generate_constrained_parameters(
             slice_type, priority, location, complexity
         )
         
-        parameters["qos_parameters"] = self.constraint_engine.generate_constrained_qos_parameters(
-            slice_type, priority, location
-        )
-        
-        parameters["resource_allocation"] = self.constraint_engine.generate_constrained_resource_allocation(
-            complexity, slice_type, priority
-        )
-        
-        description = generator.generate_description(parameters, location, slice_type)
+        # Merge additional parameters
+        for key, value in additional_params.items():
+            if key not in parameters:
+                parameters[key] = value
+            elif isinstance(value, dict) and isinstance(parameters[key], dict):
+                parameters[key].update(value)
         
         metadata = {
             "version": f"{random_int(1, 3)}.{random_int(0, 9)}.{random_int(0, 99)}",
@@ -119,6 +154,18 @@ class Advanced3GPPIntentGenerator:
             "industry_vertical": self._determine_industry_vertical(slice_type, location)
         }
         
+        # Create template context and generate advanced description
+        template_context = self._create_template_context(
+            intent_type.value, complexity, priority, slice_type, location, parameters, metadata
+        )
+        
+        # Generate sophisticated description using template engine
+        description = self._generate_advanced_description(template_context)
+        
+        # Add template metadata
+        metadata["template_engine_version"] = "2.0.0"
+        metadata["description_complexity_score"] = self._calculate_description_complexity(description)
+        
         return NetworkIntent(
             id=generate_unique_id(),
             intent_type=intent_type.value,
@@ -130,6 +177,15 @@ class Advanced3GPPIntentGenerator:
             parameters=parameters,
             metadata=metadata
         )
+    
+    def _calculate_description_complexity(self, description: str) -> float:
+        """Calculate complexity score for generated description."""
+        # Simple complexity calculation based on various factors
+        word_count = len(description.split())
+        unique_words = len(set(description.lower().split()))
+        avg_word_length = sum(len(word) for word in description.split()) / word_count if word_count > 0 else 0
+        
+        return min(10.0, (word_count / 10) + (unique_words / word_count * 5) + (avg_word_length / 2))
     
     def _calculate_quality_score(self, complexity: int, priority: str, slice_type: str) -> float:
         """Calculate quality score based on realistic factors."""
