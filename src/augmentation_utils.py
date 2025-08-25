@@ -50,7 +50,12 @@ except:
     pass
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-logging.info(f"Device set to use {device}")
+
+fake = Faker()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+logger.info(f"Device set to use {device}")
 
 try:
     bert_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
@@ -86,9 +91,6 @@ except Exception as e:
     logger.warning(f"Failed to load T5 paraphraser: {e}")
     paraphraser = None
 
-fake = Faker()
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 def back_translate(text, retries=3):
     """Backtranslate English text via French with retries."""
@@ -162,6 +164,22 @@ def gpt2_synthesize(text, max_new_tokens=50):
         logger.warning(f"GPT generation failed: {e}")
         return text
 
+# Add missing augmentation functions referenced in main.py
+def gpt2_augment(text, max_new_tokens=50):
+    """Alias for gpt2_synthesize for consistency."""
+    return gpt2_synthesize(text, max_new_tokens)
+
+def bert_fill_augment(text):
+    """Alias for mask_fill_augment for consistency."""
+    return mask_fill_augment(text)
+
+def adversarial_augment(text):
+    """Alias for adversarial_noise for consistency."""
+    return adversarial_noise(text)
+
+def entity_shuffle_augment(text):
+    """Alias for entity_shuffle for consistency."""
+    return entity_shuffle(text)
 
 def contextual_synonym_augment(text):
     """Replace one word with a contextually similar one using spaCy word vectors."""

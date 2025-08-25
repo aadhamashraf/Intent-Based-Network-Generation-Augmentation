@@ -84,7 +84,7 @@ def main():
 
             if args.use_gpt2_aug and random.random() < args.gpt2_ratio:
                 augmented_intent = intent.__class__(**intent.__dict__)
-                augmented_intent.description = gpt2_augment(intent.description)
+                augmented_intent.description = gpt2_synthesize(intent.description)
                 augmented_intent.id = generate_unique_id("AUG_GPT2")
                 augmented_intents.append(augmented_intent)
 
@@ -96,21 +96,21 @@ def main():
 
             if args.use_bert_fill_aug and random.random() < args.bert_fill_ratio:
                 augmented_intent = intent.__class__(**intent.__dict__)
-                augmented_intent.description = bert_fill_augment(intent.description)
+                augmented_intent.description = mask_fill_augment(intent.description)
                 augmented_intent.id = generate_unique_id("AUG_BERT_FILL")
                 augmented_intents.append(augmented_intent)
 
             if args.use_adversarial_aug and random.random() < args.adversarial_ratio:
                 augmented_intent = intent.__class__(**intent.__dict__)
-                augmented_intent.description = adversarial_augment(intent.description)
+                augmented_intent.description = adversarial_noise(intent.description)
                 augmented_intent.id = generate_unique_id("AUG_ADV")
                 augmented_intents.append(augmented_intent)
 
         print(f"Augmented dataset size: {len(augmented_intents)} records")
         intents = augmented_intents
     
-    needEvaluation = input("Do you need evaluation for the generated dataset ? ").lower().strip()
-    if needEvaluation == "y": 
+    need_evaluation = input("Do you need evaluation for the generated dataset? (y/n): ").lower().strip()
+    if need_evaluation in ['y', 'yes']: 
         print("\nEvaluating dataset quality...")
         try:
             evaluator = DataEvaluator()
@@ -118,35 +118,43 @@ def main():
             labels = [intent.intent_type for intent in intents[:5]]
             evaluation_results = evaluator.evaluate_batch(descriptions, labels)
         except Exception as e:
-            from Evaluation.evaluation_metric import EvaluationMetrics
             print(f"Evaluation failed: {e}")
+            from Evaluation.evaluation_metric import EvaluationMetrics
             dummy_metrics = EvaluationMetrics(0, 0, 0, 0, 0, 0)
             evaluation_results = {
                 'overall_metrics': dummy_metrics,
                 'detailed_evaluations': [],
                 'batch_insights': ['Evaluation system unavailable - using dummy metrics']
             }
+    else:
+        from Evaluation.evaluation_metric import EvaluationMetrics
+        dummy_metrics = EvaluationMetrics(0, 0, 0, 0, 0, 0)
+        evaluation_results = {
+            'overall_metrics': dummy_metrics,
+            'detailed_evaluations': [],
+            'batch_insights': ['Evaluation skipped by user']
+        }
         
-        print("Dataset Quality Metrics:")
-        metrics = evaluation_results['overall_metrics']
-        print(f"  - Overall Quality: {metrics.overall_quality:.2f}/5")
-        print(f"  - Technical Accuracy: {metrics.technical_accuracy:.2f}/5")
-        print(f"  - Domain Relevance: {metrics.realism_score:.2f}/5")
-        print(f"  - Research Value: {metrics.research_value:.2f}/5")
+    print("Dataset Quality Metrics:")
+    metrics = evaluation_results['overall_metrics']
+    print(f"  - Overall Quality: {metrics.overall_quality:.2f}/5")
+    print(f"  - Technical Accuracy: {metrics.technical_accuracy:.2f}/5")
+    print(f"  - Domain Relevance: {metrics.realism_score:.2f}/5")
+    print(f"  - Research Value: {metrics.research_value:.2f}/5")
+    
+    if 'evaluation_summary' in evaluation_results:
+        summary = evaluation_results['evaluation_summary']
+        print("\nDetailed Evaluation Summary:")
+        if 'score_averages' in summary:
+            averages = summary['score_averages']
+            print(f"  - Grammar Score: {averages.get('grammar_score', 0):.2f}/5")
+            print(f"  - Intent Clarity: {averages.get('intent_clarity', 0):.2f}/5")
+            print(f"  - Terminology Accuracy: {averages.get('terminology_accuracy', 0):.2f}/5")
         
-        if 'evaluation_summary' in evaluation_results:
-            summary = evaluation_results['evaluation_summary']
-            print("\nDetailed Evaluation Summary:")
-            if 'score_averages' in summary:
-                averages = summary['score_averages']
-                print(f"  - Grammar Score: {averages.get('grammar_score', 0):.2f}/5")
-                print(f"  - Intent Clarity: {averages.get('intent_clarity', 0):.2f}/5")
-                print(f"  - Terminology Accuracy: {averages.get('terminology_accuracy', 0):.2f}/5")
-            
-            if 'common_issues' in summary and summary['common_issues']:
-                print("  - Common Issues:")
-                for issue, count in list(summary['common_issues'].items())[:3]:
-                    print(f"    • {issue}: {count} occurrences")
+        if 'common_issues' in summary and summary['common_issues']:
+            print("  - Common Issues:")
+            for issue, count in list(summary['common_issues'].items())[:3]:
+                print(f"    • {issue}: {count} occurrences")
     
     print("\nExporting datasets...")
     timestamp = datetime.now().strftime("%Y-%m-%d")
@@ -176,11 +184,12 @@ def main():
             "research_value": metrics.research_value
         }
     }
-    '''
-    with open(args.metadata_file, 'w', encoding='utf-8') as f:
+    
+    metadata_filename = args.metadata_file.replace('.json', f'_{timestamp}.json')
+    with open(metadata_filename, 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
-    print(f"  - Metadata: {args.metadata_file}")
-    '''
+    print(f"  - Metadata: {metadata_filename}")
+    
     print("\nGeneration complete!")
     print("\nDataset Statistics:")
     print(f"  - Total Records: {len(intents)}")

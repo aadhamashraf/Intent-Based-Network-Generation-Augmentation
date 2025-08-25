@@ -11,7 +11,6 @@ class DeploymentIntentGenerator:
     """Generator for deployment intent records."""
     
     def __init__(self):
-        # Remove old constraint engine dependency - now handled by main generator
         pass
     
     def _extract_extensive_parameters(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -364,7 +363,6 @@ class DeploymentIntentGenerator:
             "correlation_id": f"CORR_{uuid.uuid4().hex[:16]}",
             "tenant_id": f"TENANT_{random_int(10000, 99999)}",
             "service_level": self._determine_service_level(priority, complexity),
-            "extensive_parameters": self.generate_extensive_parameters(slice_type, priority, location, complexity),
             "network_topology": self._generate_constrained_topology(slice_type, location),
             "security_parameters": self._generate_constrained_security(slice_type, priority),
             "monitoring_parameters": self._generate_constrained_monitoring(complexity, priority)
@@ -402,8 +400,8 @@ class DeploymentIntentGenerator:
     
     def _generate_constrained_topology(self, slice_type: str, location: str) -> Dict[str, Any]:
         """Generate network topology based on slice type and location constraints."""
-        slice_category = self.constraint_engine.categorize_slice_type(slice_type)
-        location_category = self.constraint_engine.categorize_location(location)
+        slice_category = self._categorize_slice_type(slice_type)
+        location_category = self._categorize_location(location)
         
         # Select appropriate architecture
         if slice_category in ['URLLC', 'V2X']:
@@ -428,6 +426,30 @@ class DeploymentIntentGenerator:
             "antenna_configuration": self._select_antenna_config(slice_category, location_category),
             "backhaul": self._select_backhaul(location_category, slice_category)
         }
+    
+    def _categorize_slice_type(self, slice_type: str) -> str:
+        """Categorize slice type into main domain categories."""
+        slice_lower = slice_type.lower()
+        if any(keyword in slice_lower for keyword in ['urllc', 'critical', 'autonomous', 'industrial']):
+            if 'v2x' in slice_lower or 'vehicle' in slice_lower or 'autonomous' in slice_lower:
+                return 'V2X'
+            return 'URLLC'
+        elif any(keyword in slice_lower for keyword in ['mmtc', 'iot', 'massive', 'agriculture', 'monitoring']):
+            return 'mMTC'
+        else:
+            return 'eMBB'
+    
+    def _categorize_location(self, location: str) -> str:
+        """Categorize location into main types."""
+        location_lower = location.lower()
+        if any(keyword in location_lower for keyword in ['highway', 'corridor', 'road']):
+            return 'highway'
+        elif any(keyword in location_lower for keyword in ['industrial', 'manufacturing', 'factory']):
+            return 'industrial'
+        elif any(keyword in location_lower for keyword in ['rural', 'farm', 'agriculture']):
+            return 'rural'
+        else:
+            return 'urban'
     
     def _select_spectrum_bands(self, slice_category: str) -> Dict[str, str]:
         """Select appropriate spectrum bands for slice category."""
@@ -493,7 +515,7 @@ class DeploymentIntentGenerator:
     
     def _select_appropriate_nf(self, slice_type: str) -> str:
         """Select appropriate network function based on slice type."""
-        slice_category = self.constraint_engine.categorize_slice_type(slice_type)
+        slice_category = self._categorize_slice_type(slice_type)
         
         nf_preferences = {
             'URLLC': ['UPF', 'SMF', 'PCF', 'NWDAF'],
@@ -604,7 +626,7 @@ class DeploymentIntentGenerator:
     
     def _generate_performance_requirements(self, slice_type: str, priority: str) -> Dict[str, Any]:
         """Generate performance requirements based on slice type and priority."""
-        slice_category = self.constraint_engine.categorize_slice_type(slice_type)
+        slice_category = self._categorize_slice_type(slice_type)
         
         # Base requirements by slice category
         base_requirements = {
@@ -672,7 +694,7 @@ class DeploymentIntentGenerator:
     
     def _generate_constrained_security(self, slice_type: str, priority: str) -> Dict[str, Any]:
         """Generate security parameters based on slice type and priority."""
-        slice_category = self.constraint_engine.categorize_slice_type(slice_type)
+        slice_category = self._categorize_slice_type(slice_type)
         
         # Critical slices and high priority get stronger security
         if slice_category in ['URLLC', 'V2X'] or priority in ['CRITICAL', 'EMERGENCY']:
