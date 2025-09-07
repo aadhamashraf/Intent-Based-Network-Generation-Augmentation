@@ -28,6 +28,83 @@ except ImportError:
         DataEvaluator = None
 
 class Advanced3GPPIntentGenerator:
+    def generate_intent(self) -> NetworkIntent:
+        """Generate a single intent record."""
+        intent_type = random_choice(list(self.generators.keys()))
+        slice_type = random_choice(ADVANCED_SLICE_TYPES)
+        location = random_choice(ADVANCED_LOCATIONS)
+        priority = self.constraint_engine.generate_constrained_priority(slice_type, location, intent_type.value)
+        complexity = self.constraint_engine.generate_constrained_complexity(slice_type, priority, intent_type.value)
+        research_context = self.constraint_engine.generate_constrained_research_context(slice_type, complexity, priority)
+
+        compliance_standards = self.constraint_engine.generate_constrained_compliance_standards(
+            slice_type, intent_type.value, "CORE"
+        )
+
+        # Create comprehensive parameter context
+        param_context = {
+            'slice_type': slice_type,
+            'priority': priority,
+            'location': location,
+            'complexity': complexity,
+            'intent_type': intent_type.value,
+            'research_context': research_context,
+            'compliance_standards': compliance_standards
+        }
+
+        # Generate comprehensive constrained parameters using enhanced constraint engine
+        parameters = self.constraint_engine.generate_constrained_parameters(param_context)
+
+        # Add additional parameters from specific generators
+        generator = self.generators[intent_type]
+        additional_params = generator.generate_constrained_parameters(
+            slice_type, priority, location, complexity
+        )
+
+        # Merge additional parameters
+        for key, value in additional_params.items():
+            if key not in parameters:
+                parameters[key] = value
+            elif isinstance(value, dict) and isinstance(parameters[key], dict):
+                parameters[key].update(value)
+
+        # Generate description and capture base template
+        template_engine = self.template_engine
+        context = self._create_template_context(
+            intent_type.value, complexity, priority, slice_type, location, parameters, {}
+        )
+        description, base_template = template_engine.generate_description(context)
+
+        # Build metadata including base_template
+        metadata = {
+            "version": f"{random_int(1, 3)}.{random_int(0, 9)}.{random_int(0, 99)}",
+            "standard": "3GPP_Release_17",
+            "compliance": compliance_standards,
+            "research_context": research_context,
+            "technical_complexity": complexity,
+            "generation_timestamp": current_timestamp(),
+            "generator_version": "2.0.0_Research_Edition",
+            "data_classification": random_choice(['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'RESTRICTED']),
+            "quality_score": self._calculate_quality_score(complexity, priority, slice_type),
+            "validation_status": random_choice(['VALIDATED', 'PENDING_VALIDATION']),
+            "research_relevance": self._determine_research_relevance(complexity, priority),
+            "industry_vertical": self._determine_industry_vertical(slice_type, location),
+            "base_template": base_template,
+            "template_engine_version": "2.0.0",
+            "description_complexity_score": self._calculate_description_complexity(description)
+        }
+
+        return NetworkIntent(
+            id=generate_unique_id(),
+            intent_type=intent_type.value,
+            description=description,
+            timestamp=current_timestamp(),
+            priority=priority,
+            network_slice=slice_type,
+            location=location,
+            parameters=parameters,
+            metadata=metadata
+        )
     """Main class for generating advanced 3GPP intent records."""
     
     def __init__(self, use_llm_synthesis: bool = True):
@@ -54,7 +131,6 @@ class Advanced3GPPIntentGenerator:
         """Create template context for advanced description generation."""
         slice_category = self.constraint_engine.categorize_slice_type(slice_type)
         location_category = self.constraint_engine.categorize_location(location)
-        
         return TemplateContext(
             intent_type=intent_type,
             complexity=complexity,
@@ -64,54 +140,12 @@ class Advanced3GPPIntentGenerator:
             parameters=parameters,
             metadata=metadata
         )
-    
-    def _generate_advanced_description(self, context: TemplateContext) -> str:
-        """Generate advanced description using template engine."""
-        return self.template_engine.generate_description(context)
-    
-    def generate_metadata(self, intent_type: str) -> Dict[str, Any]:
-        """Generate metadata for an intent record."""
-        complexity = random_int(1, 10)
-        
-        return {
-            "version": f"{random_int(1, 3)}.{random_int(0, 9)}.{random_int(0, 99)}",
-            "standard": "3GPP_Release_17",
-            "compliance": random.sample(COMPLIANCE_STANDARDS, 2),
-            "research_context": random_choice(RESEARCH_CONTEXTS),
-            "technical_complexity": complexity,
-            "generation_timestamp": current_timestamp(),
-            "generator_version": "2.0.0_Research_Edition",
-            "data_classification": random_choice(['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'RESTRICTED']),
-            "quality_score": random_float(7.5, 10.0),
-            "validation_status": random_choice(['VALIDATED', 'PENDING_VALIDATION', 'VALIDATION_FAILED']),
-            "research_relevance": random_choice(['HIGH', 'MEDIUM', 'LOW']),
-            "industry_vertical": random_choice(['TELECOMMUNICATIONS', 'AUTOMOTIVE', 'HEALTHCARE', 'MANUFACTURING', 'ENERGY', 'SMART_CITIES'])
-        }
-    
-    def generate_intent(self) -> NetworkIntent:
-        """Generate a single intent record."""
-        intent_type = random_choice(list(IntentType))
-        
-        # Generate base parameters
-        slice_type = random_choice(ADVANCED_SLICE_TYPES)
-        location = random_choice(ADVANCED_LOCATIONS)
-        
-        priority = self.constraint_engine.generate_constrained_priority(
-            slice_type, location, intent_type.value
-        )
-        
-        complexity = self.constraint_engine.generate_constrained_complexity(
-            slice_type, priority, intent_type.value
-        )
-        
-        research_context = self.constraint_engine.generate_constrained_research_context(
-            slice_type, complexity, priority
-        )
-        
+
+        # --- FIXED LOGIC: Generate parameters, description, and metadata correctly ---
         compliance_standards = self.constraint_engine.generate_constrained_compliance_standards(
             slice_type, intent_type.value, "CORE"
         )
-        
+
         # Create comprehensive parameter context
         param_context = {
             'slice_type': slice_type,
@@ -122,23 +156,31 @@ class Advanced3GPPIntentGenerator:
             'research_context': research_context,
             'compliance_standards': compliance_standards
         }
-        
+
         # Generate comprehensive constrained parameters using enhanced constraint engine
         parameters = self.constraint_engine.generate_constrained_parameters(param_context)
-        
+
         # Add additional parameters from specific generators
         generator = self.generators[intent_type]
         additional_params = generator.generate_constrained_parameters(
             slice_type, priority, location, complexity
         )
-        
+
         # Merge additional parameters
         for key, value in additional_params.items():
             if key not in parameters:
                 parameters[key] = value
             elif isinstance(value, dict) and isinstance(parameters[key], dict):
                 parameters[key].update(value)
-        
+
+        # Generate description and capture base template
+        template_engine = self.template_engine
+        context = self._create_template_context(
+            intent_type.value, complexity, priority, slice_type, location, parameters, {}
+        )
+        description, base_template = template_engine.generate_description(context)
+
+        # Build metadata including base_template
         metadata = {
             "version": f"{random_int(1, 3)}.{random_int(0, 9)}.{random_int(0, 99)}",
             "standard": "3GPP_Release_17",
@@ -151,21 +193,12 @@ class Advanced3GPPIntentGenerator:
             "quality_score": self._calculate_quality_score(complexity, priority, slice_type),
             "validation_status": random_choice(['VALIDATED', 'PENDING_VALIDATION']),
             "research_relevance": self._determine_research_relevance(complexity, priority),
-            "industry_vertical": self._determine_industry_vertical(slice_type, location)
+            "industry_vertical": self._determine_industry_vertical(slice_type, location),
+            "base_template": base_template,
+            "template_engine_version": "2.0.0",
+            "description_complexity_score": self._calculate_description_complexity(description)
         }
-        
-        # Create template context and generate advanced description
-        template_context = self._create_template_context(
-            intent_type.value, complexity, priority, slice_type, location, parameters, metadata
-        )
-        
-        # Generate sophisticated description using template engine
-        description = self._generate_advanced_description(template_context)
-        
-        # Add template metadata
-        metadata["template_engine_version"] = "2.0.0"
-        metadata["description_complexity_score"] = self._calculate_description_complexity(description)
-        
+
         return NetworkIntent(
             id=generate_unique_id(),
             intent_type=intent_type.value,
@@ -282,16 +315,14 @@ class Advanced3GPPIntentGenerator:
             json.dump(data, f, indent=2, ensure_ascii=False)
     
     def export_to_csv(self, intents: List[NetworkIntent], filename: str):
-        """Export intents to CSV file."""
+        """Export intents to CSV file with BaseTemplate column."""
         with open(filename, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            
             writer.writerow([
                 'ID', 'Intent Type', 'Description', 'Timestamp', 'Priority',
                 'Network Slice', 'Location', 'Technical Complexity',
-                'Research Context', 'Compliance Standards', 'Parameters'
+                'Research Context', 'Compliance Standards', 'BaseTemplate', 'Parameters'
             ])
-            
             for intent in intents:
                 writer.writerow([
                     intent.id,
@@ -304,6 +335,7 @@ class Advanced3GPPIntentGenerator:
                     intent.metadata.get('technical_complexity', ''),
                     intent.metadata.get('research_context', ''),
                     '; '.join(intent.metadata.get('compliance', [])),
+                    intent.metadata.get('base_template', ''),
                     json.dumps(intent.parameters)
                 ])
     
