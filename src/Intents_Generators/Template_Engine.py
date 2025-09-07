@@ -290,7 +290,7 @@ class AdvancedTemplateEngine:
         logger.info(f"Template engine initialized with {len(self.template_registry)} intent types")
         logger.info(f"Total templates available: {sum(len(templates) for templates in self.template_registry.values())}")
     
-    def generate_description(self, context: TemplateContext) -> str:
+    def generate_description(self, context: TemplateContext) -> Tuple[str, str]:
         """
         Generate sophisticated description using comprehensive parameter utilization.
         
@@ -302,7 +302,7 @@ class AdvancedTemplateEngine:
             context: TemplateContext containing all necessary information
             
         Returns:
-            str: Generated network intent description
+            tuple: (Generated network intent description, Base template used)
         """
         logger.info(f"Generating description for {context.intent_type} with complexity {context.complexity}")
         
@@ -333,12 +333,12 @@ class AdvancedTemplateEngine:
             description = self._apply_post_processing(description, context, extracted_params)
             
             logger.info(f"Successfully generated description with {len(description)} characters")
-            return description
+            return description, selected_template
             
         except Exception as e:
             logger.error(f"Error generating description: {str(e)}")
             # Fallback to basic template
-            return self._generate_fallback_description(context)
+            return self._generate_fallback_description(context), "FALLBACK_TEMPLATE"
     
     def _extract_comprehensive_parameters(self, parameters: Dict[str, Any]) -> ParameterExtraction:
         """
