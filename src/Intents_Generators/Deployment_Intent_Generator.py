@@ -550,7 +550,7 @@ class DeploymentIntentGenerator:
     
     def _generate_deployment_flavor(self, slice_type: str, complexity: int) -> Dict[str, Any]:
         """Generate deployment flavor based on slice type and complexity."""
-        slice_category = self.constraint_engine.categorize_slice_type(slice_type)
+        slice_category = self._categorize_slice_type(slice_type)
         
         # Determine optimization focus
         if slice_category in ['URLLC', 'V2X']:
