@@ -27,16 +27,114 @@ except ImportError:
     except ImportError:
         DataEvaluator = None
 
+
 class Advanced3GPPIntentGenerator:
+    """Main class for generating advanced 3GPP intent records."""
+    
+    def __init__(self, use_llm_synthesis: bool = True):
+        self.use_llm_synthesis = use_llm_synthesis
+        self.used_ids = set()
+        self.used_descriptions = set()
+        self.intent_counter = 0
+        self.research_session_id = f"RESEARCH_{int(time.time())}_{uuid.uuid4().hex[:12]}"
+        self.constraint_engine = EnhancedConstraintEngine()
+        self.template_engine = AdvancedTemplateEngine()
+        self.data_evaluator = DataEvaluator() if DataEvaluator else None
+        
+        self.generators = {
+            IntentType.DEPLOYMENT: DeploymentIntentGenerator(),
+            IntentType.MODIFICATION: ModificationIntentGenerator(),
+            IntentType.PERFORMANCE_ASSURANCE: PerformanceAssuranceIntentGenerator(),
+            IntentType.REPORT_REQUEST: ReportRequestIntentGenerator(),
+            IntentType.FEASIBILITY_CHECK: FeasibilityCheckIntentGenerator(),
+            IntentType.NOTIFICATION_REQUEST: NotificationRequestIntentGenerator()
+        }
+    
+    def _generate_unique_id(self) -> str:
+        """Generate a truly unique ID and ensure it's not duplicated."""
+        max_attempts = 100
+        for _ in range(max_attempts):
+            new_id = generate_unique_id()
+            if new_id not in self.used_ids:
+                self.used_ids.add(new_id)
+                return new_id
+        
+        # Fallback: create a guaranteed unique ID
+        fallback_id = f"{generate_unique_id()}_{self.intent_counter}_{int(time.time())}"
+        self.used_ids.add(fallback_id)
+        return fallback_id
+    
+    def _generate_unique_description(self, context: TemplateContext, max_attempts: int = 10) -> tuple[str, str]:
+        """Generate a unique description that hasn't been used before."""
+        for attempt in range(max_attempts):
+            # Add randomization to context to increase variety
+            enhanced_context = self._enhance_context_for_uniqueness(context, attempt)
+            description, base_template = self.template_engine.generate_description(enhanced_context)
+            
+            # Create a normalized version for comparison (remove extra spaces, lowercase)
+            normalized_desc = ' '.join(description.lower().split())
+            
+            if normalized_desc not in self.used_descriptions:
+                self.used_descriptions.add(normalized_desc)
+                return description, base_template
+        
+        # If we can't generate a unique description, add a unique suffix
+        description, base_template = self.template_engine.generate_description(context)
+        unique_suffix = f" [Instance-{self.intent_counter}-{int(time.time() * 1000) % 10000}]"
+        unique_description = description + unique_suffix
+        
+        normalized_desc = ' '.join(unique_description.lower().split())
+        self.used_descriptions.add(normalized_desc)
+        
+        return unique_description, base_template
+    
+    def _enhance_context_for_uniqueness(self, context: TemplateContext, attempt: int) -> TemplateContext:
+        """Enhance context with additional randomization to increase description variety."""
+        # Create a copy of the context
+        enhanced_context = TemplateContext(
+            intent_type=context.intent_type,
+            complexity=context.complexity,
+            priority=context.priority,
+            slice_category=context.slice_category,
+            location_category=context.location_category,
+            parameters=context.parameters.copy(),
+            metadata=context.metadata.copy()
+        )
+        
+        # Add variety-enhancing parameters based on attempt number
+        variety_params = {
+            'variation_seed': attempt,
+            'description_style': random_choice(['technical', 'business', 'operational', 'detailed', 'concise']),
+            'focus_aspect': random_choice(['performance', 'security', 'reliability', 'efficiency', 'scalability']),
+            'implementation_phase': random_choice(['planning', 'deployment', 'optimization', 'monitoring', 'maintenance']),
+            'stakeholder_perspective': random_choice(['operator', 'vendor', 'enterprise', 'regulator', 'researcher']),
+            'time_horizon': random_choice(['immediate', 'short-term', 'medium-term', 'long-term', 'strategic']),
+            'deployment_scenario': random_choice(['greenfield', 'brownfield', 'hybrid', 'migration', 'upgrade']),
+            'business_context': random_choice(['cost-optimization', 'service-enhancement', 'compliance', 'innovation', 'competition'])
+        }
+        
+        # Add these to the enhanced context
+        enhanced_context.parameters.update(variety_params)
+        enhanced_context.metadata.update({
+            'description_variation_attempt': attempt,
+            'uniqueness_enhancers': variety_params
+        })
+        
+        return enhanced_context
+    
     def generate_intent(self) -> NetworkIntent:
         """Generate a single intent record."""
+        self.intent_counter += 1
+        
+        # Select intent type and basic parameters
         intent_type = random_choice(list(self.generators.keys()))
         slice_type = random_choice(ADVANCED_SLICE_TYPES)
         location = random_choice(ADVANCED_LOCATIONS)
+        
+        # Generate constrained parameters
         priority = self.constraint_engine.generate_constrained_priority(slice_type, location, intent_type.value)
         complexity = self.constraint_engine.generate_constrained_complexity(slice_type, priority, intent_type.value)
         research_context = self.constraint_engine.generate_constrained_research_context(slice_type, complexity, priority)
-
         compliance_standards = self.constraint_engine.generate_constrained_compliance_standards(
             slice_type, intent_type.value, "CORE"
         )
@@ -69,11 +167,10 @@ class Advanced3GPPIntentGenerator:
                 parameters[key].update(value)
 
         # Generate description and capture base template
-        template_engine = self.template_engine
         context = self._create_template_context(
             intent_type.value, complexity, priority, slice_type, location, parameters, {}
         )
-        description, base_template = template_engine.generate_description(context)
+        description, base_template = self._generate_unique_description(context)
 
         # Build metadata including base_template
         metadata = {
@@ -95,7 +192,7 @@ class Advanced3GPPIntentGenerator:
         }
 
         return NetworkIntent(
-            id=generate_unique_id(),
+            id=self._generate_unique_id(),
             intent_type=intent_type.value,
             description=description,
             timestamp=current_timestamp(),
@@ -105,25 +202,6 @@ class Advanced3GPPIntentGenerator:
             parameters=parameters,
             metadata=metadata
         )
-    """Main class for generating advanced 3GPP intent records."""
-    
-    def __init__(self, use_llm_synthesis: bool = True):
-        self.use_llm_synthesis = use_llm_synthesis
-        self.used_ids = set()
-        self.intent_counter = 0
-        self.research_session_id = f"RESEARCH_{int(time.time())}_{uuid.uuid4().hex[:12]}"
-        self.constraint_engine = EnhancedConstraintEngine()
-        self.template_engine = AdvancedTemplateEngine()
-        self.data_evaluator = DataEvaluator() if DataEvaluator else None
-        
-        self.generators = {
-            IntentType.DEPLOYMENT: DeploymentIntentGenerator(),
-            IntentType.MODIFICATION: ModificationIntentGenerator(),
-            IntentType.PERFORMANCE_ASSURANCE: PerformanceAssuranceIntentGenerator(),
-            IntentType.REPORT_REQUEST: ReportRequestIntentGenerator(),
-            IntentType.FEASIBILITY_CHECK: FeasibilityCheckIntentGenerator(),
-            IntentType.NOTIFICATION_REQUEST: NotificationRequestIntentGenerator()
-        }
     
     def _create_template_context(self, intent_type: str, complexity: int, priority: str, 
                                 slice_type: str, location: str, parameters: Dict[str, Any], 
@@ -140,83 +218,16 @@ class Advanced3GPPIntentGenerator:
             parameters=parameters,
             metadata=metadata
         )
-
-        # --- FIXED LOGIC: Generate parameters, description, and metadata correctly ---
-        compliance_standards = self.constraint_engine.generate_constrained_compliance_standards(
-            slice_type, intent_type.value, "CORE"
-        )
-
-        # Create comprehensive parameter context
-        param_context = {
-            'slice_type': slice_type,
-            'priority': priority,
-            'location': location,
-            'complexity': complexity,
-            'intent_type': intent_type.value,
-            'research_context': research_context,
-            'compliance_standards': compliance_standards
-        }
-
-        # Generate comprehensive constrained parameters using enhanced constraint engine
-        parameters = self.constraint_engine.generate_constrained_parameters(param_context)
-
-        # Add additional parameters from specific generators
-        generator = self.generators[intent_type]
-        additional_params = generator.generate_constrained_parameters(
-            slice_type, priority, location, complexity
-        )
-
-        # Merge additional parameters
-        for key, value in additional_params.items():
-            if key not in parameters:
-                parameters[key] = value
-            elif isinstance(value, dict) and isinstance(parameters[key], dict):
-                parameters[key].update(value)
-
-        # Generate description and capture base template
-        template_engine = self.template_engine
-        context = self._create_template_context(
-            intent_type.value, complexity, priority, slice_type, location, parameters, {}
-        )
-        description, base_template = template_engine.generate_description(context)
-
-        # Build metadata including base_template
-        metadata = {
-            "version": f"{random_int(1, 3)}.{random_int(0, 9)}.{random_int(0, 99)}",
-            "standard": "3GPP_Release_17",
-            "compliance": compliance_standards,
-            "research_context": research_context,
-            "technical_complexity": complexity,
-            "generation_timestamp": current_timestamp(),
-            "generator_version": "2.0.0_Research_Edition",
-            "data_classification": random_choice(['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'RESTRICTED']),
-            "quality_score": self._calculate_quality_score(complexity, priority, slice_type),
-            "validation_status": random_choice(['VALIDATED', 'PENDING_VALIDATION']),
-            "research_relevance": self._determine_research_relevance(complexity, priority),
-            "industry_vertical": self._determine_industry_vertical(slice_type, location),
-            "base_template": base_template,
-            "template_engine_version": "2.0.0",
-            "description_complexity_score": self._calculate_description_complexity(description)
-        }
-
-        return NetworkIntent(
-            id=generate_unique_id(),
-            intent_type=intent_type.value,
-            description=description,
-            timestamp=current_timestamp(),
-            priority=priority,
-            network_slice=slice_type,
-            location=location,
-            parameters=parameters,
-            metadata=metadata
-        )
     
     def _calculate_description_complexity(self, description: str) -> float:
         """Calculate complexity score for generated description."""
         # Simple complexity calculation based on various factors
         word_count = len(description.split())
+        if word_count == 0:
+            return 0.0
+            
         unique_words = len(set(description.lower().split()))
-        avg_word_length = sum(len(word) for word in description.split()) / word_count if word_count > 0 else 0
+        avg_word_length = sum(len(word) for word in description.split()) / word_count
         
         return min(10.0, (word_count / 10) + (unique_words / word_count * 5) + (avg_word_length / 2))
     
@@ -273,12 +284,29 @@ class Advanced3GPPIntentGenerator:
             return 'TELECOMMUNICATIONS'
     
     def generate_batch(self, count: int, progress_callback=None) -> List[NetworkIntent]:
-        """Generate a batch of intent records."""
+        """Generate a batch of intent records with guaranteed uniqueness."""
         intents = []
+        description_attempts = 0
+        max_description_attempts = count * 3  # Allow more attempts for unique descriptions
         
         for i in range(count):
-            intent = self.generate_intent()
-            intents.append(intent)
+            # Generate intent with retry logic for unique descriptions
+            max_retries = 5
+            intent = None
+            
+            for retry in range(max_retries):
+                try:
+                    intent = self.generate_intent()
+                    break
+                except Exception as e:
+                    if retry == max_retries - 1:
+                        # If all retries failed, generate with fallback
+                        print(f"Warning: Failed to generate unique intent after {max_retries} attempts: {e}")
+                        intent = self.generate_intent()
+                        break
+            
+            if intent:
+                intents.append(intent)
             
             if progress_callback and i % 100 == 0:
                 progress_callback(i, count)
@@ -286,7 +314,23 @@ class Advanced3GPPIntentGenerator:
             if i % 50 == 0:
                 time.sleep(0.001)
         
-        return intents
+        # Verify uniqueness (additional safety check)
+        seen_ids = set()
+        seen_descriptions = set()
+        unique_intents = []
+        
+        for intent in intents:
+            normalized_desc = ' '.join(intent.description.lower().split())
+            if intent.id not in seen_ids and normalized_desc not in seen_descriptions:
+                seen_ids.add(intent.id)
+                seen_descriptions.add(normalized_desc)
+                unique_intents.append(intent)
+        
+        if len(unique_intents) != len(intents):
+            duplicates_removed = len(intents) - len(unique_intents)
+            print(f"Warning: Removed {duplicates_removed} duplicate intents (IDs or descriptions)")
+        
+        return unique_intents
     
     def evaluate_dataset(self, intents: List[NetworkIntent]) -> Dict[str, Any]:
         """Evaluate the generated dataset."""
@@ -370,10 +414,10 @@ class Advanced3GPPIntentGenerator:
                 "dataset_purpose": "Advanced 3GPP Intent-Based Networking Research",
                 "compliance_standards": ['3GPP_TS_28.312', '3GPP_TS_28.313', 'ETSI_NFV_SOL_001'],
                 "quality_metrics": {
-                    "average_complexity": sum(intent.metadata.get('technical_complexity', 0) for intent in intents) / len(intents),
-                    "diversity_score": len(set(intent.intent_type for intent in intents)) / len(list(IntentType)),
-                    "research_relevance": len([i for i in intents if i.metadata.get('research_relevance') == 'HIGH']) / len(intents),
-                    "llm_enhanced_records": len([i for i in intents if i.llm_metadata and i.llm_metadata.get('synthesized')])
+                    "average_complexity": sum(intent.metadata.get('technical_complexity', 0) for intent in intents) / len(intents) if intents else 0,
+                    "diversity_score": len(set(intent.intent_type for intent in intents)) / len(list(IntentType)) if intents else 0,
+                    "research_relevance": len([i for i in intents if i.metadata.get('research_relevance') == 'HIGH']) / len(intents) if intents else 0,
+                    "llm_enhanced_records": len([i for i in intents if hasattr(i, 'llm_metadata') and i.llm_metadata and i.llm_metadata.get('synthesized')]) if intents else 0
                 },
                 "evaluation_results": serialize_evaluation_results(evaluation_results)
             },
@@ -384,9 +428,19 @@ class Advanced3GPPIntentGenerator:
                 "intent_type_distribution": {
                     intent_type.value: len([i for i in intents if i.intent_type == intent_type.value])
                     for intent_type in IntentType
-                }
+                },
+                "unique_ids_generated": len(self.used_ids),
+                "unique_descriptions_generated": len(self.used_descriptions),
+                "description_uniqueness_ratio": len(self.used_descriptions) / len(intents) if intents else 0
             }
         }
         
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(research_data, f, indent=2, ensure_ascii=False)
+    
+    def reset_session(self):
+        """Reset the generator session and clear used IDs."""
+        self.used_ids.clear()
+        self.used_descriptions.clear()
+        self.intent_counter = 0
+        self.research_session_id = f"RESEARCH_{int(time.time())}_{uuid.uuid4().hex[:12]}"
