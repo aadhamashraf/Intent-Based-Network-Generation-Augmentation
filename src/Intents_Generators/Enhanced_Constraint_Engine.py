@@ -77,6 +77,7 @@ class EnhancedConstraintEngine:
     
     def _initialize_slice_constraints(self) -> Dict[str, Dict[str, Any]]:
         """Initialize slice-specific constraints."""
+        from .Constants_Enums import Priority
         return {
             'eMBB_Ultra_HD_Streaming': {
                 'domain_category': 'eMBB',
@@ -84,7 +85,7 @@ class EnhancedConstraintEngine:
                 'max_latency': 20,
                 'min_reliability': 99.9,
                 'complexity_range': (4, 7),
-                'priority_weights': {'HIGH': 0.4, 'MEDIUM': 0.5, 'LOW': 0.1},
+                'priority_weights': {Priority.HIGH: 0.4, Priority.MEDIUM: 0.5, Priority.LOW: 0.1},
                 'preferred_locations': ['urban', 'stadium', 'mall'],
                 'required_nfs': ['UPF', 'SMF', 'AMF']
             },
@@ -94,7 +95,7 @@ class EnhancedConstraintEngine:
                 'max_latency': 5,
                 'min_reliability': 99.999,
                 'complexity_range': (8, 10),
-                'priority_weights': {'CRITICAL': 0.6, 'HIGH': 0.3, 'EMERGENCY': 0.1},
+                'priority_weights': {Priority.CRITICAL: 0.6, Priority.HIGH: 0.3, Priority.EMERGENCY: 0.1},
                 'preferred_locations': ['highway', 'urban', 'intersection'],
                 'required_nfs': ['UPF', 'AMF', 'PCF', 'NWDAF']
             },
@@ -104,7 +105,7 @@ class EnhancedConstraintEngine:
                 'max_latency': 1,
                 'min_reliability': 99.9999,
                 'complexity_range': (7, 10),
-                'priority_weights': {'CRITICAL': 0.5, 'HIGH': 0.4, 'EMERGENCY': 0.1},
+                'priority_weights': {Priority.CRITICAL: 0.5, Priority.HIGH: 0.4, Priority.EMERGENCY: 0.1},
                 'preferred_locations': ['industrial', 'manufacturing', 'factory'],
                 'required_nfs': ['UPF', 'SMF', 'PCF', 'NWDAF']
             },
@@ -114,7 +115,7 @@ class EnhancedConstraintEngine:
                 'max_latency': 1000,
                 'min_reliability': 99.0,
                 'complexity_range': (2, 5),
-                'priority_weights': {'MEDIUM': 0.5, 'LOW': 0.4, 'HIGH': 0.1},
+                'priority_weights': {Priority.MEDIUM: 0.5, Priority.LOW: 0.4, Priority.HIGH: 0.1},
                 'preferred_locations': ['rural', 'agricultural', 'farm'],
                 'required_nfs': ['UPF', 'SMF', 'UDM']
             }
@@ -155,10 +156,11 @@ class EnhancedConstraintEngine:
     
     def _initialize_interdependency_rules(self) -> List[ConstraintRule]:
         """Initialize interdependency rules between parameters."""
+        from .Constants_Enums import Priority
         return [
             # Priority-Latency correlation
             ConstraintRule(
-                condition="priority in ['CRITICAL', 'EMERGENCY']",
+                condition="priority in [Priority.CRITICAL, Priority.EMERGENCY]",
                 parameter="latency_multiplier",
                 value_generator=lambda: random.uniform(0.3, 0.7),
                 weight=0.9

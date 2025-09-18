@@ -30,9 +30,10 @@ except ImportError:
 
 class Advanced3GPPIntentGenerator:
     """Main class for generating advanced 3GPP intent records."""
-    
     def __init__(self, use_llm_synthesis: bool = True):
+        import threading
         self.use_llm_synthesis = use_llm_synthesis
+        self._lock = threading.Lock()
         self.used_ids = set()
         self.used_descriptions = set()
         self.intent_counter = 0
@@ -40,52 +41,40 @@ class Advanced3GPPIntentGenerator:
         self.constraint_engine = EnhancedConstraintEngine()
         self.template_engine = AdvancedTemplateEngine()
         self.data_evaluator = DataEvaluator() if DataEvaluator else None
-        
+
+        # Pass the shared constraint_engine to all intent generators
         self.generators = {
-            IntentType.DEPLOYMENT: DeploymentIntentGenerator(),
-            IntentType.MODIFICATION: ModificationIntentGenerator(),
-            IntentType.PERFORMANCE_ASSURANCE: PerformanceAssuranceIntentGenerator(),
-            IntentType.REPORT_REQUEST: ReportRequestIntentGenerator(),
-            IntentType.FEASIBILITY_CHECK: FeasibilityCheckIntentGenerator(),
-            IntentType.NOTIFICATION_REQUEST: NotificationRequestIntentGenerator()
+            IntentType.DEPLOYMENT: DeploymentIntentGenerator(self.constraint_engine),
+            IntentType.MODIFICATION: ModificationIntentGenerator(self.constraint_engine),
+            IntentType.PERFORMANCE_ASSURANCE: PerformanceAssuranceIntentGenerator(self.constraint_engine),
+            IntentType.REPORT_REQUEST: ReportRequestIntentGenerator(self.constraint_engine),
+            IntentType.FEASIBILITY_CHECK: FeasibilityCheckIntentGenerator(self.constraint_engine),
+            IntentType.NOTIFICATION_REQUEST: NotificationRequestIntentGenerator(self.constraint_engine)
         }
     
     def _generate_unique_id(self) -> str:
-        """Generate a truly unique ID and ensure it's not duplicated."""
+        """Generate a truly unique ID and ensure it's not duplicated (thread-safe)."""
         max_attempts = 100
         for _ in range(max_attempts):
             new_id = generate_unique_id()
-            if new_id not in self.used_ids:
-                self.used_ids.add(new_id)
-                return new_id
-        
+            with self._lock:
+                if new_id not in self.used_ids:
+                    self.used_ids.add(new_id)
+                    return new_id
         # Fallback: create a guaranteed unique ID
         fallback_id = f"{generate_unique_id()}_{self.intent_counter}_{int(time.time())}"
-        self.used_ids.add(fallback_id)
+        with self._lock:
+            self.used_ids.add(fallback_id)
         return fallback_id
     
     def _generate_unique_description(self, context: TemplateContext, max_attempts: int = 10) -> tuple[str, str]:
-        """Generate a unique description that hasn't been used before."""
-        for attempt in range(max_attempts):
-            # Add randomization to context to increase variety
-            enhanced_context = self._enhance_context_for_uniqueness(context, attempt)
-            description, base_template = self.template_engine.generate_description(enhanced_context)
-            
-            # Create a normalized version for comparison (remove extra spaces, lowercase)
-            normalized_desc = ' '.join(description.lower().split())
-            
-            if normalized_desc not in self.used_descriptions:
-                self.used_descriptions.add(normalized_desc)
-                return description, base_template
-        
-        # If we can't generate a unique description, add a unique suffix
+        """Generate a unique description with a deterministic unique suffix for scalability (thread-safe)."""
         description, base_template = self.template_engine.generate_description(context)
         unique_suffix = f" [Instance-{self.intent_counter}-{int(time.time() * 1000) % 10000}]"
         unique_description = description + unique_suffix
-        
         normalized_desc = ' '.join(unique_description.lower().split())
-        self.used_descriptions.add(normalized_desc)
-        
+        with self._lock:
+            self.used_descriptions.add(normalized_desc)
         return unique_description, base_template
     
     def _enhance_context_for_uniqueness(self, context: TemplateContext, attempt: int) -> TemplateContext:
@@ -223,7 +212,17 @@ class Advanced3GPPIntentGenerator:
             else:
                 return description
                 
+        except ImportError as e:
+            print(f"Warning: LLM synthesis import failed: {e}")
+            return description
+        except AttributeError as e:
+            print(f"Warning: LLM synthesis attribute error: {e}")
+            return description
         except Exception as e:
+            # Only catch truly unexpected errors, but re-raise critical ones
+            import sys
+            if isinstance(e, (KeyboardInterrupt, SystemExit)):
+                raise
             print(f"Warning: LLM synthesis failed: {e}")
             return description
     
@@ -322,10 +321,19 @@ class Advanced3GPPIntentGenerator:
                 try:
                     intent = self.generate_intent()
                     break
-                except Exception as e:
+                except (ValueError, RuntimeError) as e:
                     if retry == max_retries - 1:
                         # If all retries failed, generate with fallback
                         print(f"Warning: Failed to generate unique intent after {max_retries} attempts: {e}")
+                        intent = self.generate_intent()
+                        break
+                except Exception as e:
+                    # Only re-raise critical errors
+                    import sys
+                    if isinstance(e, (KeyboardInterrupt, SystemExit)):
+                        raise
+                    print(f"Warning: Unexpected error during intent generation: {e}")
+                    if retry == max_retries - 1:
                         intent = self.generate_intent()
                         break
             

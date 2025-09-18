@@ -5,21 +5,22 @@ from .Constants_Enums import NETWORK_FUNCTIONS, ADVANCED_SLICE_TYPES, ADVANCED_L
 from .Parameter_Generator import ParameterGenerator
 from .utilis_generator import current_timestamp, generate_unique_id, random_choice, random_int
 
-class NotificationRequestIntentGenerator:
+from .BaseIntentGenerator import BaseIntentGenerator
+
+class NotificationRequestIntentGenerator(BaseIntentGenerator):
     """Generator for notification request intent records."""
-    
-    def __init__(self):
-        # Remove old constraint engine dependency - now handled by main generator
-        pass
+    def __init__(self, constraint_engine=None):
+        super().__init__(constraint_engine)
     
     def generate_constrained_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
         """Generate notification request parameters with realistic constraints."""
-        # Import constraint engine for consistent constraint application
-        from .Enhanced_Constraint_Engine import EnhancedConstraintEngine
-        constraint_engine = EnhancedConstraintEngine()
-        
-        # Generate base parameters
-        base_params = self.generate_parameters()
+        constraint_engine = self.constraint_engine
+        base_params = self.generate_base_params('NOTIFICATION_REQUEST', {
+            'slice_type': slice_type,
+            'priority': priority,
+            'location': location,
+            'complexity': complexity
+        })
         
         # Apply constraints based on context
         slice_category = constraint_engine.categorize_slice_type(slice_type)
@@ -81,21 +82,9 @@ class NotificationRequestIntentGenerator:
         
         return base_params
     
-    @staticmethod
-    def generate_parameters() -> Dict[str, Any]:
+    def generate_parameters(self, context: Dict[str, Any] = None) -> Dict[str, Any]:
         """Generate notification request-specific parameters."""
-        base_params = {
-            "timestamp": current_timestamp(),
-            "request_id": f"REQ_{generate_unique_id()}",
-            "correlation_id": f"CORR_{uuid.uuid4().hex[:16]}",
-            "tenant_id": f"TENANT_{random_int(10000, 99999)}",
-            "service_level": random_choice(['PLATINUM_PLUS', 'PLATINUM', 'GOLD_PREMIUM', 'GOLD', 'SILVER_PLUS', 'SILVER', 'BRONZE']),
-            "network_topology": ParameterGenerator.generate_network_topology(),
-            "qos_parameters": ParameterGenerator.generate_qos_parameters(),
-            "security_parameters": ParameterGenerator.generate_security_parameters(),
-            "resource_allocation": ParameterGenerator.generate_resource_allocation(),
-            "monitoring_parameters": ParameterGenerator.generate_monitoring_parameters()
-        }
+        base_params = self.generate_base_params('NOTIFICATION_REQUEST', context or {})
         
         # Add notification request-specific parameters
         notification_params = {
