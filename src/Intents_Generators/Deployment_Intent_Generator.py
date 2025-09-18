@@ -7,44 +7,16 @@ from .Constants_Enums import NETWORK_FUNCTIONS
 from .Parameter_Generator import ParameterGenerator
 from .utilis_generator import current_timestamp, generate_unique_id, random_choice, random_int, random_float
 
+from .Parameter_Builders import (
+    SecurityParameterBuilder, NetworkParameterBuilder, ResourceParameterBuilder,
+    MonitoringParameterBuilder, QoSParameterBuilder
+)
+
 class DeploymentIntentGenerator:
     """Generator for deployment intent records."""
     
     def __init__(self):
         pass
-    
-    def _extract_extensive_parameters(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract extensive parameters from the comprehensive parameter set."""
-        extracted = {}
-        
-        # Extract from nested parameter structures
-        for key, value in params.items():
-            if isinstance(value, dict):
-                extracted.update(self._flatten_parameters(value, key))
-            else:
-                extracted[key] = value
-        
-        return extracted
-    
-    def _flatten_parameters(self, params: Dict[str, Any], prefix: str = "") -> Dict[str, Any]:
-        """Flatten nested parameter structures for extensive utilization."""
-        flattened = {}
-        
-        for key, value in params.items():
-            new_key = f"{prefix}_{key}" if prefix else key
-            
-            if isinstance(value, dict):
-                flattened.update(self._flatten_parameters(value, new_key))
-            elif isinstance(value, list):
-                for i, item in enumerate(value):
-                    if isinstance(item, dict):
-                        flattened.update(self._flatten_parameters(item, f"{new_key}_{i}"))
-                    else:
-                        flattened[f"{new_key}_{i}"] = item
-            else:
-                flattened[new_key] = value
-        
-        return flattened
     
     @staticmethod
     def generate_parameters() -> Dict[str, Any]:
@@ -357,28 +329,32 @@ class DeploymentIntentGenerator:
     
     def generate_constrained_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
         """Generate deployment parameters with realistic constraints."""
+        # Import constraint engine for consistent constraint application
+        from .Enhanced_Constraint_Engine import EnhancedConstraintEngine
+        constraint_engine = EnhancedConstraintEngine()
+        
         base_params = {
             "timestamp": current_timestamp(),
             "request_id": f"REQ_{generate_unique_id()}",
             "correlation_id": f"CORR_{uuid.uuid4().hex[:16]}",
             "tenant_id": f"TENANT_{random_int(10000, 99999)}",
             "service_level": self._determine_service_level(priority, complexity),
-            "network_topology": self._generate_constrained_topology(slice_type, location),
-            "security_parameters": self._generate_constrained_security(slice_type, priority),
+            "network_topology": self._generate_constrained_topology(slice_type, location, constraint_engine),
+            "security_parameters": self._generate_constrained_security(slice_type, priority, constraint_engine),
             "monitoring_parameters": self._generate_constrained_monitoring(complexity, priority)
         }
         
         # Add deployment-specific constrained parameters
         deployment_params = {
             "deployment_specification": {
-                "network_function": self._select_appropriate_nf(slice_type),
+                "network_function": self._select_appropriate_nf(slice_type, constraint_engine),
                 "vnf_descriptor": self._generate_vnf_descriptor(complexity, priority),
-                "deployment_flavor": self._generate_deployment_flavor(slice_type, complexity),
+                "deployment_flavor": self._generate_deployment_flavor(slice_type, complexity, constraint_engine),
                 "instantiation_level_id": f"level_{min(5, max(1, complexity // 2))}",
                 "additional_params": self._generate_additional_params(priority, complexity)
             },
             "orchestration_parameters": self._generate_orchestration_params(complexity),
-            "performance_requirements": self._generate_performance_requirements(slice_type, priority)
+            "performance_requirements": self._generate_performance_requirements(slice_type, priority, constraint_engine)
         }
         
         return {**base_params, **deployment_params}
@@ -398,10 +374,10 @@ class DeploymentIntentGenerator:
         else:
             return 'SILVER'
     
-    def _generate_constrained_topology(self, slice_type: str, location: str) -> Dict[str, Any]:
+    def _generate_constrained_topology(self, slice_type: str, location: str, constraint_engine) -> Dict[str, Any]:
         """Generate network topology based on slice type and location constraints."""
-        slice_category = self._categorize_slice_type(slice_type)
-        location_category = self._categorize_location(location)
+        slice_category = constraint_engine.categorize_slice_type(slice_type)
+        location_category = constraint_engine.categorize_location(location)
         
         # Select appropriate architecture
         if slice_category in ['URLLC', 'V2X']:
@@ -426,30 +402,6 @@ class DeploymentIntentGenerator:
             "antenna_configuration": self._select_antenna_config(slice_category, location_category),
             "backhaul": self._select_backhaul(location_category, slice_category)
         }
-    
-    def _categorize_slice_type(self, slice_type: str) -> str:
-        """Categorize slice type into main domain categories."""
-        slice_lower = slice_type.lower()
-        if any(keyword in slice_lower for keyword in ['urllc', 'critical', 'autonomous', 'industrial']):
-            if 'v2x' in slice_lower or 'vehicle' in slice_lower or 'autonomous' in slice_lower:
-                return 'V2X'
-            return 'URLLC'
-        elif any(keyword in slice_lower for keyword in ['mmtc', 'iot', 'massive', 'agriculture', 'monitoring']):
-            return 'mMTC'
-        else:
-            return 'eMBB'
-    
-    def _categorize_location(self, location: str) -> str:
-        """Categorize location into main types."""
-        location_lower = location.lower()
-        if any(keyword in location_lower for keyword in ['highway', 'corridor', 'road']):
-            return 'highway'
-        elif any(keyword in location_lower for keyword in ['industrial', 'manufacturing', 'factory']):
-            return 'industrial'
-        elif any(keyword in location_lower for keyword in ['rural', 'farm', 'agriculture']):
-            return 'rural'
-        else:
-            return 'urban'
     
     def _select_spectrum_bands(self, slice_category: str) -> Dict[str, str]:
         """Select appropriate spectrum bands for slice category."""
@@ -513,9 +465,9 @@ class DeploymentIntentGenerator:
             "redundancy": "Active_Active" if slice_category in ['URLLC', 'V2X'] else random.choice(['Active_Active', 'Active_Standby'])
         }
     
-    def _select_appropriate_nf(self, slice_type: str) -> str:
+    def _select_appropriate_nf(self, slice_type: str, constraint_engine) -> str:
         """Select appropriate network function based on slice type."""
-        slice_category = self._categorize_slice_type(slice_type)
+        slice_category = constraint_engine.categorize_slice_type(slice_type)
         
         nf_preferences = {
             'URLLC': ['UPF', 'SMF', 'PCF', 'NWDAF'],
@@ -548,9 +500,9 @@ class DeploymentIntentGenerator:
             "vnfd_invariant_id": f"invariant_{uuid.uuid4().hex[:16]}"
         }
     
-    def _generate_deployment_flavor(self, slice_type: str, complexity: int) -> Dict[str, Any]:
+    def _generate_deployment_flavor(self, slice_type: str, complexity: int, constraint_engine) -> Dict[str, Any]:
         """Generate deployment flavor based on slice type and complexity."""
-        slice_category = self._categorize_slice_type(slice_type)
+        slice_category = constraint_engine.categorize_slice_type(slice_type)
         
         # Determine optimization focus
         if slice_category in ['URLLC', 'V2X']:
@@ -624,9 +576,9 @@ class DeploymentIntentGenerator:
             }
         }
     
-    def _generate_performance_requirements(self, slice_type: str, priority: str) -> Dict[str, Any]:
+    def _generate_performance_requirements(self, slice_type: str, priority: str, constraint_engine) -> Dict[str, Any]:
         """Generate performance requirements based on slice type and priority."""
-        slice_category = self._categorize_slice_type(slice_type)
+        slice_category = constraint_engine.categorize_slice_type(slice_type)
         
         # Base requirements by slice category
         base_requirements = {
@@ -692,37 +644,23 @@ class DeploymentIntentGenerator:
             }
         }
     
-    def _generate_constrained_security(self, slice_type: str, priority: str) -> Dict[str, Any]:
+    def _generate_constrained_security(self, slice_type: str, priority: str, constraint_engine) -> Dict[str, Any]:
         """Generate security parameters based on slice type and priority."""
-        slice_category = self._categorize_slice_type(slice_type)
+        slice_category = constraint_engine.categorize_slice_type(slice_type)
         
-        # Critical slices and high priority get stronger security
-        if slice_category in ['URLLC', 'V2X'] or priority in ['CRITICAL', 'EMERGENCY']:
-            encryption = random.choice(['256_NEA1', '256_NEA2'])
-            integrity = random.choice(['256_NIA1', '256_NIA2'])
-            key_length = '256_bit'
-            rotation_interval = random_int(1, 6)  # More frequent rotation
-        else:
-            encryption = random.choice(['128_NEA1', '128_NEA2', '128_NEA3'])
-            integrity = random.choice(['128_NIA1', '128_NIA2', '128_NIA3'])
-            key_length = random.choice(['128_bit', '256_bit'])
-            rotation_interval = random_int(6, 24)
+        # Determine security level based on slice category and priority
+        security_level = 'HIGH' if (slice_category in ['URLLC', 'V2X'] or priority in ['CRITICAL', 'EMERGENCY']) else 'STANDARD'
+        
+        # Use modular builders for security parameters
+        auth_block = SecurityParameterBuilder.build_authentication_block(security_level)
+        encryption_block = SecurityParameterBuilder.build_encryption_block(security_level)
+        privacy_block = SecurityParameterBuilder.build_privacy_block(security_level)
         
         return {
-            "authentication_method": random.choice(['5G_AKA', 'EAP_AKA_Prime']),
-            "encryption_algorithm": encryption,
-            "integrity_protection": integrity,
-            "key_management": {
-                "kdf": random.choice(['HMAC_SHA256', 'HMAC_SHA384', 'HMAC_SHA512']),
-                "key_length": key_length,
-                "key_rotation_interval": f"{rotation_interval}hours",
-                "key_derivation_counter": random_int(1, 65535)
-            },
-            "privacy_protection": {
-                "supi_concealment": "ENABLED",
-                "temporary_identifiers": random.choice(['5G_GUTI', '5G_TMSI']),
-                "location_privacy": "FULL_PROTECTION" if priority in ['CRITICAL', 'EMERGENCY'] else random.choice(['FULL_PROTECTION', 'PARTIAL_PROTECTION'])
-            }
+            "authentication": auth_block,
+            "encryption": encryption_block,
+            "privacy_protection": privacy_block,
+            "integrity_protection": random_choice(['256_NIA1', '256_NIA2']) if security_level == 'HIGH' else random_choice(['128_NIA1', '128_NIA2', '128_NIA3'])
         }
     
     def _generate_constrained_monitoring(self, complexity: int, priority: str) -> Dict[str, Any]:

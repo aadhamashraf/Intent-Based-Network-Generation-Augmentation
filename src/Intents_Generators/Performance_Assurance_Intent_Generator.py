@@ -13,9 +13,54 @@ class PerformanceAssuranceIntentGenerator:
     
     def generate_constrained_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
         """Generate performance assurance parameters with realistic constraints."""
+        # Import constraint engine for consistent constraint application
+        from .Enhanced_Constraint_Engine import EnhancedConstraintEngine
+        constraint_engine = EnhancedConstraintEngine()
+        
+        # Generate base parameters
         base_params = self.generate_parameters()
         
-        # Note: Constraints now handled by Enhanced Constraint Engine in main generator
+        # Apply constraints based on context
+        slice_category = constraint_engine.categorize_slice_type(slice_type)
+        location_category = constraint_engine.categorize_location(location)
+        
+        # Adjust SLA commitments based on slice category and priority
+        if slice_category in ['URLLC', 'V2X']:
+            base_params["performance_objectives"]["service_level"]["commitments"]["availability"] = f"{random_float(99.99, 99.999)}%"
+            base_params["performance_objectives"]["service_level"]["commitments"]["mean_time_to_repair"] = f"{random_int(5, 30)}minutes"
+            base_params["performance_objectives"]["kpi_targets"]["network_kpis"]["end_to_end_latency"]["target"] = f"{random_float(0.1, 5)}ms"
+            base_params["performance_objectives"]["kpi_targets"]["network_kpis"]["packet_loss_rate"]["target"] = f"{random_float(0.0001, 0.001)}%"
+        elif slice_category == 'eMBB':
+            base_params["performance_objectives"]["service_level"]["commitments"]["availability"] = f"{random_float(99.5, 99.9)}%"
+            base_params["performance_objectives"]["kpi_targets"]["network_kpis"]["end_to_end_latency"]["target"] = f"{random_float(5, 50)}ms"
+            base_params["performance_objectives"]["kpi_targets"]["network_kpis"]["throughput"]["target"] = f"{random_int(100, 10000)}Mbps"
+        else:  # mMTC
+            base_params["performance_objectives"]["service_level"]["commitments"]["availability"] = f"{random_float(99.0, 99.5)}%"
+            base_params["performance_objectives"]["kpi_targets"]["network_kpis"]["end_to_end_latency"]["target"] = f"{random_float(50, 1000)}ms"
+        
+        # Adjust assurance actions based on priority
+        if priority in ['CRITICAL', 'EMERGENCY']:
+            # More aggressive proactive actions for critical services
+            base_params["assurance_actions"]["proactive_actions"][0]["parameters"]["prediction_horizon"] = f"{random_int(1, 15)}minutes"
+            base_params["assurance_actions"]["proactive_actions"][0]["parameters"]["confidence_level"] = f"{random_int(90, 99)}%"
+            base_params["assurance_actions"]["reactive_actions"][0]["parameters"]["max_reroute_attempts"] = random_int(5, 10)
+        elif priority == 'HIGH':
+            base_params["assurance_actions"]["proactive_actions"][0]["parameters"]["prediction_horizon"] = f"{random_int(15, 30)}minutes"
+            base_params["assurance_actions"]["proactive_actions"][0]["parameters"]["confidence_level"] = f"{random_int(85, 95)}%"
+        else:
+            base_params["assurance_actions"]["proactive_actions"][0]["parameters"]["prediction_horizon"] = f"{random_int(30, 60)}minutes"
+            base_params["assurance_actions"]["proactive_actions"][0]["parameters"]["confidence_level"] = f"{random_int(80, 90)}%"
+        
+        # Adjust monitoring frequency based on complexity
+        if complexity >= 8:
+            base_params["monitoring_configuration"]["data_collection"]["collection_interval"] = f"{random_int(1, 5)}seconds"
+            base_params["monitoring_configuration"]["data_collection"]["aggregation_window"] = f"{random_int(1, 5)}minutes"
+        elif complexity >= 5:
+            base_params["monitoring_configuration"]["data_collection"]["collection_interval"] = f"{random_int(5, 30)}seconds"
+            base_params["monitoring_configuration"]["data_collection"]["aggregation_window"] = f"{random_int(5, 10)}minutes"
+        else:
+            base_params["monitoring_configuration"]["data_collection"]["collection_interval"] = f"{random_int(30, 60)}seconds"
+            base_params["monitoring_configuration"]["data_collection"]["aggregation_window"] = f"{random_int(10, 15)}minutes"
         
         return base_params
     

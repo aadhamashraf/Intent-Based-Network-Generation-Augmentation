@@ -14,9 +14,66 @@ class ReportRequestIntentGenerator:
     
     def generate_constrained_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
         """Generate report request parameters with realistic constraints."""
+        # Import constraint engine for consistent constraint application
+        from .Enhanced_Constraint_Engine import EnhancedConstraintEngine
+        constraint_engine = EnhancedConstraintEngine()
+        
+        # Generate base parameters
         base_params = self.generate_parameters()
         
-        # Note: Constraints now handled by Enhanced Constraint Engine in main generator
+        # Apply constraints based on context
+        slice_category = constraint_engine.categorize_slice_type(slice_type)
+        location_category = constraint_engine.categorize_location(location)
+        
+        # Adjust report type based on slice category
+        if slice_category in ['URLLC', 'V2X']:
+            base_params["report_specification"]["report_type"] = random_choice(['PERFORMANCE_ANALYTICS', 'FAULT_ANALYSIS'])
+            base_params["report_specification"]["data_requirements"]["filter_criteria"]["severity_level"] = random_choice(['CRITICAL_ONLY', 'MAJOR_AND_ABOVE'])
+        elif slice_category == 'eMBB':
+            base_params["report_specification"]["report_type"] = random_choice(['PERFORMANCE_ANALYTICS', 'RESOURCE_UTILIZATION'])
+        else:  # mMTC
+            base_params["report_specification"]["report_type"] = random_choice(['RESOURCE_UTILIZATION', 'COMPLIANCE_ASSESSMENT'])
+        
+        # Adjust temporal scope based on priority
+        if priority in ['CRITICAL', 'EMERGENCY']:
+            # More frequent, detailed reporting for critical services
+            base_params["report_specification"]["report_scope"]["temporal_scope"]["granularity"] = random_choice(['1_MINUTE', '5_MINUTES'])
+            base_params["output_configuration"]["delivery"]["retry_policy"]["max_retries"] = random_int(5, 10)
+        elif priority == 'HIGH':
+            base_params["report_specification"]["report_scope"]["temporal_scope"]["granularity"] = random_choice(['5_MINUTES', '15_MINUTES'])
+            base_params["output_configuration"]["delivery"]["retry_policy"]["max_retries"] = random_int(3, 7)
+        else:
+            base_params["report_specification"]["report_scope"]["temporal_scope"]["granularity"] = random_choice(['15_MINUTES', '1_HOUR', '1_DAY'])
+            base_params["output_configuration"]["delivery"]["retry_policy"]["max_retries"] = random_int(1, 5)
+        
+        # Adjust data requirements based on complexity
+        if complexity >= 8:
+            # More comprehensive metrics for complex scenarios
+            base_params["report_specification"]["data_requirements"]["aggregation_methods"] = [
+                random_choice(['AVERAGE', 'MEDIAN', 'P95', 'P99']),
+                random_choice(['MIN', 'MAX', 'SUM', 'COUNT'])
+            ]
+            base_params["quality_assurance"]["data_validation"]["accuracy_threshold"] = f"{random_float(98, 99.9)}%"
+        elif complexity >= 5:
+            base_params["report_specification"]["data_requirements"]["aggregation_methods"] = [
+                random_choice(['AVERAGE', 'MEDIAN', 'P95'])
+            ]
+            base_params["quality_assurance"]["data_validation"]["accuracy_threshold"] = f"{random_float(95, 98)}%"
+        else:
+            base_params["report_specification"]["data_requirements"]["aggregation_methods"] = [
+                random_choice(['AVERAGE', 'MEDIAN'])
+            ]
+            base_params["quality_assurance"]["data_validation"]["accuracy_threshold"] = f"{random_float(90, 95)}%"
+        
+        # Adjust security based on slice category and priority
+        if slice_category in ['URLLC', 'V2X'] or priority in ['CRITICAL', 'EMERGENCY']:
+            base_params["output_configuration"]["encryption"]["enabled"] = "true"
+            base_params["output_configuration"]["encryption"]["algorithm"] = "AES_256_GCM"
+            base_params["output_configuration"]["delivery"]["authentication"]["type"] = random_choice(['OAUTH2', 'MUTUAL_TLS'])
+        else:
+            base_params["output_configuration"]["encryption"]["enabled"] = random_choice(["true", "false"])
+            if base_params["output_configuration"]["encryption"]["enabled"] == "true":
+                base_params["output_configuration"]["encryption"]["algorithm"] = random_choice(['AES_256_GCM', 'AES_128_GCM'])
         
         return base_params
     

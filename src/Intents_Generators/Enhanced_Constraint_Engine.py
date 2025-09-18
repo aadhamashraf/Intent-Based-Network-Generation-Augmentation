@@ -273,6 +273,7 @@ class EnhancedConstraintEngine:
         priority = param_context.get('priority', 'MEDIUM')
         location = param_context.get('location', 'Cell_Site_Urban_Dense_001')
         complexity = param_context.get('complexity', 5)
+        intent_type = param_context.get('intent_type', 'DEPLOYMENT')
         
         # Generate QoS parameters with constraints
         qos_params = self.generate_constrained_qos_parameters(slice_type, priority, location)
@@ -282,19 +283,82 @@ class EnhancedConstraintEngine:
         
         # Generate compliance standards
         compliance_standards = self.generate_constrained_compliance_standards(
-            slice_type, param_context.get('intent_type', 'DEPLOYMENT'), 'CORE'
+            slice_type, intent_type, 'CORE'
         )
+        
+        # Apply interdependency rules
+        applied_rules = self._apply_interdependency_rules(param_context, qos_params, resource_params)
         
         return {
             'qos_parameters': qos_params,
             'resource_allocation': resource_params,
             'compliance_standards': compliance_standards,
+            'applied_interdependency_rules': applied_rules,
             'constraint_metadata': {
                 'slice_category': self.categorize_slice_type(slice_type),
                 'location_category': self.categorize_location(location),
-                'constraint_engine_version': '2.0.0'
+                'constraint_engine_version': '2.0.0',
+                'rules_applied': len(applied_rules)
             }
         }
+    
+    def _apply_interdependency_rules(self, param_context: Dict[str, Any], qos_params: Dict[str, Any], resource_params: Dict[str, Any]) -> List[str]:
+        """Apply interdependency rules and return list of applied rule names."""
+        applied_rules = []
+        
+        priority = param_context.get('priority', 'MEDIUM')
+        complexity = param_context.get('complexity', 5)
+        slice_type = param_context.get('slice_type', 'eMBB_Ultra_HD_Streaming')
+        slice_category = self.categorize_slice_type(slice_type)
+        
+        # Rule 1: Priority-Latency correlation
+        if priority in ['CRITICAL', 'EMERGENCY']:
+            latency_multiplier = random.uniform(0.3, 0.7)
+            current_latency = float(qos_params.get('packet_delay_budget', '10ms').replace('ms', ''))
+            adjusted_latency = current_latency * latency_multiplier
+            qos_params['packet_delay_budget'] = f"{adjusted_latency:.2f}ms"
+            applied_rules.append("priority_latency_correlation")
+        
+        # Rule 2: Complexity-Resource correlation
+        if complexity >= 8:
+            resource_multiplier = random.uniform(1.5, 3.0)
+            compute_resources = resource_params.get('compute_resources', {})
+            if 'cpu_cores' in compute_resources:
+                current_cores = compute_resources['cpu_cores']
+                compute_resources['cpu_cores'] = int(current_cores * resource_multiplier)
+            if 'memory_size' in compute_resources:
+                current_memory = int(compute_resources['memory_size'].replace('GB', ''))
+                compute_resources['memory_size'] = f"{int(current_memory * resource_multiplier)}GB"
+            applied_rules.append("complexity_resource_correlation")
+        
+        # Rule 3: Slice-Priority correlation
+        if slice_category == 'V2X':
+            priority_boost = random.uniform(0.8, 1.0)
+            # Boost reliability requirements for V2X
+            current_error_rate = float(qos_params.get('packet_error_rate', '1e-3'))
+            boosted_error_rate = current_error_rate * (1 - priority_boost)
+            qos_params['packet_error_rate'] = f"{boosted_error_rate:.2e}"
+            applied_rules.append("v2x_priority_boost")
+        
+        # Rule 4: Location-Resource correlation
+        location_category = self.categorize_location(param_context.get('location', ''))
+        if location_category == 'industrial':
+            # Industrial locations need more robust resources
+            network_resources = resource_params.get('network_resources', {})
+            if 'bandwidth_allocation' in network_resources:
+                current_bw = int(network_resources['bandwidth_allocation'].replace('Mbps', ''))
+                network_resources['bandwidth_allocation'] = f"{int(current_bw * 1.5)}Mbps"
+            applied_rules.append("industrial_location_boost")
+        
+        # Rule 5: URLLC-Reliability correlation
+        if slice_category == 'URLLC':
+            # URLLC requires ultra-high reliability
+            qos_params['preemption_capability'] = 'MAY_PREEMPT'
+            qos_params['preemption_vulnerability'] = 'NOT_PREEMPTABLE'
+            qos_params['reflective_qos'] = 'ENABLED'
+            applied_rules.append("urllc_reliability_enforcement")
+        
+        return applied_rules
     
     def generate_constrained_qos_parameters(self, slice_type: str, priority: str, location: str) -> Dict[str, Any]:
         """Generate QoS parameters with realistic constraints."""

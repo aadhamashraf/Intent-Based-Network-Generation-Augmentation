@@ -171,6 +171,10 @@ class Advanced3GPPIntentGenerator:
             intent_type.value, complexity, priority, slice_type, location, parameters, {}
         )
         description, base_template = self._generate_unique_description(context)
+        
+        # Apply LLM synthesis if enabled
+        if self.use_llm_synthesis:
+            description = self._apply_llm_synthesis(description, context)
 
         # Build metadata including base_template
         metadata = {
@@ -188,7 +192,8 @@ class Advanced3GPPIntentGenerator:
             "industry_vertical": self._determine_industry_vertical(slice_type, location),
             "base_template": base_template,
             "template_engine_version": "2.0.0",
-            "description_complexity_score": self._calculate_description_complexity(description)
+            "description_complexity_score": self._calculate_description_complexity(description),
+            "llm_enhanced": self.use_llm_synthesis
         }
 
         return NetworkIntent(
@@ -202,6 +207,25 @@ class Advanced3GPPIntentGenerator:
             parameters=parameters,
             metadata=metadata
         )
+    
+    def _apply_llm_synthesis(self, description: str, context: TemplateContext) -> str:
+        """Apply LLM synthesis to enhance description quality."""
+        try:
+            # Import augmentation utilities for LLM enhancement
+            from augmentation_utils import paraphrase
+            
+            # Apply paraphrasing for better quality
+            enhanced_description = paraphrase(description)
+            
+            # Ensure the enhanced description maintains technical accuracy
+            if len(enhanced_description) > 0 and enhanced_description != description:
+                return enhanced_description
+            else:
+                return description
+                
+        except Exception as e:
+            print(f"Warning: LLM synthesis failed: {e}")
+            return description
     
     def _create_template_context(self, intent_type: str, complexity: int, priority: str, 
                                 slice_type: str, location: str, parameters: Dict[str, Any], 

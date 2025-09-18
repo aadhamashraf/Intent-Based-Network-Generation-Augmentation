@@ -14,9 +14,70 @@ class NotificationRequestIntentGenerator:
     
     def generate_constrained_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
         """Generate notification request parameters with realistic constraints."""
+        # Import constraint engine for consistent constraint application
+        from .Enhanced_Constraint_Engine import EnhancedConstraintEngine
+        constraint_engine = EnhancedConstraintEngine()
+        
+        # Generate base parameters
         base_params = self.generate_parameters()
         
-        # Note: Constraints now handled by Enhanced Constraint Engine in main generator
+        # Apply constraints based on context
+        slice_category = constraint_engine.categorize_slice_type(slice_type)
+        location_category = constraint_engine.categorize_location(location)
+        
+        # Adjust subscription type based on slice category
+        if slice_category in ['URLLC', 'V2X']:
+            # Critical slices need real-time or threshold-based notifications
+            base_params["notification_configuration"]["subscription_details"]["subscription_type"] = random_choice(['EVENT_BASED', 'THRESHOLD_BASED'])
+            base_params["notification_configuration"]["subscription_details"]["delivery_configuration"]["frequency"] = random_choice(['REAL_TIME', 'EVERY_SECOND'])
+            base_params["notification_configuration"]["subscription_details"]["subscription_scope"]["severity_filter"] = random_choice(['CRITICAL_ONLY', 'CRITICAL_MAJOR'])
+        elif slice_category == 'eMBB':
+            base_params["notification_configuration"]["subscription_details"]["subscription_type"] = random_choice(['EVENT_BASED', 'PERIODIC'])
+            base_params["notification_configuration"]["subscription_details"]["delivery_configuration"]["frequency"] = random_choice(['EVERY_SECOND', 'EVERY_5_SECONDS', 'EVERY_MINUTE'])
+        else:  # mMTC
+            base_params["notification_configuration"]["subscription_details"]["subscription_type"] = random_choice(['PERIODIC', 'THRESHOLD_BASED'])
+            base_params["notification_configuration"]["subscription_details"]["delivery_configuration"]["frequency"] = random_choice(['EVERY_5_MINUTES', 'HOURLY', 'DAILY'])
+        
+        # Adjust delivery mechanism based on priority
+        if priority in ['CRITICAL', 'EMERGENCY']:
+            # Multiple delivery channels for critical notifications
+            base_params["notification_configuration"]["delivery_mechanism"]["primary_channel"]["type"] = random_choice(['WEBHOOK', 'WEBSOCKET', 'gRPC'])
+            base_params["notification_configuration"]["delivery_mechanism"]["fallback_channel"]["type"] = random_choice(['SMS', 'PAGERDUTY'])
+            base_params["notification_configuration"]["delivery_mechanism"]["fallback_channel"]["configuration"]["escalation_delay"] = f"{random_int(1, 5)}minutes"
+        elif priority == 'HIGH':
+            base_params["notification_configuration"]["delivery_mechanism"]["primary_channel"]["type"] = random_choice(['WEBHOOK', 'KAFKA', 'WEBSOCKET'])
+            base_params["notification_configuration"]["delivery_mechanism"]["fallback_channel"]["configuration"]["escalation_delay"] = f"{random_int(5, 15)}minutes"
+        else:
+            base_params["notification_configuration"]["delivery_mechanism"]["primary_channel"]["type"] = random_choice(['WEBHOOK', 'KAFKA', 'AMQP', 'MQTT'])
+            base_params["notification_configuration"]["delivery_mechanism"]["fallback_channel"]["configuration"]["escalation_delay"] = f"{random_int(15, 60)}minutes"
+        
+        # Adjust QoS based on complexity and priority
+        if complexity >= 8 or priority in ['CRITICAL', 'EMERGENCY']:
+            base_params["notification_configuration"]["quality_of_service"]["delivery_guarantee"] = "EXACTLY_ONCE"
+            base_params["notification_configuration"]["quality_of_service"]["ordering_guarantee"] = random_choice(['PARTITION_ORDERED', 'GLOBAL_ORDERED'])
+            base_params["notification_configuration"]["quality_of_service"]["durability"] = "REPLICATED"
+            base_params["notification_configuration"]["quality_of_service"]["retry_policy"]["max_retries"] = random_int(10, 20)
+        elif complexity >= 5 or priority == 'HIGH':
+            base_params["notification_configuration"]["quality_of_service"]["delivery_guarantee"] = "AT_LEAST_ONCE"
+            base_params["notification_configuration"]["quality_of_service"]["durability"] = random_choice(['DISK_BACKED', 'REPLICATED'])
+            base_params["notification_configuration"]["quality_of_service"]["retry_policy"]["max_retries"] = random_int(5, 15)
+        else:
+            base_params["notification_configuration"]["quality_of_service"]["delivery_guarantee"] = random_choice(['AT_MOST_ONCE', 'AT_LEAST_ONCE'])
+            base_params["notification_configuration"]["quality_of_service"]["durability"] = random_choice(['MEMORY_ONLY', 'DISK_BACKED'])
+            base_params["notification_configuration"]["quality_of_service"]["retry_policy"]["max_retries"] = random_int(3, 10)
+        
+        # Adjust monitoring based on complexity
+        if complexity >= 8:
+            base_params["notification_configuration"]["monitoring"]["metrics_collection"]["enabled"] = "true"
+            base_params["notification_configuration"]["monitoring"]["metrics_collection"]["aggregation_interval"] = f"{random_int(1, 5)}minutes"
+            base_params["notification_configuration"]["monitoring"]["health_checks"]["enabled"] = "true"
+            base_params["notification_configuration"]["monitoring"]["health_checks"]["check_interval"] = f"{random_int(10, 30)}seconds"
+        elif complexity >= 5:
+            base_params["notification_configuration"]["monitoring"]["metrics_collection"]["enabled"] = "true"
+            base_params["notification_configuration"]["monitoring"]["metrics_collection"]["aggregation_interval"] = f"{random_int(5, 15)}minutes"
+        else:
+            base_params["notification_configuration"]["monitoring"]["metrics_collection"]["enabled"] = random_choice(["true", "false"])
+            base_params["notification_configuration"]["monitoring"]["metrics_collection"]["aggregation_interval"] = f"{random_int(15, 60)}minutes"
         
         return base_params
     

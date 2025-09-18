@@ -14,9 +14,72 @@ class FeasibilityCheckIntentGenerator:
     
     def generate_constrained_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
         """Generate feasibility check parameters with realistic constraints."""
+        # Import constraint engine for consistent constraint application
+        from .Enhanced_Constraint_Engine import EnhancedConstraintEngine
+        constraint_engine = EnhancedConstraintEngine()
+        
+        # Generate base parameters
         base_params = self.generate_parameters()
         
-        # Note: Constraints now handled by Enhanced Constraint Engine in main generator
+        # Apply constraints based on context
+        slice_category = constraint_engine.categorize_slice_type(slice_type)
+        location_category = constraint_engine.categorize_location(location)
+        
+        # Adjust assessment scope based on complexity
+        if complexity >= 8:
+            base_params["feasibility_assessment"]["assessment_scope"] = "COMPREHENSIVE"
+            base_params["feasibility_assessment"]["assessment_criteria"]["technical_feasibility"]["technology_maturity"]["implementation_readiness"] = random_choice(['PRODUCTION_READY', 'BETA'])
+        elif complexity >= 5:
+            base_params["feasibility_assessment"]["assessment_scope"] = random_choice(['COMPREHENSIVE', 'TECHNICAL_ONLY'])
+            base_params["feasibility_assessment"]["assessment_criteria"]["technical_feasibility"]["technology_maturity"]["implementation_readiness"] = random_choice(['PRODUCTION_READY', 'BETA', 'ALPHA'])
+        else:
+            base_params["feasibility_assessment"]["assessment_scope"] = random_choice(['TECHNICAL_ONLY', 'ECONOMIC_ONLY'])
+            base_params["feasibility_assessment"]["assessment_criteria"]["technical_feasibility"]["technology_maturity"]["implementation_readiness"] = random_choice(['PRODUCTION_READY', 'BETA', 'ALPHA', 'PROTOTYPE'])
+        
+        # Adjust resource availability based on slice category
+        if slice_category in ['URLLC', 'V2X']:
+            # Critical slices need higher resource availability
+            base_params["feasibility_assessment"]["assessment_criteria"]["technical_feasibility"]["resource_availability"]["compute_resources"] = f"{random_int(80, 95)}%_available"
+            base_params["feasibility_assessment"]["assessment_criteria"]["technical_feasibility"]["resource_availability"]["network_resources"] = f"{random_int(85, 95)}%_available"
+        elif slice_category == 'eMBB':
+            base_params["feasibility_assessment"]["assessment_criteria"]["technical_feasibility"]["resource_availability"]["compute_resources"] = f"{random_int(70, 90)}%_available"
+            base_params["feasibility_assessment"]["assessment_criteria"]["technical_feasibility"]["resource_availability"]["network_resources"] = f"{random_int(75, 90)}%_available"
+        else:  # mMTC
+            base_params["feasibility_assessment"]["assessment_criteria"]["technical_feasibility"]["resource_availability"]["compute_resources"] = f"{random_int(60, 85)}%_available"
+            base_params["feasibility_assessment"]["assessment_criteria"]["technical_feasibility"]["resource_availability"]["network_resources"] = f"{random_int(70, 85)}%_available"
+        
+        # Adjust economic feasibility based on priority
+        if priority in ['CRITICAL', 'EMERGENCY']:
+            # Higher budget allocation for critical services
+            base_params["feasibility_assessment"]["assessment_criteria"]["economic_feasibility"]["cost_analysis"]["capital_expenditure"] = f"{random_int(100000, 10000000)}_USD"
+            base_params["feasibility_assessment"]["assessment_criteria"]["economic_feasibility"]["budget_constraints"]["approval_required"] = random_choice(['TECHNICAL', 'FINANCIAL', 'EXECUTIVE'])
+        elif priority == 'HIGH':
+            base_params["feasibility_assessment"]["assessment_criteria"]["economic_feasibility"]["cost_analysis"]["capital_expenditure"] = f"{random_int(50000, 5000000)}_USD"
+            base_params["feasibility_assessment"]["assessment_criteria"]["economic_feasibility"]["budget_constraints"]["approval_required"] = random_choice(['TECHNICAL', 'FINANCIAL'])
+        else:
+            base_params["feasibility_assessment"]["assessment_criteria"]["economic_feasibility"]["cost_analysis"]["capital_expenditure"] = f"{random_int(10000, 1000000)}_USD"
+            base_params["feasibility_assessment"]["assessment_criteria"]["economic_feasibility"]["budget_constraints"]["approval_required"] = random_choice(['NONE', 'TECHNICAL'])
+        
+        # Adjust recommendation based on overall feasibility
+        feasibility_factors = []
+        if slice_category in ['URLLC', 'V2X'] and priority in ['CRITICAL', 'EMERGENCY']:
+            feasibility_factors.append(0.9)  # High feasibility for critical URLLC/V2X
+        elif complexity <= 5:
+            feasibility_factors.append(0.8)  # Lower complexity is more feasible
+        else:
+            feasibility_factors.append(0.6)  # Default moderate feasibility
+        
+        avg_feasibility = sum(feasibility_factors) / len(feasibility_factors) * 100
+        base_params["recommendation_engine"]["feasibility_score"] = avg_feasibility
+        
+        if avg_feasibility >= 80:
+            base_params["recommendation_engine"]["recommendation"] = "PROCEED"
+        elif avg_feasibility >= 60:
+            base_params["recommendation_engine"]["recommendation"] = "PROCEED_WITH_CONDITIONS"
+        elif avg_feasibility >= 40:
+            base_params["recommendation_engine"]["recommendation"] = "DEFER"
+        else:
+            base_params["recommendation_engine"]["recommendation"] = "REJECT"
         
         return base_params
     

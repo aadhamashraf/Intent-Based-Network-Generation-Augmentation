@@ -13,9 +13,54 @@ class ModificationIntentGenerator:
     
     def generate_constrained_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
         """Generate modification parameters with realistic constraints."""
+        # Import constraint engine for consistent constraint application
+        from .Enhanced_Constraint_Engine import EnhancedConstraintEngine
+        constraint_engine = EnhancedConstraintEngine()
+        
+        # Generate base parameters
         base_params = self.generate_parameters()
         
-        # Note: Constraints now handled by Enhanced Constraint Engine in main generator
+        # Apply constraints based on context
+        slice_category = constraint_engine.categorize_slice_type(slice_type)
+        location_category = constraint_engine.categorize_location(location)
+        
+        # Adjust modification operations based on priority and complexity
+        if priority in ['CRITICAL', 'EMERGENCY']:
+            # Critical modifications need more conservative approaches
+            base_params["modification_specification"]["change_pattern"] = "BLUE_GREEN"
+            base_params["modification_specification"]["rollback_configuration"]["rollback_enabled"] = "true"
+            base_params["modification_specification"]["rollback_configuration"]["rollback_timeout"] = "300seconds"
+        elif priority == 'HIGH':
+            base_params["modification_specification"]["change_pattern"] = random_choice(["BLUE_GREEN", "CANARY"])
+            base_params["modification_specification"]["rollback_configuration"]["rollback_enabled"] = "true"
+        else:
+            base_params["modification_specification"]["change_pattern"] = random_choice(["ROLLING_UPDATE", "CANARY", "IMMEDIATE"])
+        
+        # Adjust impact analysis based on complexity
+        if complexity >= 8:
+            base_params["impact_analysis"]["affected_services"] = random_int(20, 50)
+            base_params["impact_analysis"]["estimated_downtime"] = f"{random_int(60, 300)}seconds"
+            base_params["impact_analysis"]["risk_assessment"]["technical_risk"] = random_choice(['HIGH', 'VERY_HIGH'])
+        elif complexity >= 5:
+            base_params["impact_analysis"]["affected_services"] = random_int(5, 20)
+            base_params["impact_analysis"]["estimated_downtime"] = f"{random_int(10, 60)}seconds"
+            base_params["impact_analysis"]["risk_assessment"]["technical_risk"] = random_choice(['MEDIUM', 'HIGH'])
+        else:
+            base_params["impact_analysis"]["affected_services"] = random_int(1, 5)
+            base_params["impact_analysis"]["estimated_downtime"] = f"{random_int(0, 10)}seconds"
+            base_params["impact_analysis"]["risk_assessment"]["technical_risk"] = random_choice(['LOW', 'MEDIUM'])
+        
+        # Adjust validation criteria based on slice category
+        if slice_category in ['URLLC', 'V2X']:
+            base_params["validation_criteria"]["performance_validation"]["latency_threshold"] = f"{random_float(0.1, 5)}ms"
+            base_params["validation_criteria"]["performance_validation"]["error_rate_threshold"] = f"{random_float(0.001, 0.01)}%"
+            base_params["validation_criteria"]["performance_validation"]["availability_threshold"] = f"{random_float(99.99, 99.999)}%"
+        elif slice_category == 'eMBB':
+            base_params["validation_criteria"]["performance_validation"]["latency_threshold"] = f"{random_float(5, 50)}ms"
+            base_params["validation_criteria"]["performance_validation"]["throughput_threshold"] = f"{random_int(100, 10000)}Mbps"
+        else:  # mMTC
+            base_params["validation_criteria"]["performance_validation"]["latency_threshold"] = f"{random_float(50, 1000)}ms"
+            base_params["validation_criteria"]["performance_validation"]["error_rate_threshold"] = f"{random_float(0.1, 1)}%"
         
         return base_params
     
