@@ -164,23 +164,6 @@ def gpt2_synthesize(text, max_new_tokens=50):
         logger.warning(f"GPT generation failed: {e}")
         return text
 
-# Add missing augmentation functions referenced in main.py
-def gpt2_augment(text, max_new_tokens=50):
-    """Alias for gpt2_synthesize for consistency."""
-    return gpt2_synthesize(text, max_new_tokens)
-
-def bert_fill_augment(text):
-    """Alias for mask_fill_augment for consistency."""
-    return mask_fill_augment(text)
-
-def adversarial_augment(text):
-    """Alias for adversarial_noise for consistency."""
-    return adversarial_noise(text)
-
-def entity_shuffle_augment(text):
-    """Alias for entity_shuffle for consistency."""
-    return entity_shuffle(text)
-
 def contextual_synonym_augment(text):
     """Replace one word with a contextually similar one using spaCy word vectors."""
     if not nlp:

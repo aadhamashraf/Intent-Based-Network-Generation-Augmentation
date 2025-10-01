@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from Intents_Generators.Advanced3GPPIntentGenerator import Advanced3GPPIntentGenerator
 from Evaluation.evaluation_metric import DataEvaluator
-from augmentation_utils import paraphrase, back_translate, synonym_augment, typo_augment, entity_shuffle_augment
+from augmentation_utils import paraphrase, back_translate, synonym_augment, typo_augment, entity_shuffle
 
 
 def example_basic_generation():
@@ -41,13 +41,14 @@ def example_augmentation():
     original_text = "Deploy AMF network function with high availability requirements for eMBB service"
     
     print(f"Original: {original_text}")
-    
-  augmentations = [
-    ("Synonym", synonym_augment),
-    ("Paraphrasing", paraphrasing_augment),
-    ("Backtranslation", backtranslation_augment),
-    ("Typo Simulation", typo_augment),
-    ("Entity Shuffling", entity_shuffle_augment)] 
+
+    augmentations = [
+        ("Synonym", synonym_augment),
+        ("Paraphrasing", paraphrase),
+        ("Backtranslation", back_translate),
+        ("Typo Simulation", typo_augment),
+        ("Entity Shuffling", entity_shuffle)
+    ] 
 
     for name, func in augmentations:
         try:

@@ -68,7 +68,7 @@ def parse_args():
     parser.add_argument("--use_gpt2_aug", action="store_true", help="Enable GPT-2-based synthesis")
     parser.add_argument("--gpt2_ratio", type=float, default=0.2, help="Ratio for GPT-2 synthesis (0-1)")
     parser.add_argument("--use_contextual_synonym_aug", action="store_true", help="Enable contextual synonym augmentation")
-    parser.add_argument("--contextual_syn_ratio", type=float, default=0.2)
+    parser.add_argument("--contextual_synonym_ratio", type=float, default=0.2)
     parser.add_argument("--use_bert_fill_aug", action="store_true", help="Enable BERT mask filling")
     parser.add_argument("--bert_fill_ratio", type=float, default=0.2)
     parser.add_argument("--use_adversarial_aug", action="store_true", help="Enable character-level noise")
@@ -76,7 +76,7 @@ def parse_args():
 
     args = parser.parse_args()
 
-    for ratio_arg in ["paraphrase_ratio", "backtranslate_ratio", "synonym_ratio", "entity_shuffle_ratio", "out_of_scope_ratio", "ambiguous_ratio", "typo_ratio", "gpt2_ratio", "contextual_syn_ratio", "bert_fill_ratio", "adversarial_ratio"]:
+    for ratio_arg in ["paraphrase_ratio", "backtranslate_ratio", "synonym_ratio", "entity_shuffle_ratio", "out_of_scope_ratio", "ambiguous_ratio", "typo_ratio", "gpt2_ratio", "contextual_synonym_ratio", "bert_fill_ratio", "adversarial_ratio"]:
         value = getattr(args, ratio_arg)
         if not (0.0 <= value <= 1.0):
             parser.error(f"{ratio_arg} must be between 0 and 1")
