@@ -258,27 +258,299 @@ class AdvancedTemplateEngine:
         """
         logger.info("Initializing Advanced Template Engine")
         
-        # Initialize core template categories
-        self.deployment_templates = self._initialize_deployment_templates()
-        self.modification_templates = self._initialize_modification_templates()
-        self.performance_templates = self._initialize_performance_templates()
-        self.report_templates = self._initialize_report_templates()
-        self.feasibility_templates = self._initialize_feasibility_templates()
-        self.notification_templates = self._initialize_notification_templates()
-        
-        # Initialize advanced template categories for specialized scenarios
-        self.scenario_templates = self._initialize_scenario_templates()
-        self.cross_domain_templates = self._initialize_cross_domain_templates()
-        self.ai_driven_templates = self._initialize_ai_driven_templates()
-        
+        templates = {
+            "Deployment": [
+                "This intent specifies the instantiation of a User Plane Function (UPF) for a {slice_category} network slice, as per the architecture defined in 3GPP TS 23.501 §6.2.2. The {nfvo_id} orchestrator must deploy the {network_function} VNF from provider {vnf_provider} version {vnf_version} using the {deployment_flavor} that allocates {cpu_cores} {cpu_arch} cores and {memory_size} of {memory_type} memory. The system must adhere to an {auto_scaling_policy} to dynamically scale between {min_instances} and {max_instances} based on real-time throughput demands (TS 28.531 §5.4.4). In case of instantiation failure within the {instantiation_timeout} period, a {rollback_strategy} must be triggered automatically.",
+                "Execute orchestration workflow {workflow_id} via {nfvo_id} to deploy the {network_function} across multiple VIMs, including {vim_id}. This cross-VIM deployment is designed to achieve high availability and load distribution as per ETSI NFV MANO principles referenced in 3GPP TS 28.530 §4.2. The workflow must ensure that network connectivity between VNF components has a maximum latency of {backhaul_latency}.",
+                "This intent is to trigger an automated update of the {network_function} from version {vnf_version} to a newer version using the {workflow_engine}. The process must follow a canary deployment model, initially directing 10% of traffic to the new version. The {auto_scaling_policy} must be temporarily adjusted during the upgrade to prevent resource conflicts. A full {rollback_strategy} to the previous version is required if the packet error rate exceeds {packet_error_rate}.",
+                "Deploy a virtualized Evolved Packet Core (vEPC) for an LTE private network, ensuring the MME and SGW components have a strong {affinity} policy. This co-location is intended to minimize control plane latency, aligning with performance goals in TS 23.401. Resources must be provisioned on the {orchestration_platform} with {min_instances} of each component, each having {cpu_cores} cores and {memory_size} memory.",
+                "Instantiate the {network_function} with a security-hardened profile. The deployment must enforce {encryption} with {key_length} bits for all external interfaces and use {auth_method} for management access. As per security assurance specifications (TS 33.501 §6.1), the VNF image must be scanned for vulnerabilities before deployment is allowed to proceed. The {zero_trust_identity} framework must be applied to all service-to-service communication.",
+                "Deploy a UPF at {location_category} edge data centers to support an ultra-reliable low-latency communications (uRLLC) slice for V2X services (3GPP TS 23.288 §5.2). This deployment must guarantee a user plane latency not exceeding {latency_req} (e.g., 1ms) and a {reliability_req} of 99.999%. The RAN configuration must use {high_band} spectrum with {beamforming} enabled to achieve this performance. A {backhaul_type} of dedicated fiber with a capacity of {backhaul_capacity} is mandated.",
+                "Instantiate a Multi-access Edge Computing (MEC) application, {network_function}, on the {orchestration_platform} located at the network edge. The intent is to process video streams locally, requiring {cpu_cores} {cpu_arch} cores with GPU acceleration and a {packet_delay} of less than 5ms. The SMF must be configured to steer traffic for {flow_id} to this local UPF, as per TS 23.501 §5.13 on edge computing support.",
+                "This is a policy-driven intent. If the end-to-end {latency_req} for the {slice_category} slice exceeds 10ms for more than the {averaging_window}, the {nfvo_id} must automatically trigger workflow {workflow_id}. This workflow will instantiate a new instance of {network_function} at a {location_category} edge site and update routing rules to minimize latency, reflecting the dynamic nature of edge deployments (TS 28.541 §A.15).",
+                "For tenant {tenant_id}, configure a local data breakout at the enterprise edge. Deploy a lightweight UPF and an enterprise firewall VNF ({network_function}) at the customer premises. This setup requires minimal resources: {cpu_cores} cores and {memory_size} RAM. The intent ensures that enterprise traffic does not traverse the core network, enhancing {location_privacy} and reducing {backhaul_latency}.",
+                "To support an augmented reality service, allocate compute resources at the far edge with an {adaptation_speed} of under 50ms. The {vim_id} must provision {cpu_cores} cores and {memory_size} RAM on demand. The QoS profile must enforce a strict {jitter_tolerance} of 1ms to prevent disruptions in the user experience, as latency spikes are critical for this {slice_category}.",
+                "Deploy a Security Edge Protection Proxy (SEPP) at the {location_category} edge to secure roaming interconnects locally (TS 33.501 §13). The SEPP VNF must enforce {encryption} using {kdf} for key derivation and mandate {integrity} protection for all signaling. This localized security enforcement reduces latency compared to routing traffic to a central security gateway.",
+                "Given the limited resources at {location_category} edge sites, deploy the {network_function} using a containerized flavor on {container_runtime}. The deployment must prioritize resource efficiency, utilizing {cpu_cores} ARM-based {cpu_arch} cores. If memory utilization exceeds 85%, the {optimization_algorithm} should be triggered to consolidate workloads without violating the {sla_type} agreement.",
+                "Configure the RAN with a specific {sectorization} strategy to maximize coverage and capacity at the {location_category} event venue. Use {low_band} for coverage and {mid_band} for capacity, managed by a SON algorithm. The goal is to support {connection_density} while ensuring {availability_req} for all users.",
+                "Upon detection of a large public event (e.g., via an external API call), the {nfvo_id} must automatically execute workflow {workflow_id} to deploy a mobile broadband capacity enhancement solution at the nearest {location_category} edge. This includes instantiating a local UPF and DU/CU resources, pre-configured to handle a surge in {connection_density}.",
+                "Deploy the {network_function} as a collection of cloud-native functions (CNFs) on the {orchestration_platform} Kubernetes cluster, using {container_runtime}. Service-to-service communication must be managed by a {mesh_technology} like Istio, enforcing mTLS for security. This aligns with the 5G service-based architecture (SBA) principles outlined in TS 23.501 §4.2.6.",
+                "The desired state of the {network_function} CNF is defined using the {iac_tool} (e.g., Helm, Kustomize) in a Git repository. The orchestration platform must continuously reconcile the running state with the Git repository, achieving a Level {automation_level} of automation. Any configuration drift must trigger an alert via {notification_channels}.",
+                "Enable {distributed_tracing} across all microservices comprising the {network_function}. Traces must be collected and forwarded to a central observability platform to diagnose performance bottlenecks and ensure the end-to-end {latency_req} is met. This is crucial for debugging complex interactions in an SBA environment (TS 28.532 §A.5).",
+                "Enforce a {zero_trust_identity} security model for all CNFs within the {tenant_id} namespace. Each microservice must present a valid SPIFFE/SPIRE identity token for any communication. Network policies must be configured to deny all traffic by default, only allowing explicit connections defined for the service-based interface.",
+                "Upon a new commit to the source code repository for {network_function}, the CI/CD pipeline, managed by {workflow_engine}, must automatically spin up an ephemeral test environment. This environment will run a suite of conformance and load tests, ensuring the new CNF version meets the {throughput_req} and {reliability_req} before being promoted.",
+                "Deploy the UDM (Unified Data Management) as a stateful CNF. The deployment must utilize a distributed {storage_type} solution (e.g., Ceph) with a capacity of {storage_capacity} to store subscriber data persistently, as per data storage principles in TS 23.501 §6.2.5. The storage solution must provide {redundancy} to prevent data loss.",
+                "Orchestrate an end-to-end network slice for tenant {tenant_id} with {correlation_id}. The {nfvo_id} will coordinate with the RAN controller, transport SDN controller, and core {vim_id}. The intent is to deliver a {sla_type} service with a guaranteed {throughput_req} from the UE to the data network, as envisioned by the network slice management functions in TS 28.541 §5.2.",
+                "Implement a {hybrid_strategy} for the {slice_category} eMBB slice. The baseline capacity for the UPF will be hosted on the on-premise {vim_id}. If traffic demand exceeds 80% of the on-premise capacity, the {nfvo_id} must burst additional UPF instances onto {cloud_providers} (e.g., AWS, Azure) to handle the overflow.",
+                "Apply a uniform security policy across the on-premise private cloud and the public {cloud_providers}. This includes enforcing {encryption} with a consistent {key_rotation} policy of 24 hours and using {auth_method} for all management plane access, regardless of where the {network_function} is hosted.",
+                "Ensure that the 5QI (5G QoS Identifier) value {priority_level_num} in the 5G core is correctly mapped to the corresponding QoS markings (e.g., DSCP) in the transport network. This cross-domain mapping is critical to maintain the end-to-end {packet_delay} and {packet_error_rate} characteristics defined in TS 23.501 §5.7.",
+                "Implement a cross-domain monitoring solution that uses {correlation_id} to track service performance from RAN to Core. If the {sla_type} is breached, the system must perform automated root cause analysis to identify if the fault lies in the radio, transport, or core domain and trigger the appropriate {escalation_l1} procedure.",
+                "The end-to-end instantiation of the service for {tenant_id}, including resource provisioning in the RAN, transport path setup, and core NF deployment, must complete within the {instantiation_timeout}. If it fails, a full {rollback_strategy} across all domains must be executed by {nfvo_id}.",
+                "Utilize the {ai_prediction_model} to forecast traffic demand for the {slice_category} slice based on historical data collected by NWDAF (TS 23.501 §5.27). Proactively execute a {horizontal_scaling} operation on the UPF 30 minutes before the predicted traffic peak to ensure the {guaranteed_bitrate} is always available and prevent congestion. The model must achieve an {accuracy_level} of 95%.",
+                "Continuously monitor QoS parameters such as {packet_delay} and {jitter_tolerance} using an {anomaly_detection} algorithm. If the AI model detects a deviation from the established baseline that could lead to an SLA violation, it must automatically create a trouble ticket and notify the {escalation_l1} team via {notification_channels} (TS 28.533 §5.2).",
+                "Implement a closed-loop automation system where the NWDAF provides analytics to the PCF and NSSF. If the AI model ({optimization_algorithm}) determines that network resources for a slice are over-provisioned, it will instruct the {nfvo_id} to downscale the resources ({vertical_scaling} or {horizontal_scaling}) without impacting the {sla_type} agreement, thus improving resource efficiency (TS 28.541 §6.4).",
+                "Using {predictive_analytics}, monitor the health metrics of the {network_function}. The {ai_prediction_model} will predict potential failures based on subtle changes in CPU, memory, and network I/O patterns. Upon predicting a failure with {accuracy_level} confidence, the system will automatically trigger a healing workflow to migrate services to a healthy instance, aiming to improve {mtbf}.",
+                "Leverage an AI model to determine the optimal placement of the {network_function}. The model, {optimization_algorithm}, will consider multiple factors including {latency_requirement}, compute resource availability across different {location_category} sites, and energy costs to select the most efficient VIM ({vim_id}) for instantiation.",
+                "Deploy an AI-based security system that analyzes signaling traffic (e.g., at the SEPP) for anomalous patterns indicative of a security threat. The {anomaly_detection} model is trained to identify zero-day attacks that signature-based systems would miss. Upon detection, it will automatically apply a firewall rule to block the malicious source.",
+                "This intent enables an AI-driven QoS adaptation mechanism. If the {predictive_analytics} model forecasts network congestion, the PCF will dynamically adjust the QoS parameters for non-critical flows, such as lowering the {maximum_bitrate} for {flow_id}, to protect the {guaranteed_bitrate} of high-priority services like {slice_category}.",
+                "Run a weekly {ai_prediction_model} to forecast long-term resource requirements ({cpu_cores}, {memory_size}, {storage_capacity}) for the next quarter. This forecast, based on NWDAF analytics, will be used for capacity planning to ensure that the infrastructure can meet future {throughput_req} and {connection_density} growth.",
+                "In the event of a service degradation alarm, trigger an ML-based root cause analysis workflow. The {optimization_algo} will analyze logs and metrics from multiple domains (collected with {sampling_rate}) to pinpoint the root cause, distinguishing between RAN, transport, or core issues with a specified {accuracy_level}. The finding is then routed to the correct {escalation_l2} team, drastically reducing the {mttr}."
+            ] , 
+            
+            "Feasibility Check": [
+                "Evaluate the end-to-end feasibility of launching a {service_level} service for {tenant_id} using the {network_function}. Assess if the combined requirements for {guaranteed_bitrate}, {latency_requirement}, and {availability_req} can be met concurrently on the target {architecture}. This check is a prerequisite for slice allocation as per 3GPP TS 28.541 §5.3.1. Confirm that the {orchestration_platform} is capable of deploying this service within the {instantiation_timeout}. If any core KPI is unachievable, the intent must be flagged as infeasible.",
+                "Determine if a {slice_category} slice is feasible in the target deployment area. Verify that the underlying infrastructure can support the expected {connection_density} and the associated signaling load, a key consideration for slice design mentioned in 3GPP TS 23.501 §5.15.2.2. Can the specified {backhaul_type} support the aggregate bandwidth demands? The intent should be rejected if the resource pool is insufficient for even the {min_instances} of the required network functions.",
+                "Assess the feasibility of meeting a {sla_type} agreement for the {vnf_provider}'s {network_function}. Can the system guarantee {reliability_req}% reliability and {availability_req}% availability simultaneously? This check relates to the service requirements that form the basis for a Network Slice as a Service (NSaaS) model, conceptually covered in 3GPP TS 28.530 §4.3.5. Evaluate whether the {rollback_on_failure} policy can be executed without violating the SLA's Mean Time to Repair (MTTR) constraints. If not, propose an alternative {rollback_strategy}.",
+                "Verify that the infrastructure is ready to onboard {tenant_id} with their requested {service_level}. Check for sufficient multi-tenancy support in the {orchestration_platform}, as implied by the management framework in 3GPP TS 28.530 §4.2. Is it possible to enforce strict resource isolation using the current {hypervisor} or {container_runtime}? Confirm that the {auth_method} meets the tenant's security requirements. The intent is infeasible if tenant-specific policies cannot be enforced.",
+                "Evaluate the feasibility of a {hybrid_strategy} deployment that integrates on-premise resources with {cloud_providers}. Can the proposed {architecture} maintain the required {latency_requirement} for cross-domain traffic? This feasibility check pertains to orchestrating services across multiple administrative domains, a concept discussed in 3GPP TS 28.531 §5.5. Assess if the {workflow_engine} can manage dependencies between cloud-native and legacy network functions. The plan is not viable if a unified {distributed_tracing} system cannot be implemented.",
+                "Confirm the technical feasibility of a URLLC service by assessing if a {latency_requirement} (e.g., <1ms) and {reliability_req} (e.g., 99.999%) can be co-guaranteed. This aligns with the URLLC requirements specified in 3GPP TS 22.261 §6.5. Is the selected {cpu_arch} with {cpu_frequency} capable of processing data within the allocated time budget? Verify that the {backhaul_latency} does not exceed its allocated portion of the end-to-end latency budget. If predictive analytics from {ai_prediction_model} indicates a high probability of jitter, flag the intent as high-risk.",
+                "Validate if a {guaranteed_bitrate} for an eMBB {slice_category} can be sustained under a {connection_density} of active users. This check ensures the QoS flow for GFBR can be supported, as defined in 3GPP TS 23.501 §5.7.3. Assess if the {storage_type} (e.g., NVMe) has sufficient I/O throughput to avoid bottlenecks for content caching NFs. The intent is not feasible if the {load_balancing} strategy cannot distribute traffic effectively to maintain the bitrate for all users.",
+                "Assess the feasibility of enforcing the required security context for the {network_function}. Can the system support the specified {encryption} and {auth_method} algorithms for all control and user plane traffic? This validation is based on the security architecture outlined in 3GPP TS 33.501 §6. Furthermore, is it technically possible to implement a {zero_trust_identity} policy by validating {device_trust} at every connection attempt? The deployment is infeasible if the security gateways lack the processing power to handle the cryptographic load without impacting latency.",
+                "Evaluate the feasibility of configuring the Radio Access Network for a specific {slice_category}. Does the RAN support resource partitioning to provide a dedicated {guaranteed_bitrate}? This aligns with the RAN-related aspects of network slicing detailed in 3GPP TS 38.300 §16. Can the specified {backhaul_capacity} handle the traffic from the cell sites for this slice in addition to others? The configuration is infeasible if the RAN scheduler cannot prioritize traffic according to the slice requirements.",
+                "Determine the technical feasibility of a V2X {slice_category} service. Can the network achieve the required end-to-end {latency_requirement} for safety-critical messages? This is a core requirement for V2X services as per 3GPP TS 23.287 §5.2. Verify that edge nodes have sufficient {cpu_cores} to run the V2X application server locally. Is it possible to guarantee resource availability and preemption for V2X traffic over other services? If not, the intent is technically infeasible.",
+                "Check for sufficient compute resources at the edge for deploying {network_function}. Are there {cpu_cores} of type {cpu_arch} and {memory_size} of {memory_type} available? This aligns with the NFVI resource management principles in 3GPP TS 28.541 §A.4. Assess if the existing {storage_capacity} of {storage_type} is adequate. The intent must be rejected if the {latency_requirement} cannot be met due to resource oversubscription at the edge location.",
+                "Evaluate if the existing {backhaul_type} has the required {backhaul_capacity} and {backhaul_latency} to support a new eMBB {slice_category}. This is a critical prerequisite for fulfilling the PDU Session QoS, as described in 3GPP TS 23.502 §4.3.2.2. Does the backhaul have QoS marking and queuing capabilities? If the backhaul is shared, confirm that this new slice will not degrade the performance of existing high-priority services.",
+                "Assess if the available {storage_type} provides sufficient performance for the {network_function}. Is the IOPS (Input/Output Operations Per Second) rating of the {storage_capacity} adequate for the expected transaction load? This detailed resource check is part of the VNF Descriptor (VNFD) information model referenced in 3GPP TS 28.531 §6.3.2. For a stateful application, verify that the storage system's reliability meets the service's {reliability_req}. The intent is infeasible if storage latency contributes significantly to exceeding the overall {latency_requirement}.",
+                "Verify that there are enough resources to support the {auto_scaling_policy} for {network_function}, from {min_instances} to {max_instances}. This preemptive check is crucial for the LCM scaling operations defined in 3GPP TS 28.531 §8.2. Are there enough floating CPU and memory resources in the cluster to accommodate {max_instances} during a peak event? Assess if the power and cooling systems at the data center can handle the maximum load. The scaling policy is infeasible if resource reservation cannot be guaranteed.",
+                "Determine if the proposed {affinity} and {anti_affinity} rules for the {network_function} components are satisfiable on the current infrastructure. This is a key aspect of VNF placement described in management standards like 3GPP TS 28.531 §6.2. For example, can two VNF components be placed on separate physical hosts to meet the {anti_affinity} rule for high availability? The intent is infeasible if the number of available compute hosts or racks is insufficient to satisfy the placement constraints.",
+                "Check if the selected {orchestration_platform} is compatible with the {workflow_version} required to deploy the {network_function} from {vnf_provider}. This verification aligns with the LCM orchestration principles in 3GPP TS 28.531 §6.2.3. Can the orchestrator communicate with the target {container_runtime} or {hypervisor}? The deployment is infeasible if the required management APIs are not exposed by the underlying virtualization platform.",
+                "Assess the viability of the proposed {rollback_strategy}. Can the system state be captured and restored within the service's MTTR target if {rollback_on_failure} is triggered? The ability to manage and terminate NFs is a core LCM function specified in 3GPP TS 28.531 §6.2.5. For a stateful {network_function}, verify that a data backup and restore mechanism exists and is reliable. The strategy is infeasible if a rollback would lead to data inconsistency or extended downtime.",
+                "Determine if the {network_function} can be reliably deployed within the specified {instantiation_timeout}. This check validates the performance of the entire orchestration chain, a key operational aspect of the LCM process from 3GPP TS 28.531 §6.2.3. Analyze historical deployment times for similar VNFs. Does the image download time from the registry plus the boot time fall comfortably within the timeout period? If not, the intent is at high risk of failure.",
+                "Verify that the designated {container_runtime} (e.g., containerd, CRI-O) supports all the features required by the cloud-native {network_function}. Does it support the necessary networking CNI plugins and storage CSI drivers? This detailed check is an implementation aspect of deploying VNFs on a container infrastructure, as abstracted in 3GPP TS 28.541 §A.4. Is the runtime version compatible with the {orchestration_platform} (e.g., Kubernetes)? The deployment is infeasible if the runtime cannot enforce the required CPU/memory limits.",
+                "Assess the feasibility of integrating the {network_function} into the existing {mesh_technology}. Can the service mesh sidecar be injected without compromising the VNF's performance or stability? This is an advanced deployment scenario for cloud-native functions, whose management aligns with the principles of 3GPP TS 28.531. Does the mesh support the required traffic routing, {load_balancing}, and {circuit_breaker} patterns? The integration is not feasible if the mesh's MTLS encryption introduces latency that violates the {latency_requirement}.",
+                "Evaluate if the selected {ai_prediction_model} has a sufficient {accuracy_level} to be used for a proactive {auto_scaling_policy}. This is a forward-looking application of the scaling management functions in 3GPP TS 28.531 §8.2. Will the model's predictions allow for resource allocation with enough lead time to meet the {adaptation_speed}? The model is considered infeasible if its false positive rate for scaling predictions would lead to excessive resource costs.",
+                "Assess if the {optimization_algorithm} can dynamically allocate resources to meet the {sla_type} more efficiently than static allocation. Can this algorithm reduce the required {cpu_cores} or {memory_size} while still guaranteeing the {latency_requirement}? This aligns with the goal of efficient resource utilization in NFV, a core principle behind 3GPP TS 28.530. The algorithm is not feasible if its computational overhead negates the resource savings.",
+                "Determine the feasibility of monitoring a {slice_category} slice using an AI-based anomaly detection model. Can the model process telemetry data at the required rate to detect deviations in {guaranteed_bitrate} or {latency_requirement} in near real-time? This relates to the performance monitoring data that can be collected for a slice, as mentioned in 3GPP TS 28.552 §5.2. The approach is infeasible if the model cannot distinguish between normal traffic fluctuations and genuine service degradations.",
+                "Evaluate if the {ai_prediction_model} can be used to preemptively identify security threats to the {network_function}. Does the model have access to the necessary logs and network flows to achieve a high {accuracy_level} in threat detection? This is an advanced security assurance mechanism that builds upon the foundational security architecture of 3GPP TS 33.501. The intent is infeasible if the AI model's response time is slower than the speed of common automated attacks.",
+                "Assess the feasibility of the proposed {edge_strategy} which uses an {ai_prediction_model} to decide traffic offload to {cloud_providers}. Can the model make decisions fast enough to maintain the session continuity and {latency_requirement} for the user? This complex orchestration is a future-facing implementation of the principles in 3GPP TS 28.530. The strategy is infeasible if the cost of data transfer to the cloud for analysis outweighs the benefits of offloading the compute.",
+                "Validate if the end-to-end {latency_requirement} can be met for a service traversing the core, transport, and RAN domains. Can each domain commit to its allocated portion of the latency budget? This is a fundamental check for services defined in 3GPP TS 23.501 §5.7. The intent is infeasible if the {backhaul_latency} alone consumes an unacceptable percentage of the total budget. Assess if distributed_tracing is possible across all domains to monitor compliance.",
+                "Assess the feasibility of a service chain composing multiple VNFs from different {vnf_provider}s. Can the {orchestration_platform} manage the lifecycle dependencies and health checks for the entire chain? This complex orchestration is governed by the principles of Network Service (NS) management in 3GPP TS 28.531 §6. The chain is infeasible if the cumulative resource needs ({cpu_cores}, {memory_size}) of all VNFs exceed the capacity of a single availability zone, violating the {affinity} requirements.",
+                "Confirm that the proposed deployment of {network_function} for {tenant_id} can meet regulatory requirements such as Lawful Intercept (LI). Are the necessary interfaces and probes available in the {architecture}? The architectural requirements for LI are specified in 3GPP TS 33.126. The deployment is infeasible if enabling LI functionality compromises the {guaranteed_bitrate} or introduces significant latency.",
+                "Validate the technical feasibility of an mMTC {slice_category} service. Can the core network's AMF and SMF handle the projected {connection_density} without performance degradation? This is a key capability of the 5G core as defined in 3GPP TS 23.501 §5.15.4. Assess if the {storage_type} for the UDM can handle the high rate of registration and authentication requests. The intent fails if the signaling storm from massive device connections cannot be mitigated.",
+                "Determine if Reflective QoS (RQI) can be supported for the intended service on the {network_function} (UPF). This capability is defined in 3GPP TS 23.501 §5.7.5. Can the UPF derive and apply QoS rules for uplink traffic based on the downlink packets? The feature is infeasible if the {cpu_arch} of the UPF cannot perform the required deep packet inspection and rule correlation at line rate without violating the {latency_requirement}.",
+                "Assess the feasibility of implementing SUPI concealment for enhanced user privacy. Are the UDM and UDR in the network configured to support this feature as per 3GPP TS 33.501 §6.12? Can the home network generate and manage public/private key pairs for all subscribers? The intent is infeasible if the {auth_method} used by legacy devices in the network is incompatible with the SUPI concealment mechanism.",
+                "For a high-performance {network_function} like a UPF, assess the feasibility of applying CPU pinning and ensuring NUMA (Non-Uniform Memory Access) awareness. Does the {hypervisor} and {orchestration_platform} expose the controls needed for such fine-grained resource allocation? This is an advanced implementation of the resource management concepts in 3GPP TS 28.541 §A.4. The deployment is infeasible if NUMA node locality cannot be guaranteed, as this would violate the {latency_requirement}.",
+                "Evaluate if there are sufficient resources across multiple clusters to support a geographically redundant deployment of the {network_function}. Can {min_instances} be deployed in at least two separate availability zones to satisfy the {availability_req}? This relates to the high-level management goal of ensuring service continuity (3GPP TS 28.530). The intent is infeasible if the inter-cluster {backhaul_latency} is too high for state replication.",
+                "Assess the feasibility of managing the {network_function} configuration using a GitOps workflow. Is the {orchestration_platform} (e.g., Kubernetes) integrated with a Git repository and a reconciliation agent? This is a modern, declarative approach to the configuration management aspects mentioned in 3GPP TS 28.532. The approach is not viable if the {vnf_provider} packages their application in a format that cannot be managed declaratively.",
+                "Can the {network_function} be updated to a new version in-place without requiring a full re-instantiation? This feasibility check pertains to the VNF software modification LCM procedure in 3GPP TS 28.531 §8.5. Does the {vnf_provider} support rolling updates? The intent is infeasible if the update process would violate the {availability_req} for the service.",
+                "Evaluate if a service chain can be deployed when its constituent network functions are managed by different orchestrators (e.g., a core NF on OpenStack and an edge NF on Kubernetes). Can a higher-level service orchestrator manage the end-to-end {workflow_version}? This scenario addresses the challenge of multi-domain orchestration described in 3GPP TS 28.530 §4.3. The deployment is infeasible if there is no standardized API or integration layer between the orchestration systems.",
+                "Assess the feasibility of creating a digital twin of the {slice_category} slice to test the impact of the {optimization_algorithm} before live deployment. Does the simulation environment have an accurate model of the network {architecture} and resources? This is an advanced assurance technique beyond standard monitoring (3GPP TS 28.552). The digital twin is not viable if it cannot predict the effect of configuration changes on {guaranteed_bitrate} with at least {accuracy_level}% accuracy.",
+                "Determine if an AI model can be used for automated root cause analysis (RCA) when a {sla_type} violation occurs. Does the model have access to the logs and network flows to identify the root cause faster than a human operator's Mean Time to Identify (MTTI)? This is an AI-powered enhancement to the fault management capabilities outlined in 3GPP TS 28.532 §4.8. The AI-RCA is infeasible if it cannot identify the root cause faster than a human operator's Mean Time to Identify (MTTI).",
+                "Evaluate the feasibility of using a reinforcement learning (RL) model as the {optimization_algorithm} for real-time radio resource management. Can the RL agent interface with the RAN scheduler to adjust parameters and improve spectral efficiency? This is a highly advanced application of the RAN management principles in 3GPP TS 38.300. The intent is infeasible if the agent's decision loop ({adaptation_speed}) is slower than the channel state changes.",
+                "Check if the {ai_prediction_model} can be used for predictive maintenance of the underlying physical or virtual infrastructure. Can it analyze hardware telemetry or hypervisor logs to predict failures before they impact the {availability_req}? This AI-driven approach enhances the fault management capabilities described in 3GPP TS 28.532. The model is not feasible if its predictions are not actionable or do not provide enough lead time for maintenance.",
+                "Evaluate the general feasibility of a {hybrid_strategy} for the {network_function} across {cloud_providers} and on-premise. Can the {orchestration_platform} manage a unified resource inventory? This check is a prerequisite for cross-domain management as per 3GPP TS 28.530 §4.3. The strategy is infeasible if security policies, like {zero_trust_identity}, cannot be consistently enforced across all environments.",
+                "Assess the feasibility of a closed-loop automation intent for the {slice_category} slice. Can the monitoring system detect an SLA deviation and trigger the {optimization_algorithm} via the {workflow_engine} without human intervention? This is the ultimate goal of the intent-based networking principles evolving from 3GPP TS 28.530. The loop is infeasible if the {adaptation_speed} from detection to remediation exceeds the service's MTTR target.",
+                "Determine if it's feasible to dynamically instantiate a temporary, high-priority {slice_category} slice for emergency services or a large public event. Can the {orchestration_platform} provision all required resources within a {instantiation_timeout} of 5 minutes? This is an agile application of the slice allocation procedures in 3GPP TS 28.541 §5.3. The intent is infeasible if resources cannot be preempted from lower-priority slices.",
+                "Evaluate the feasibility of an energy-saving policy for the {network_function}. Can instances be scaled down from {max_instances} to {min_instances} during off-peak hours without affecting the {availability_req}? Can the {optimization_algorithm} consolidate workloads onto fewer physical servers? This aligns with the operational efficiency goals inherent in the NFV management framework (3GPP TS 28.530). The policy is infeasible if the power state transition time for servers is too long.",
+                "Assess if the {network_function} provided by {tenant_id} can securely and efficiently interact with the core network via the Network Exposure Function (NEF). Are the required APIs exposed by the NEF, and does the {auth_method} comply with 3GPP standards as per TS 29.522? This is a technical feasibility check of a key 5G capability (TS 23.501 §5.20). The integration is infeasible if the NEF cannot handle the API call rate from the tenant's application.",
+                "For a performance-critical {network_function} like a UPF, is it feasible to deploy it on bare metal servers instead of under a {hypervisor}? Does the {orchestration_platform} support bare metal provisioning? This choice directly impacts the achievable performance, a key consideration for resources in 3GPP TS 28.541 §A.4. The intent is infeasible if the security and isolation guarantees required for the {tenant_id} cannot be met without a hypervisor.",
+                "Validate if the contracted QoS parameters, such as {guaranteed_bitrate}, can be feasibly delivered for roaming users from {tenant_id}. Does the interconnect agreement with the partner network support the necessary QoS markings and traffic handling? This relates to inter-network slice management and the procedures defined in 3GPP TS 23.501 §5.15.6. The service is infeasible if the visited network's backhaul cannot support the required SLA.",
+                "Assess if the new {network_function} from {vnf_provider} can be integrated into the operator's existing CI/CD pipeline for automated testing and deployment. Is the VNF packaged as a container ({container_runtime}) and defined with a declarative configuration (e.g., Helm, Kustomize)? This is a modern operational approach to the VNF lifecycle management described in 3GPP TS 28.531. The integration is infeasible if the VNF requires manual configuration steps that cannot be automated.",
+                "Evaluate the feasibility of using an {ai_prediction_model} to proactively re-route traffic before a predicted network congestion event occurs. Can the {optimization_algorithm} calculate an alternative path and execute the change via the SDN controller without violating the {packet_error_rate}? This proactive traffic management is an intelligent application of the policy and charging control (PCC) framework from 3GPP TS 23.503. The intent is infeasible if the network topology does not offer sufficient path diversity.",
+                "Can a caching {network_function} be dynamically deployed to an edge location based on real-time content popularity analytics? Assess if the {orchestration_platform} can trigger a deployment workflow within the {execution_timeout} when the analytics platform detects a demand surge. This is an agile implementation of placing functions closer to the user to meet latency goals (a principle from 3GPP TS 23.501). The strategy is infeasible if the edge location lacks pre-provisioned {storage_capacity}."
+            ] ,
+                
+            "Report Request": [
+                "Generate a comprehensive performance report for the {network_function} operating within the {slice_category}. The report must detail the {throughput_req} and {latency_req} over the last 24 hours. Correlate these KPIs with the underlying resource utilization, specifically {cpu_cores} and {memory_size}. If {availability_req} drops below the defined threshold, automatically include {mtbf} and {mttr} metrics.",
+                "Produce a security compliance audit for the {slice_category} network slice. This report must verify that configured {encryption} and {integrity} protection policies are consistently enforced. Confirm that the {key_rotation} schedule is being followed as per security guidelines. The report's data must be stored for the specified {retention_period}.",
+                "Initiate a predictive analytics report for {network_function} using the {ai_prediction_model}. Forecast the resource demand for {cpu_cores} and {bandwidth_allocation} based on historical consumption patterns. The model must achieve an {accuracy_level} of 95% or higher. If a resource shortfall is predicted, suggest an alternative {optimization_algorithm} for traffic management.",
+                "Create a daily SLA report for {sla_type} agreements. The report should summarize the {guaranteed_bitrate} and {maximum_bitrate} for {flow_id}. It must also include statistics on {packet_delay} and {packet_error_rate} averaged over a {averaging_window}. Attach all logs where {preemption_capability} was invoked.",
+                "Assess the performance impact of the current {auto_scaling_policy} for the {network_function}. The report should analyze the time taken for {horizontal_scaling} events to complete versus the {execution_timeout} limit. Correlate scaling events with fluctuations in {jitter_tolerance}. Does the current {workflow_engine} meet the {adaptation_speed} required to prevent SLA breaches?",
+                "Generate a report verifying adherence to our {zero_trust_identity} framework for all devices connecting to the {network_function}. The report must list all successful and failed {auth_method} attempts. Additionally, verify that {location_privacy} mechanisms are active for all UEs in the {location_category}.",
+                "Run an anomaly detection report on the {slice_category}. Use {anomaly_detection} algorithms to identify unusual patterns in {packet_error_rate} and {connection_density}. If an anomaly is detected with high confidence, trigger a deeper analysis using {distributed_tracing} to pinpoint the root cause and notify {escalation_l2}.",
+                "Provide a resource utilization summary for the {network_function} instances. The report should detail the average and peak usage of {memory_size} ({memory_type}) and {storage_capacity} ({storage_type}). Compare this utilization against the configured {deployment_flavor} to identify optimization opportunities.",
+                "Create a forecast report predicting potential {backhaul_capacity} bottlenecks in the {location_category}. Use {predictive_analytics} to model traffic growth over the next quarter. If a future bottleneck is identified, evaluate the effectiveness of {load_balancing} as a proactive mitigation strategy.",
+                "Compile a monthly reliability report for the {architecture}. The report must feature {mtbf} and {mttr} statistics for critical network functions. Include a summary of all {circuit_breaker} events and their resulting impact on the overall {availability_req}.",
+                "Generate a data privacy compliance report. Confirm that {location_privacy} is enabled for all relevant services as per policy. The report must also verify that the {retention_period} for user-specific data complies with regulatory requirements.",
+                "Develop a report that uses {predictive_analytics} to identify subscribers experiencing degraded Quality of Experience. The model should analyze {packet_error_rate} and {throughput_req} deviations. If a group of users is affected, escalate to {escalation_l1} with a list of potential causes.",
+                "Create a report analyzing the end-to-end latency for the {slice_category}. Use data from {distributed_tracing} to break down latency contributions from different network segments. This report must verify compliance with the overall {latency_req} defined in the {sla_type}.",
+                "Audit the {affinity} and {anti_affinity} rules for all deployed instances of {network_function}. The report must confirm that these rules are correctly enforced by the orchestrator to ensure high availability. Flag any violations found during the audit period.",
+                "Initiate a report to determine the optimal {sampling_rate} and {aggregation_interval} for monitoring the {network_function}. Use an {optimization_algorithm} to balance monitoring granularity against resource overhead. The goal is to detect anomalies without overburdening the system.",
+                "Provide a high-level executive summary of network slice performance for the {slice_category}. The report should visualize key metrics like {availability_req} and {reliability_req} against targets. Include a section on major incidents and their resolution times.",
+                "Report on the correlation between {backhaul_capacity} and the {maximum_bitrate} achievable in the {location_category}. If {backhaul_capacity} is found to be a limiting factor, append a simulation of the expected performance gains from a potential capacity upgrade.",
+                "Generate a report to verify that all VNF/CNF images currently in use match their expected and approved versions. This report must cross-reference the running instances against the management system's catalog. Include a check on {integrity} hashes where available.",
+                "Use {ai_prediction_model} to report on the likelihood of SLA violations for {sla_type} in the next 7 days. The prediction should be based on current trends in resource usage and network congestion. If the likelihood exceeds 75%, trigger a proactive resource {vertical_scaling} recommendation.",
+                "Request a report detailing all manual interventions performed on the network infrastructure over the past quarter. The report should categorize these interventions and identify prime candidates for future automation using {iac_tool}.",
+                "Generate a comparative report on resource efficiency between {memory_type} DD4 and DDR5 for the {network_function}. The report should analyze if the upgrade to DDR5 resulted in a measurable improvement in {latency_req} under heavy load conditions.",
+                "Create a compliance report that confirms all network traffic within the {slice_category} is properly isolated from other slices. The report should include verification of network policies, VLANs, and routing tables to ensure separation.",
+                "Report on the primary causes of {mttr} for the {network_function}. Use {anomaly_detection} on logs and metrics to correlate failures with specific events (e.g., software updates, traffic spikes). Suggest improvements to the {rollback_strategy} based on these findings.",
+                "Produce a report summarizing all active QoS flows with a {priority_level_num} of 1. For each flow, list the associated service and its currently configured {guaranteed_bitrate}.",
+                "Initiate a report to find silent failures within the {architecture}. Use {predictive_analytics} to analyze subtle performance degradations that do not trigger standard alarms but could indicate an impending {mtbf} event. Escalate these findings to {escalation_l3}.",
+                "Compile a capacity planning report for {storage_type} resources. Project the storage needs for the next 12 months based on current data growth trends. The report should factor in the {retention_period} for all collected monitoring and log data.",
+                "Create a report analyzing the efficiency of the {auto_scaling_policy}. The report should answer: Are we scaling out too aggressively or too late? Compare the timing of {horizontal_scaling} events with the actual load on {cpu_cores}.",
+                "Document all instances where {preemption_capability} was used to de-allocate resources from lower-priority flows. The report must verify that this action was justified and followed the predefined policies for the {slice_category}.",
+                "Run a report using the {optimization_algorithm} to identify underutilized resources in our cloud-native environment. The report should suggest specific {vertical_scaling} actions (e.g., reducing {memory_size}) for idle instances of {network_function} to save costs.",
+                "I need a detailed report on {jitter_tolerance} performance for real-time services in the {slice_category}. If jitter exceeds the SLA threshold, the report must include a snapshot of the network state captured via {distributed_tracing} at the time of the event.",
+                "Produce a report verifying that all deployed network functions are running on infrastructure that meets the {architecture} specifications (e.g., CPU instruction sets). Flag any function running on non-compliant or deprecated hardware.",
+                "Create a report that predicts the impact of a potential {backhaul_capacity} failure at {location_category}. Use the {ai_prediction_model} to simulate the re-routing of traffic and forecast the resulting increase in {latency_req} for affected services.",
+                "Assess the {packet_error_rate} for the {slice_category}. If the rate is above the acceptable threshold, the report must include an analysis correlating the errors with specific network segments or functions.",
+                "Please provide a report confirming that all management interfaces for the {network_function} are secured using the approved {auth_method} and {encryption} protocols. Any exceptions must be highlighted.",
+                "Use {predictive_analytics} to report on the \"health score\" of each network slice. The score should be a composite metric derived from {availability_req}, {latency_req}, {throughput_req}, and user-reported issues, indicating overall service quality.",
+                "I need a report listing all configured {sla_type} contracts and their primary parameters ({guaranteed_bitrate}, {latency_req}).",
+                "Can you generate a report showing the impact of {horizontal_scaling} events on {memory_type} consumption patterns? I want to see if scaling out causes unexpected memory pressure on the underlying hypervisors.",
+                "Run a report to verify that the {anti_affinity} rules are preventing critical and redundant instances of {network_function} from being placed on the same physical host.",
+                "Generate a report identifying the root cause of intermittent {jitter_tolerance} violations. Use {distributed_tracing} combined with {anomaly_detection} to find correlations that are not obvious from standard metrics.",
+                "Report on the end-to-end {packet_delay} for {flow_id}. The report must use an {averaging_window} of 5 minutes and highlight any spikes that exceed the {sla_type} definition."
+            ],
+            
+            "Modification": [
+                "Initiate a vertical scaling modification for {network_function} of {vnf_version}. Augment the existing {deployment_flavor} by increasing compute resources to {cpu_cores} cores and {memory_size} of {memory_type} RAM. This modification is intended to maintain the {availability_req}% SLA under projected load increases. The {rollback_strategy} must be pre-configured to revert changes if monitoring detects a breach of the {mttr} objective.",
+                "Modify the QoS profile for {flow_id} to meet stringent URLLC requirements. Adjust the QoS Flow to enforce a maximum {packet_delay} and a {packet_error_rate} of 10-5. This change must be compliant with the 5QI characteristics for low latency services. Validate that the {preemption_capability} is enabled to prioritize this flow over non-critical traffic.",
+                "Update the orchestration policy for {network_function} to implement a new {auto_scaling_policy}. The scaling limits are to be adjusted to a range of {min_instances} to {max_instances}. Scaling actions will be triggered by the {optimization_algorithm} when {connection_density} metrics exceed predefined thresholds. All scaling operations must adhere to the {anti_affinity} rules specified for this service.",
+                "Reconfigure the gNBs in the {deployment_scenario} to utilize advanced {beamforming} techniques. This modification applies to the {mid_band} frequency range and aims to improve spectral efficiency. The change should be coordinated by the orchestration platform to minimize service disruption. Monitor the impact on cell edge performance and overall sector throughput.",
+                "Implement a cross-domain service modification to optimize the data path between the RAN and the data network. Increase {backhaul_capacity} and re-route traffic to ensure the end-to-end {latency_requirement} is met. This requires coordinated changes in both transport network and the core {network_function} (e.g., UPF). Ensure the {reliability_req} is not compromised during this transition.",
+                "Update the security context for the {slice_category} slice by enforcing a new {key_rotation} policy. Modify the NFs to use {auth_method} for all internal communications. This security enhancement must be rolled out without impacting the {availability_req} of the service. Log all configuration changes for audit purposes.",
+                "Modify the existing horizontal scaling policy for {network_function} to be predictive. Use the {ai_prediction_model} to forecast traffic patterns and preemptively trigger {horizontal_scaling} actions. The model must achieve an {accuracy_level} of 95% to avoid resource over-provisioning. The {adaptation_speed} of the scaling mechanism should be less than the predicted traffic ramp-up time.",
+                "Adjust the SLA for tenant {tenant_id} by modifying the {guaranteed_bitrate} for {flow_id}. The new GBR should be set to {guaranteed_bitrate}, with a peak of {maximum_bitrate}. The Policy Control Function (PCF) should enforce this change. Monitor the flow to ensure compliance and use {reflective_qos} where applicable.",
+                "Execute a VNF modification by changing the {deployment_flavor} for all instances of {network_function}. This involves a planned migration to instances with {storage_capacity} of {storage_type} to support increased logging and state storage. The process must be executed within the {execution_timeout} window and use the {rollback_strategy} upon failure.",
+                "Adapt the deployment of {network_function} to a {hybrid_strategy}, distributing new instances across on-premise VIM and {cloud_providers}. This modification requires updating the {workflow_engine} with {workflow_version} to manage multi-cloud resources. Use {load_balancing} to distribute traffic according to the defined policy.",
+                "Modify the monitoring policy by adjusting the {sampling_rate} and {aggregation_interval} for performance metrics related to {network_function}. Enable {anomaly_detection} with a higher sensitivity to track jitter. The data {retention_period} for these high-granularity metrics should be set to {retention_period}.",
+                "Refine the QoS profile for a real-time communication service by setting the {jitter_tolerance} parameter. This modification is critical for maintaining voice and video quality for the {slice_category}. The network must ensure that packet delay variation remains within this new bound.",
+                "Initiate a rolling upgrade of {network_function} to {vnf_version}. The upgrade shall be managed by the {workflow_engine} using a blue-green deployment to ensure zero downtime. The new version must maintain or improve upon the existing {reliability_req}. If post-deployment checks fail, trigger an automated rollback to the previous version.",
+                "Increase the dedicated {bandwidth_allocation} for the network slice serving {tenant_id}. This is to support a higher {connection_density} and ensure the {guaranteed_bitrate} can be met during peak hours. The modification should be applied at both the transport and core network layers.",
+                "Modify the RAN configuration to implement a new {sectorization} strategy, increasing the number of sectors per cell site. This change is aimed at increasing capacity in a dense {deployment_scenario}. Concurrently, ensure the {backhaul_capacity} is sufficient to handle the increased aggregated traffic from the new sectors.",
+                "Adjust the {circuit_breaker} parameters for the microservices within {network_function}. The intent is to make the function more resilient to transient downstream failures. Modify the failure threshold and reset timeout to align with the target {mtbf} for the service.",
+                "Update the security policy to mandate the use of a new {integrity} protection algorithm for user plane traffic within the {slice_category} slice. This change must be propagated to all relevant NFs (e.g., UPF, gNB). This is a compliance requirement to protect against data tampering.",
+                "Enable {reflective_qos} for specific services to allow the UE to mirror downlink QoS for uplink traffic. This modification simplifies QoS management for symmetric services. The change must be authorized by the PCF and applied at the UPF.",
+                "Expand the {storage_capacity} for {network_function} to accommodate a longer data {retention_period} for analytics. The new {storage_type} should be optimized for high-throughput reads. The expansion should be performed live without impacting the function's operation.",
+                "Trigger a re-evaluation and potential modification of the resources allocated to a network slice. If {predictive_analytics} indicates a sustained increase in demand, automatically adjust {cpu_cores}, {memory_size}, and {bandwidth_allocation} to meet the {sla_type}.",
+                "Modify the RAN configuration to activate the {low_band} spectrum for wide-area coverage. This change is intended to improve indoor penetration and cell-edge performance. Ensure UEs capable of carrier aggregation can utilize this new band in conjunction with existing {mid_band} carriers.",
+                "Modify the {execution_timeout} for orchestration workflows related to {network_function} scaling. The current timeout is too aggressive and causes false positives. A longer timeout will improve the reliability of scaling operations during high load. The {rollback_on_failure} policy remains in effect.",
+                "Modify the security configuration to enhance {location_privacy} for subscribers. This involves tighter controls on how location information is exposed to third-party applications via the NEF. The change must align with regulatory requirements.",
+                "Change the active {optimization_algorithm} used for RAN resource management. The new algorithm leverages an {ai_prediction_model} to dynamically allocate resources, aiming to reduce inter-cell interference. The goal is to improve the overall {throughput_req} across the network.",
+                "Adjust the {auto_scaling_policy} for {network_function} by increasing the {max_instances} parameter. This modification will provide greater elasticity to handle unexpected traffic surges. Ensure the underlying {orchestration_platform} has sufficient resource headroom to support this new upper limit.",
+                "Change the {load_balancing} algorithm for traffic entering the {network_function} service mesh from round-robin to least-connections. This modification is intended to provide a more even distribution of load across instances. Monitor instance CPU utilization to verify the effectiveness of the change.",
+                "Update the service commitment for a slice by modifying its {availability_req} and {reliability_req} parameters. This reflects a new {sla_type} agreement. The orchestrator must verify that the current resource allocation and resilience mechanisms can support these new, stricter targets.",
+                "Modify the inventory database to reflect an upgrade of {antenna_type} at specific cell sites. This information is critical for the accuracy of network planning and optimization tools. The change should trigger a re-evaluation of beamforming patterns for the affected cells.",
+                "Initiate a modification to rebalance instances of {network_function} across multiple VIMs, including {cloud_providers}. The goal is to optimize for geographic latency and improve resilience. This requires a {workflow_engine} capable of cross-site orchestration and state management.",
+                "Modify the QoS configuration to make {flow_id} subject to preemption by higher-priority traffic by disabling its {preemption_capability}. This change is intended to free up resources for critical services like emergency calls during network congestion.",
+                "Update the lifecycle management {workflow_version} to support the deployment and configuration of {vnf_version} of {network_function}. The new workflow must include updated configuration steps and health checks specific to the new version. The old workflow should be deprecated but retained for rollback purposes.",
+                "Trigger a {vertical_scaling} operation on {network_function} to increase its {memory_size}. This is in response to monitoring alerts indicating high memory pressure that could impact performance. The change should be applied with minimal service impact.",
+                "Modify the RAN configuration to activate {high_band} (mmWave) spectrum for a Fixed Wireless Access (FWA) {deployment_scenario}. This requires enabling specific {beamforming} procedures for stationary users. Ensure the core network's UPF has the capacity to handle the resulting {maximum_bitrate}.",
+                "Modify the monitoring configuration to use a different {compression_ratio} for performance data sent to the analytics engine. The goal is to reduce the load on the management network without losing essential information needed by the {anomaly_detection} system.",
+                "Change the {rollback_strategy} for {network_function} from a full revert to a stateful, canary-based rollback. This allows for more granular failure recovery during phased rollouts. The new strategy should be tested in a staging environment before being applied to production.",
+                "Modify an existing network slice to align with a new service profile, which mandates a lower {latency_requirement} and a higher {guaranteed_bitrate}. This will likely trigger a full re-evaluation of the slice's resource allocation and configuration by the orchestrator.",
+                "Create and apply a new {deployment_flavor} for {network_function} instances at the network edge. This flavor will be optimized for low resource consumption ({cpu_cores}, {memory_size}) to fit edge hardware constraints, supporting the operator's {edge_strategy}.",
+                "Modify the network access policies to support {auth_method} as a new primary authentication mechanism. This requires configuration changes on the AUSF and UDM ({network_function}). The change should be rolled out progressively to different subscriber groups.",
+                "Alter the service function chain for a specific data flow by inserting a new VNF for traffic inspection. This requires the orchestrator to update the network forwarding paths and ensure the new chain does not violate the end-to-end {latency_requirement}.",
+                "Update the resilience objectives for the {slice_category} slice by modifying the target {mtbf} (Mean Time Between Failures) and {mttr} (Mean Time To Repair). The orchestrator must confirm that the current {redundancy} model and {rollback_strategy} can meet these new targets.",
+                "Decommission and re-provision {network_function} to migrate it to a new {storage_type} (e.g., from HDD to SSD). This modification is intended to resolve an I/O bottleneck that is impacting service performance. The migration must be performed within a scheduled maintenance window.",
+                "Modify the NFVO/VIM configuration to add a new public {cloud_providers} as a valid resource pool. This involves updating the {workflow_engine} with the appropriate APIs and image repositories. The intent is to enable a {hybrid_strategy} for bursting capacity.",
+                "Fine-tune the {auto_scaling_policy} by adjusting the {horizontal_scaling} step size and cooldown period. The intent is to make the scaling response more aggressive to quickly adapt to flash crowd scenarios, while avoiding flapping.",
+                "Modify the QoS target for a massive IoT service by relaxing the {packet_error_rate} requirement. This allows for more efficient radio resource utilization for devices that are tolerant to some data loss.",
+                "Push a runtime configuration change to all instances of {network_function}. The change involves updating an internal application parameter (e.g., cache size) to improve performance. This modification should be applied via the VNFM without requiring a full restart of the instances.",
+                "Enhance the resilience of a cell site by provisioning a secondary, diverse {backhaul_type} path. The modification should ensure that failover between the primary and secondary paths is automatic and occurs within the service's {mttr} objective.",
+                "Replace the current {ai_prediction_model} used for network slice load forecasting with an updated version. The new model promises a higher {accuracy_level} and better handling of seasonal traffic variations. The NWDAF ({network_function}) should be updated to use this new model for its analytics services."
+            ],
+                    
+            "Performance Assurance":  [
+                "Continuously assure that the service maintains a {throughput_req} and stays below a {latency_req} threshold. This performance assurance intent is critical for maintaining the {sla_type}. Activate {anomaly_detection} to identify deviations in real-time. Should performance degrade, automatically adjust the {load_balancing} strategy to reroute traffic and maintain stability.",
+                "Enforce a strict {sla_type} by monitoring for {availability_req}% uptime and a {reliability_req}% success rate. Track {mttr} and {mtbf} metrics continuously over a {retention_period}. Use {predictive_analytics} to forecast potential SLA breaches. If a breach is predicted with {accuracy_level}% confidence, trigger the {auto_scaling_policy} to preemptively add resources.",
+                "This intent focuses on ultra-low latency optimization, targeting a maximum {latency_req} and a minimal {jitter_tolerance}. Implement a high-frequency {sampling_rate} for packet delay measurements. Engage {distributed_tracing} to pinpoint sources of latency across the service chain. Any packet delay exceeding the {packet_delay} threshold must trigger an immediate re-optimization of the network path.",
+                "Maximize service throughput by assuring a {guaranteed_bitrate} and allowing bursts up to {maximum_bitrate}. Monitor the data flow over a defined {averaging_window} to ensure compliance. If the guaranteed bitrate is not met, dynamically re-allocate network resources. The {preemption_capability} for this flow is set to {priority_level_num} to ensure resource availability.",
+                "Implement an AI-driven assurance loop for this service. Use {predictive_analytics} to forecast throughput demand and potential latency spikes with {accuracy_level}% accuracy. The model should have an {adaptation_speed} capable of responding to real-time changes. If a degradation is predicted, the system must automatically initiate a corrective workflow.",
+                "Assure performance by maintaining a {throughput_req} and {packet_error_rate} below the specified limits. The {monitoring_interval} shall be set to {aggregation_interval}. Any detected anomaly via {anomaly_detection} should trigger an alert and a data capture for root cause analysis. This is essential for maintaining the core {sla_type} agreement.",
+                "This intent is to guarantee the {sla_type} for a mission-critical service, focusing on an {availability_req}% target. Continuously verify that {mtbf} is high and {mttr} is low. The system must automatically failover in case of a component failure. All performance data will be stored for a {retention_period} for compliance auditing.",
+                "Optimize for consistent low latency by ensuring the end-to-end {packet_delay} does not exceed {latency_req}. Monitor {jitter_tolerance} to guarantee smooth real-time communication. If jitter exceeds the threshold, prioritize the traffic flow to {priority_level_num}. This is crucial for interactive services like cloud gaming or AR/VR.",
+                "Ensure the service can consistently achieve a {maximum_bitrate} during peak demand by monitoring traffic patterns. Apply an aggressive {auto_scaling_policy} to rapidly scale resources when throughput demand nears the {throughput_req} ceiling. Use {load_balancing} to distribute the increased load efficiently across all available instances.",
+                "Deploy an AI-powered performance assurance model, {predictive_analytics}, to maintain the service's health. The model must predict {packet_error_rate} trends with {accuracy_level}% accuracy. Based on predictions, the system should dynamically adjust resource allocation with a high {adaptation_speed}. This ensures proactive, closed-loop service assurance.",
+                "Maintain a constant watch on the {guaranteed_bitrate} for this flow, ensuring it never drops below the specified {sla_type} value. Data will be measured using a {sampling_rate} of 1 per second. If performance degrades, {anomaly_detection} must trigger a workflow to investigate the cause, referencing the required {reliability_req}.",
+                "The primary goal is to assure the {availability_req}% SLA commitment. The system's performance will be evaluated against {mtbf} and {mttr} goals. In the event of an outage, the recovery process must be completed within the {mttr} window. All assurance data is subject to a {retention_period} for review.",
+                "This intent is to minimize latency fluctuations by enforcing a strict {jitter_tolerance}. Monitor the network path continuously for any increase in delay variation. If the {averaging_window} shows a negative trend, re-route the traffic through a more stable path. This is vital for high-quality voice and video services.",
+                "Assure that the aggregated service throughput consistently meets or exceeds {throughput_req}. Use {load_balancing} across multiple instances to achieve this goal. If the total throughput drops, the {auto_scaling_policy} should be invoked to horizontally scale the service and meet demand.",
+                "Leverage {predictive_analytics} to proactively manage QoS. The AI model will forecast potential {jitter_tolerance} violations based on current network conditions. If a violation is predicted with {accuracy_level}% confidence, the system will apply corrective measures with a defined {adaptation_speed} before the user experience is impacted.",
+                "The performance assurance intent is to monitor the {packet_delay} for a specific flow with {priority_level_num}. If the delay exceeds the target, activate {distributed_tracing} to identify the bottleneck. This granular level of observability is required to meet the stringent {sla_type}.",
+                "This SLA assurance intent mandates a {reliability_req}% for the service. The system must adhere to the agreed {mtbf} and {mttr} values. The monitoring system will aggregate data every {aggregation_interval} and will trigger alerts if the reliability metric trends downwards.",
+                "To ensure a superior real-time experience, this intent targets a {latency_req} and a low {packet_error_rate}. The network must be configured to prioritize this traffic. If contention occurs, the {preemption_capability} will be used to secure the necessary resources.",
+                "Assure that the service can handle burst traffic up to {maximum_bitrate} without performance degradation. The {auto_scaling_policy} must be sensitive enough to react to sudden spikes in demand. Monitor resource utilization and throughput to ensure the scaling actions are effective.",
+                "In case of a link failure scenario, this intent ensures service continuity with a minimal {mttr}. The {mesh_technology} should provide at least two redundant paths. The system must automatically switch to the backup path and report the failover event, ensuring the {availability_req} is not compromised.",
+                "Utilize an AI model for intelligent service assurance. The {predictive_analytics} engine will analyze monitoring data to predict impending failures that could impact the {reliability_req}. The system's {adaptation_speed} must be fast enough to take corrective action, such as migrating a service, before the failure occurs.",
+                "Assure performance by ensuring the {guaranteed_bitrate} is always met, measured over a sliding {averaging_window}. The {anomaly_detection} system will check for any prolonged dips in performance. A sustained dip will trigger a resource evaluation and potential vertical scaling.",
+                "The SLA for this service requires {availability_req}% uptime. To achieve this, the assurance system will monitor health checks at a high {sampling_rate}. In case of failure, the {mttr} must be strictly adhered to, with automated recovery scripts in place.",
+                "This intent is focused on optimizing latency for edge computing applications, targeting a {latency_req}. Use {distributed_tracing} to monitor the service mesh performance. If latency increases, adjust the {load_balancing} to favor edge nodes closer to the user.",
+                "Guarantee sufficient bandwidth by monitoring the {throughput_req}. If traffic demand consistently exceeds 80% of the allocated capacity, the {auto_scaling_policy} will be triggered to provision additional resources. This proactive scaling ensures the {maximum_bitrate} is always achievable.",
+                "Simulate a network congestion scenario and verify that the service maintains its QoS. The {priority_level_num} traffic must still meet its {guaranteed_bitrate} and {latency_req}. The {preemption_capability} must function correctly to shed lower-priority traffic.",
+                "This AI-driven intent is to minimize service downtime. The {predictive_analytics} model will forecast hardware failures that could impact {mtbf}. If a failure is predicted with {accuracy_level}% confidence, the system will automatically trigger a migration of services off the at-risk hardware.",
+                "Monitor and assure the end-to-end {packet_delay} and {packet_error_rate} for the specified flow. This is critical for meeting the {sla_type}. Data will be collected with a {compression_ratio} to optimize storage over the {retention_period}.",
+                "This intent is to enforce the {reliability_req}% target defined in the {sla_type}. The assurance system will track all service-affecting incidents to calculate {mtbf} and {mttr} accurately. Any deviation from the agreed reliability metrics will result in a compliance violation report.",
+                "For this latency-sensitive service, maintain a {jitter_tolerance} of less than 2ms. The monitoring system will use a high {sampling_rate} to detect micro-bursts and jitter. If jitter increases, the network fabric will be instructed to prioritize these packets.",
+                "The primary assurance goal is to ensure the {throughput_req} is consistently met. The system will use an {auto_scaling_policy} based on CPU and memory utilization to scale horizontally. This ensures that as user load increases, throughput performance remains stable.",
+                "Implement an AI assurance loop with a fast {adaptation_speed}. The system will use {predictive_analytics} to foresee SLA violations related to {latency_req}. Upon prediction, it will automatically adjust QoS parameters to prevent the violation from occurring, ensuring a consistent user experience.",
+                "Assure a {guaranteed_bitrate} and {maximum_bitrate} as per the service agreement. The performance will be monitored over a {aggregation_interval} of 5 minutes. If the guaranteed rate is not met, an alert will be raised to the network operations center.",
+                "This SLA assurance intent focuses on minimizing downtime by enforcing a strict {mttr}. Upon failure detection, automated recovery workflows must be initiated immediately. The success of these workflows is measured against the {availability_req} target.",
+                "The intent is to provide a stable, low-latency connection by limiting {packet_delay}. Use {distributed_tracing} to continuously monitor every hop in the service chain. If any component introduces excessive latency, it will be flagged for investigation.",
+                "To assure high throughput, this intent activates an aggressive {auto_scaling_policy}. The system will scale out when traffic exceeds 75% of {throughput_req}. This ensures that the service can always handle loads up to the {maximum_bitrate} without packet loss.",
+                "Use an AI model to dynamically manage service performance. The {predictive_analytics} engine will forecast user demand and preemptively trigger the {auto_scaling_policy}. This model must maintain an {accuracy_level} of over 95% to be effective.",
+                "Enforce the {availability_req}% SLA by monitoring the health of all service components. The {mtbf} for each component must meet the specified target. The assurance system will use this data to calculate the overall service availability.",
+                "This intent is to optimize for the lowest possible latency by ensuring {packet_delay} stays within the defined threshold. The network will use traffic shaping to prioritize these packets, reflecting their {priority_level_num}. Any increase in delay will be investigated immediately.",
+                "Assure that the service's throughput can scale from a baseline of {guaranteed_bitrate} to a peak of {maximum_bitrate}. The {auto_scaling_policy} will manage the required resources based on real-time demand, ensuring a smooth and responsive user experience.",
+                "In a network slice failover scenario, this intent is to assure that the service is restored within the {mttr} window. The backup slice must meet the same {latency_req} and {throughput_req} as the primary. This ensures seamless service continuity and maintains the {availability_req}.",
+                "This AI-driven intent focuses on proactive reliability assurance. The {predictive_analytics} model will identify patterns that lead to service failures. Based on these predictions, it will recommend or automate actions to prevent the failure from occurring, thereby improving the {mtbf}.",
+                "Continuously monitor the {jitter_tolerance} for a real-time video stream. If jitter exceeds the acceptable level, dynamically increase buffer sizes or re-route the stream over a more stable network path. This is key to maintaining a high-quality, uninterrupted viewing experience.",
+                "Assure the {reliability_req}% of the service by implementing a resilient architecture with {mesh_technology}. The system must tolerate single-component failures without impacting the end-user. The {mttr} for any automated recovery action must be less than 60 seconds."
+            ],
+            
+            "Regular Notification": [
+                "Generate a comprehensive performance report for the {network_function} operating within the {slice_category}. The report must detail the {throughput_req} and {latency_req} over the last 24 hours. Correlate these KPIs with the underlying resource utilization, specifically {cpu_cores} and {memory_size}. If {availability_req} drops below the defined threshold, automatically include {mtbf} and {mttr} metrics.",
+                "Produce a security compliance audit for the {slice_category} network slice. This report must verify that configured {encryption} and {integrity} protection policies are consistently enforced. Confirm that the {key_rotation} schedule is being followed as per security guidelines. The report's data must be stored for the specified {retention_period}.",
+                "Initiate a predictive analytics report for {network_function} using the {ai_prediction_model}. Forecast the resource demand for {cpu_cores} and {bandwidth_allocation} based on historical consumption patterns. The model must achieve an {accuracy_level} of 95% or higher. If a resource shortfall is predicted, suggest an alternative {optimization_algorithm} for traffic management.",
+                "Create a daily SLA report for {sla_type} agreements. The report should summarize the {guaranteed_bitrate} and {maximum_bitrate} for {flow_id}. It must also include statistics on {packet_delay} and {packet_error_rate} averaged over a {averaging_window}. Attach all logs where {preemption_capability} was invoked.",
+                "Assess the performance impact of the current {auto_scaling_policy} for the {network_function}. The report should analyze the time taken for {horizontal_scaling} events to complete versus the {execution_timeout} limit. Correlate scaling events with fluctuations in {jitter_tolerance}. Does the current {workflow_engine} meet the {adaptation_speed} required to prevent SLA breaches?",
+                "Generate a report verifying adherence to our {zero_trust_identity} framework for all devices connecting to the {network_function}. The report must list all successful and failed {auth_method} attempts. Additionally, verify that {location_privacy} mechanisms are active for all UEs in the {location_category}.",
+                "Run an anomaly detection report on the {slice_category}. Use {anomaly_detection} algorithms to identify unusual patterns in {packet_error_rate} and {connection_density}. If an anomaly is detected with high confidence, trigger a deeper analysis using {distributed_tracing} to pinpoint the root cause and notify {escalation_l2}.",
+                "Provide a resource utilization summary for the {network_function} instances. The report should detail the average and peak usage of {memory_size} ({memory_type}) and {storage_capacity} ({storage_type}). Compare this utilization against the configured {deployment_flavor} to identify optimization opportunities.",
+                "Generate a Quality of Service (QoS) trend report for {flow_id} over the past month. Track {jitter_tolerance}, {packet_delay}, and {guaranteed_bitrate}. If performance degrades by more than 10%, the report should automatically recommend adjusting the {priority_level_num}.",
+                "Produce a report detailing all orchestration actions executed by {iac_tool} for the {network_function}. The report must verify that every change was authorized and logged. Confirm that any failed deployment correctly triggered the configured {rollback_strategy}.",
+                "Create a forecast report predicting potential {backhaul_capacity} bottlenecks in the {location_category}. Use {predictive_analytics} to model traffic growth over the next quarter. If a future bottleneck is identified, evaluate the effectiveness of {load_balancing} as a proactive mitigation strategy.",
+                "Compile a monthly reliability report for the {architecture}. The report must feature {mtbf} and {mttr} statistics for critical network functions. Include a summary of all {circuit_breaker} events and their resulting impact on the overall {availability_req}.",
+                "Provide a report on the effectiveness of our current {load_balancing} algorithm. The report must show the distribution of traffic and resource load across all active instances. Correlate this with {latency_req} metrics to ensure the algorithm is not introducing unforeseen delays under peak load.",
+                "Generate a data privacy compliance report. Confirm that {location_privacy} is enabled for all relevant services as per policy. The report must also verify that the {retention_period} for user-specific data complies with regulatory requirements.",
+                "Develop a report that uses {predictive_analytics} to identify subscribers experiencing degraded Quality of Experience. The model should analyze {packet_error_rate} and {throughput_req} deviations. If a group of users is affected, escalate to {escalation_l1} with a list of potential causes.",
+                "Generate a report on the efficiency of the {workflow_engine} running {workflow_version}. The report should focus on {execution_timeout} successes and failures. Include the average time-to-execute for common orchestration tasks like {horizontal_scaling}.",
+                "Create a report analyzing the end-to-end latency for the {slice_category}. Use data from {distributed_tracing} to break down latency contributions from different network segments. This report must verify compliance with the overall {latency_req} defined in the {sla_type}.",
+                "Audit the {affinity} and {anti_affinity} rules for all deployed instances of {network_function}. The report must confirm that these rules are correctly enforced by the orchestrator to ensure high availability. Flag any violations found during the audit period.",
+                "Initiate a report to determine the optimal {sampling_rate} and {aggregation_interval} for monitoring the {network_function}. Use an {optimization_algorithm} to balance monitoring granularity against resource overhead. The goal is to detect anomalies without overburdening the system.",
+                "Provide a high-level executive summary of network slice performance for the {slice_category}. The report should visualize key metrics like {availability_req} and {reliability_req} against targets. Include a section on major incidents and their resolution times.",
+                "Report on the correlation between {backhaul_capacity} and the {maximum_bitrate} achievable in the {location_category}. If {backhaul_capacity} is found to be a limiting factor, append a simulation of the expected performance gains from a potential capacity upgrade.",
+                "Generate a report to verify that all VNF/CNF images currently in use match their expected and approved versions. This report must cross-reference the running instances against the management system's catalog. Include a check on {integrity} hashes where available.",
+                "Use {ai_prediction_model} to report on the likelihood of SLA violations for {sla_type} in the next 7 days. The prediction should be based on current trends in resource usage and network congestion. If the likelihood exceeds 75%, trigger a proactive resource {vertical_scaling} recommendation.",
+                "Request a report detailing all manual interventions performed on the network infrastructure over the past quarter. The report should categorize these interventions and identify prime candidates for future automation using {iac_tool}.",
+                "Create a compliance report that confirms all network traffic within the {slice_category} is properly isolated from other slices. The report should include verification of network policies, VLANs, and routing tables to ensure separation.",
+                "Report on the primary causes of {mttr} for the {network_function}. Use {anomaly_detection} on logs and metrics to correlate failures with specific events (e.g., software updates, traffic spikes). Suggest improvements to the {rollback_strategy} based on these findings.",
+                "Produce a report summarizing all active QoS flows with a {priority_level_num} of 1. For each flow, list the associated service and its currently configured {guaranteed_bitrate}.",
+                "I need a report that shows the performance of our {mesh_technology}. Please include metrics on path selection latency and failover time. How does this performance map to our {reliability_req} target of 99.999%?",
+                "Generate an access control report for the orchestration platform. List all users and systems with administrative privileges. The report must verify that the principle of least privilege is being followed, as required by our {zero_trust_identity} policy.",
+                "Initiate a report to find silent failures within the {architecture}. Use {predictive_analytics} to analyze subtle performance degradations that do not trigger standard alarms but could indicate an impending {mtbf} event. Escalate these findings to {escalation_l3}.",
+                "Compile a capacity planning report for {storage_type} resources. Project the storage needs for the next 12 months based on current data growth trends. The report should factor in the {retention_period} for all collected monitoring and log data.",
+                "Create a report analyzing the efficiency of the {auto_scaling_policy}. The report should answer: Are we scaling out too aggressively or too late? Compare the timing of {horizontal_scaling} events with the actual load on {cpu_cores}.",
+                "Document all instances where {preemption_capability} was used to de-allocate resources from lower-priority flows. The report must verify that this action was justified and followed the predefined policies for the {slice_category}.",
+                "Run a report using the {optimization_algorithm} to identify underutilized resources in our cloud-native environment. The report should suggest specific {vertical_scaling} actions (e.g., reducing {memory_size}) for idle instances of {network_function} to save costs.",
+                "Generate a simple daily status report for the {network_function}. It should contain only three key metrics: {availability_req} percentage for the day, number of active instances, and total throughput processed.",
+                "I need a detailed report on {jitter_tolerance} performance for real-time services in the {slice_category}. If jitter exceeds the SLA threshold, the report must include a snapshot of the network state captured via {distributed_tracing} at the time of the event.",
+                "Produce a report verifying that all deployed network functions are running on infrastructure that meets the {architecture} specifications (e.g., CPU instruction sets). Flag any function running on non-compliant or deprecated hardware.",
+                "Create a report that predicts the impact of a potential {backhaul_capacity} failure at {location_category}. Use the {ai_prediction_model} to simulate the re-routing of traffic and forecast the resulting increase in {latency_req} for affected services.",
+                "Generate an orchestration workflow failure report for {workflow_id} ({workflow_version}). For each failure, list the step that failed, the error message, and whether the {rollback_strategy} was executed successfully.",
+                "Assess the {packet_error_rate} for the {slice_category}. If the rate is above the acceptable threshold, the report must include an analysis correlating the errors with specific network segments or functions.",
+                "Please provide a report confirming that all management interfaces for the {network_function} are secured using the approved {auth_method} and {encryption} protocols. Any exceptions must be highlighted.",
+                "Use {predictive_analytics} to report on the \"health score\" of each network slice. The score should be a composite metric derived from {availability_req}, {latency_req}, {throughput_req}, and user-reported issues, indicating overall service quality.",
+                "I need a report listing all configured {sla_type} contracts and their primary parameters ({guaranteed_bitrate}, {latency_req}).",
+                "Can you generate a report showing the impact of {horizontal_scaling} events on {memory_type} consumption patterns? I want to see if scaling out causes unexpected memory pressure on the underlying hypervisors.",
+                "Run a report to verify that the {anti_affinity} rules are preventing critical and redundant instances of {network_function} from being placed on the same physical host.",
+                "Generate a report identifying the root cause of intermittent {jitter_tolerance} violations. Use {distributed_tracing} combined with {anomaly_detection} to find correlations that are not obvious from standard metrics.",
+                "Provide a summary report of all {circuit_breaker} trips in the last 7 days. Include the duration of the open state and the service that was protected.",
+                "Report on the end-to-end {packet_delay} for {flow_id}. The report must use an {averaging_window} of 5 minutes and highlight any spikes that exceed the {sla_type} definition.",
+                "I need a report that demonstrates compliance with our data {integrity} policies. The report should show regular checks have been performed on stored data and configuration files for {network_function}."
+            ]
+        }
+
         # Create comprehensive template registry for easy access
         self.template_registry = {
-            'Deployment Intent': self.deployment_templates,
-            'Modification Intent': self.modification_templates,
-            'Performance Assurance Intent': self.performance_templates,
-            'Intent Report Request': self.report_templates,
-            'Intent Feasibility Check': self.feasibility_templates,
-            'Regular Notification Request': self.notification_templates
+            'Deployment Intent': templates["Deployment"],
+            'Modification Intent': templates["Modification"],
+            'Performance Assurance Intent': templates["Performance Assurance"],
+            'Intent Report Request': templates["Report Request"],
+            'Intent Feasibility Check': templates["Feasibility Check"],
+            'Regular Notification Request': templates["Regular Notification"]
         }
         
         # Initialize parameter extraction patterns for intelligent parsing
@@ -311,25 +583,23 @@ class AdvancedTemplateEngine:
             logger.debug("Phase 1: Extracting comprehensive parameters")
             extracted_params = self._extract_comprehensive_parameters(context.parameters)
             
-            # Phase 2: Analyze parameter richness and select optimal strategy
-            logger.debug("Phase 2: Selecting template strategy")
-            template_strategy = self._select_template_strategy(context, extracted_params)
-            logger.info(f"Selected strategy: {template_strategy}")
-            
-            # Phase 3: Get candidate templates for the selected strategy
-            logger.debug("Phase 3: Retrieving candidate templates")
-            templates = self._get_templates_for_strategy(context.intent_type, template_strategy)
-            
-            # Phase 4: Select optimal template using multi-dimensional scoring
-            logger.debug("Phase 4: Selecting optimal template")
+            # Phase 2: Get candidate templates
+            logger.debug("Phase 2: Retrieving candidate templates")
+            templates = self.template_registry.get(context.intent_type, [])
+            if not templates:
+                logger.error(f"No templates found for intent type: {context.intent_type}")
+                return self._generate_fallback_description(context), "FALLBACK_TEMPLATE"
+
+            # Phase 3: Select optimal template using multi-dimensional scoring
+            logger.debug("Phase 3: Selecting optimal template")
             selected_template = self._select_optimal_template(templates, context, extracted_params)
             
-            # Phase 5: Populate template with comprehensive parameter substitution
-            logger.debug("Phase 5: Populating template with parameters")
+            # Phase 4: Populate template with comprehensive parameter substitution
+            logger.debug("Phase 4: Populating template with parameters")
             description = self._populate_comprehensive_template(selected_template, context, extracted_params)
             
-            # Phase 6: Apply post-processing enhancements and validation
-            logger.debug("Phase 6: Applying post-processing enhancements")
+            # Phase 5: Apply post-processing enhancements and validation
+            logger.debug("Phase 5: Applying post-processing enhancements")
             description = self._apply_post_processing(description, context, extracted_params)
             
             logger.info(f"Successfully generated description with {len(description)} characters")
@@ -608,271 +878,6 @@ class AdvancedTemplateEngine:
             deployment_params=deployment_params,
             advanced_params=advanced_params
         )
-    
-    def _select_template_strategy(self, context: TemplateContext, extracted_params: ParameterExtraction) -> str:
-        """
-        Select optimal template strategy based on parameter richness and context analysis.
-        
-        This method implements sophisticated strategy selection logic that considers
-        multiple factors including parameter availability, context complexity,
-        priority requirements, and slice-specific characteristics.
-        
-        Args:
-            context: Template generation context
-            extracted_params: Extracted parameter structure
-            
-        Returns:
-            str: Selected template strategy identifier
-        """
-        logger.debug("Analyzing context and parameters for strategy selection")
-        
-        # Initialize candidate strategies list
-        candidate_strategies = []
-        
-        # Analyze parameter richness across all categories
-        param_richness = self._calculate_parameter_richness(extracted_params)
-        logger.debug(f"Parameter richness scores: {param_richness}")
-        
-        # Strategy selection based on parameter richness
-        if param_richness['advanced'] > 0.7:
-            candidate_strategies.extend([
-                TemplateStrategy.AI_DRIVEN.value,
-                TemplateStrategy.CROSS_DOMAIN.value,
-                TemplateStrategy.SCENARIO_BASED.value,
-                TemplateStrategy.RESEARCH_GRADE.value
-            ])
-            logger.debug("High advanced parameter richness detected")
-        
-        if param_richness['orchestration'] > 0.6:
-            candidate_strategies.extend([
-                TemplateStrategy.ORCHESTRATION_FOCUSED.value,
-                TemplateStrategy.CROSS_DOMAIN.value,
-                TemplateStrategy.COMPREHENSIVE.value
-            ])
-            logger.debug("High orchestration parameter richness detected")
-        
-        if param_richness['security'] > 0.6:
-            candidate_strategies.extend([
-                TemplateStrategy.SECURITY_FOCUSED.value,
-                TemplateStrategy.MISSION_CRITICAL.value
-            ])
-            logger.debug("High security parameter richness detected")
-        
-        if param_richness['performance'] > 0.6:
-            candidate_strategies.extend([
-                TemplateStrategy.PERFORMANCE_FOCUSED.value,
-                TemplateStrategy.HIGH_AVAILABILITY.value
-            ])
-            logger.debug("High performance parameter richness detected")
-        
-        # Context complexity-based strategy enhancement
-        if context.complexity >= 9:
-            candidate_strategies.extend([
-                TemplateStrategy.COMPREHENSIVE.value,
-                TemplateStrategy.RESEARCH_GRADE.value,
-                TemplateStrategy.AI_DRIVEN.value
-            ])
-            logger.debug("Research-grade complexity detected")
-        elif context.complexity >= 8:
-            candidate_strategies.extend([
-                TemplateStrategy.COMPREHENSIVE.value,
-                TemplateStrategy.CROSS_DOMAIN.value
-            ])
-            logger.debug("Enterprise-class complexity detected")
-        
-        # Priority-based strategy selection
-        if context.priority in ['CRITICAL', 'EMERGENCY']:
-            candidate_strategies.extend([
-                TemplateStrategy.MISSION_CRITICAL.value,
-                TemplateStrategy.HIGH_AVAILABILITY.value,
-                TemplateStrategy.ULTRA_RELIABLE.value
-            ])
-            logger.debug("Critical/emergency priority detected")
-        
-        # Slice category-specific strategy selection
-        slice_strategies = {
-            'URLLC': [
-                TemplateStrategy.ULTRA_RELIABLE.value,
-                TemplateStrategy.LOW_LATENCY.value,
-                TemplateStrategy.MISSION_CRITICAL.value
-            ],
-            'V2X': [
-                TemplateStrategy.VEHICULAR.value,
-                TemplateStrategy.MOBILITY_FOCUSED.value,
-                TemplateStrategy.LOW_LATENCY.value
-            ],
-            'eMBB': [
-                TemplateStrategy.HIGH_THROUGHPUT.value,
-                TemplateStrategy.CAPACITY_FOCUSED.value,
-                TemplateStrategy.PERFORMANCE_FOCUSED.value
-            ],
-            'mMTC': [
-                TemplateStrategy.MASSIVE_IOT.value,
-                TemplateStrategy.SCALABILITY_FOCUSED.value,
-                TemplateStrategy.EDGE_COMPUTING.value
-            ]
-        }
-        
-        if context.slice_category in slice_strategies:
-            candidate_strategies.extend(slice_strategies[context.slice_category])
-            logger.debug(f"Slice-specific strategies added for {context.slice_category}")
-        
-        # Advanced technology detection
-        if param_richness['advanced'] > 0.5:
-            candidate_strategies.extend([
-                TemplateStrategy.CLOUD_NATIVE.value,
-                TemplateStrategy.EDGE_COMPUTING.value
-            ])
-        
-        # Select final strategy with weighted random selection
-        if candidate_strategies:
-            # Remove duplicates while preserving order
-            unique_strategies = list(dict.fromkeys(candidate_strategies))
-            
-            # Weight strategies based on frequency of occurrence
-            strategy_weights = {}
-            for strategy in unique_strategies:
-                strategy_weights[strategy] = candidate_strategies.count(strategy)
-            
-            # Select strategy with weighted probability
-            total_weight = sum(strategy_weights.values())
-            if total_weight > 0:
-                import random
-                rand_val = random.uniform(0, total_weight)
-                cumulative_weight = 0
-                
-                for strategy, weight in strategy_weights.items():
-                    cumulative_weight += weight
-                    if rand_val <= cumulative_weight:
-                        logger.info(f"Selected strategy: {strategy} (weight: {weight}/{total_weight})")
-                        return strategy
-        
-        # Fallback to deployment-focused strategy
-        fallback_strategy = TemplateStrategy.DEPLOYMENT_FOCUSED.value
-        logger.info(f"Using fallback strategy: {fallback_strategy}")
-        return fallback_strategy
-    
-    def _calculate_parameter_richness(self, extracted_params: ParameterExtraction) -> Dict[str, float]:
-        """
-        Calculate richness scores for different parameter categories.
-        
-        This method analyzes the completeness and quality of parameters
-        in each category to inform strategy selection decisions.
-        
-        Args:
-            extracted_params: Extracted parameter structure
-            
-        Returns:
-            Dict mapping category names to richness scores (0.0-1.0)
-        """
-        def count_non_default_params(params: Dict[str, Any]) -> float:
-            """
-            Count parameters that have meaningful (non-default) values.
-            
-            Args:
-                params: Parameter dictionary to analyze
-                
-            Returns:
-                float: Ratio of meaningful parameters (0.0-1.0)
-            """
-            if not params:
-                return 0.0
-            
-            meaningful_count = 0
-            total_count = len(params)
-            
-            for key, value in params.items():
-                # Check if parameter has a meaningful value
-                if value is not None and str(value).lower() not in [
-                    'none', 'default', '', 'null', 'undefined'
-                ]:
-                    # Additional checks for meaningful values
-                    if isinstance(value, str) and len(value.strip()) > 0:
-                        meaningful_count += 1
-                    elif isinstance(value, (int, float)) and value != 0:
-                        meaningful_count += 1
-                    elif isinstance(value, (list, dict)) and len(value) > 0:
-                        meaningful_count += 1
-                    elif isinstance(value, bool):
-                        meaningful_count += 1
-            
-            return meaningful_count / total_count if total_count > 0 else 0.0
-        
-        richness_scores = {
-            'network': count_non_default_params(extracted_params.network_params),
-            'qos': count_non_default_params(extracted_params.qos_params),
-            'security': count_non_default_params(extracted_params.security_params),
-            'resource': count_non_default_params(extracted_params.resource_params),
-            'monitoring': count_non_default_params(extracted_params.monitoring_params),
-            'orchestration': count_non_default_params(extracted_params.orchestration_params),
-            'performance': count_non_default_params(extracted_params.performance_params),
-            'deployment': count_non_default_params(extracted_params.deployment_params),
-            'advanced': count_non_default_params(extracted_params.advanced_params)
-        }
-        
-        logger.debug(f"Calculated parameter richness: {richness_scores}")
-        return richness_scores
-    
-    def _get_templates_for_strategy(self, intent_type: str, strategy: str) -> List[str]:
-        """
-        Retrieve appropriate templates based on intent type and selected strategy.
-        
-        This method maps strategy selections to specific template collections,
-        ensuring that the most appropriate templates are available for
-        the given context and strategy combination.
-        
-        Args:
-            intent_type: Type of network intent being generated
-            strategy: Selected template strategy
-            
-        Returns:
-            List[str]: Available templates for the strategy
-        """
-        logger.debug(f"Retrieving templates for intent: {intent_type}, strategy: {strategy}")
-        
-        # Get base templates for the intent type
-        base_templates = self.template_registry.get(intent_type, {})
-        
-        # Strategy-specific template selection
-        strategy_template_mapping = {
-            # AI and research-focused strategies
-            TemplateStrategy.AI_DRIVEN.value: self.ai_driven_templates.get(intent_type, []),
-            TemplateStrategy.RESEARCH_GRADE.value: self.ai_driven_templates.get(intent_type, []),
-            
-            # Cross-domain and comprehensive strategies
-            TemplateStrategy.CROSS_DOMAIN.value: self.cross_domain_templates.get(intent_type, []),
-            TemplateStrategy.COMPREHENSIVE.value: self.cross_domain_templates.get(intent_type, []),
-            
-            # Scenario-based and mission-critical strategies
-            TemplateStrategy.SCENARIO_BASED.value: self.scenario_templates.get(intent_type, []),
-            TemplateStrategy.MISSION_CRITICAL.value: self.scenario_templates.get(intent_type, []),
-            
-            # Standard strategies from base templates
-            TemplateStrategy.DEPLOYMENT_FOCUSED.value: base_templates.get('deployment_focused', []),
-            TemplateStrategy.ORCHESTRATION_FOCUSED.value: base_templates.get('orchestration_focused', []),
-            TemplateStrategy.PERFORMANCE_FOCUSED.value: base_templates.get('performance_focused', []),
-            TemplateStrategy.SECURITY_FOCUSED.value: base_templates.get('security_focused', []),
-            TemplateStrategy.EDGE_COMPUTING.value: base_templates.get('edge_computing', []),
-            TemplateStrategy.CLOUD_NATIVE.value: base_templates.get('cloud_native', [])
-        }
-        
-        # Get templates for the specific strategy
-        selected_templates = strategy_template_mapping.get(strategy, [])
-        
-        # Fallback to deployment_focused if no templates found
-        if not selected_templates and 'deployment_focused' in base_templates:
-            selected_templates = base_templates['deployment_focused']
-            logger.debug(f"Using fallback templates for strategy: {strategy}")
-        
-        # Final fallback to any available templates
-        if not selected_templates:
-            for template_category in base_templates.values():
-                if isinstance(template_category, list) and template_category:
-                    selected_templates = template_category
-                    break
-        
-        logger.debug(f"Retrieved {len(selected_templates)} templates for strategy: {strategy}")
-        return selected_templates
     
     def _select_optimal_template(self, templates: List[str], context: TemplateContext, 
                                 extracted_params: ParameterExtraction) -> str:
@@ -1621,791 +1626,4 @@ class AdvancedTemplateEngine:
             'priority_bonus': 0.1,
             'slice_specificity': 0.1,
             'advanced_features': 0.05
-        }
-    
-    # Template initialization methods with comprehensive, readable templates
-    
-    def _initialize_deployment_templates(self) -> Dict[str, List[str]]:
-        """
-        Initialize comprehensive deployment templates with enhanced readability and diversity.
-        
-        These templates are designed to maximize parameter utilization while
-        maintaining realistic and coherent network deployment descriptions.
-        Each template category focuses on different aspects of deployment.
-        
-        Returns:
-            Dict mapping deployment strategies to template lists
-        """
-        return {
-            "deployment_focused": [
-                "Deploy enterprise-grade {network_function} network function using {vnf_provider} {vnf_version} software on high-performance {cpu_cores}-core {cpu_arch} architecture with {memory_size} {memory_type} memory and {storage_capacity} {storage_type} storage, ensuring optimal resource utilization and scalability",
-                
-                "Execute {complexity_level} {slice_category} network slice deployment featuring {antenna_type} antenna systems with advanced {beamforming} beamforming capabilities across {low_band}/{mid_band}/{high_band} spectrum bands, optimized for {deployment_scenario} coverage scenarios",
-                
-                "Instantiate production-ready {deployment_flavor} configuration utilizing {orchestration_platform} container orchestration with {workflow_engine} workflow automation, providing seamless lifecycle management and automated scaling capabilities",
-                
-                "Provision secure {architecture} network infrastructure protected by {auth_method} authentication framework and {encryption} encryption protocols, ensuring comprehensive data protection and regulatory compliance",
-                
-                "Launch {priority_level} priority network service guaranteeing {guaranteed_bitrate} guaranteed bitrate with strict {packet_delay} packet delay budget, supporting mission-critical applications with deterministic performance characteristics",
-                
-                "Establish robust {backhaul_type} backhaul connectivity delivering {backhaul_capacity} capacity with {backhaul_latency} ultra-low latency and {redundancy} redundancy configuration for maximum availability and fault tolerance",
-                
-                "Initialize cloud-native virtualization environment using {hypervisor} hypervisor technology with {container_runtime} container runtime, enabling efficient resource sharing and dynamic workload management",
-                
-                "Deploy multi-cloud infrastructure spanning {cloud_providers} cloud platforms with intelligent {hybrid_strategy} hybrid cloud strategy, ensuring optimal cost efficiency and vendor independence",
-                
-                "Configure advanced {mesh_technology} service mesh architecture with intelligent {load_balancing} load balancing algorithms and {circuit_breaker} circuit breaker patterns for enhanced resilience and traffic management",
-                
-                "Implement {automation_level} infrastructure automation using {iac_tool} infrastructure-as-code methodology, enabling consistent deployments and configuration management across environments"
-            ],
-            
-            "orchestration_focused": [
-                "Orchestrate comprehensive {network_function} deployment through coordinated {nfvo_id} Network Function Virtualization Orchestrator and {vnfm_id} VNF Manager interaction, ensuring seamless lifecycle management and resource optimization",
-                
-                "Execute sophisticated {workflow_id} version {workflow_version} orchestration workflow with {execution_timeout} execution timeout and intelligent {rollback_strategy} rollback strategy, providing robust error handling and recovery mechanisms",
-                
-                "Implement dynamic scaling orchestration from {min_instances} minimum to {max_instances} maximum instances using {auto_scaling_policy} auto-scaling policies with {anti_affinity} anti-affinity rules for optimal resource distribution",
-                
-                "Coordinate high-performance compute allocation featuring {cpu_cores} processing cores operating at {cpu_frequency} with {bandwidth_allocation} dedicated bandwidth allocation, ensuring consistent performance delivery",
-                
-                "Manage comprehensive {sla_type} Service Level Agreement enforcement guaranteeing {throughput_req} throughput performance and {latency_req} latency requirements through intelligent resource orchestration",
-                
-                "Secure multi-domain orchestration using {kdf} key derivation functions with {key_length} cryptographic keys automatically rotated every {key_rotation}, maintaining security posture across deployment lifecycle",
-                
-                "Monitor orchestrated services using advanced {optimization_algo} optimization algorithms with {retention_period} data retention policies, enabling predictive maintenance and performance optimization",
-                
-                "Process {edge_strategy} edge deployment orchestration across distributed {cloud_providers} cloud infrastructure, ensuring optimal placement and resource utilization",
-                
-                "Implement comprehensive {integrity} integrity protection with {location_privacy} location privacy controls throughout the orchestration process, maintaining security and compliance requirements",
-                
-                "Optimize orchestration performance through {ai_prediction_model} machine learning models with {compression_ratio} data compression, achieving intelligent resource allocation and cost optimization"
-            ],
-            
-            "performance_focused": [
-                "Optimize {slice_category} network slice performance achieving {throughput_req} maximum throughput with stringent {latency_req} latency constraints, utilizing advanced traffic engineering and quality of service mechanisms",
-                
-                "Scale network resources dynamically supporting {horizontal_scaling} horizontal scaling and {vertical_scaling} vertical scaling through intelligent {auto_scaling_policy} auto-scaling policies, ensuring optimal performance under varying load conditions",
-                
-                "Guarantee {maximum_bitrate} maximum bitrate delivery with {packet_error_rate} packet error rate tolerance, implementing sophisticated traffic shaping and congestion control algorithms",
-                
-                "Secure high-performance communications using {supi_concealment} SUPI concealment mechanisms and {encryption} encryption protocols, maintaining security without compromising performance characteristics",
-                
-                "Monitor performance metrics using {anomaly_detection} anomaly detection achieving {accuracy_level} prediction accuracy with {predictive_analytics} predictive analytics, enabling proactive performance management",
-                
-                "Support robust {backhaul_type} backhaul infrastructure with {redundancy} redundancy configuration, ensuring consistent performance delivery even during network failures or maintenance",
-                
-                "Implement advanced {sectorization} antenna sectorization optimized for {deployment_scenario} deployment scenarios, maximizing spectral efficiency and user experience quality",
-                
-                "Ensure {availability_req} service availability through {preemption_capability} preemption capabilities and priority-based resource allocation, maintaining performance guarantees for critical services",
-                
-                "Configure {averaging_window} performance averaging windows for {flow_id} QoS flow management, providing consistent service quality and fair resource distribution",
-                
-                "Authenticate users using {zero_trust_identity} zero-trust identity verification with {key_rotation} key rotation policies, maintaining security while optimizing authentication performance"
-            ],
-            
-            "security_focused": [
-                "Implement comprehensive {auth_method} authentication framework with advanced {encryption} encryption algorithms, providing multi-layered security protection for all network communications and data transactions",
-                
-                "Deploy sophisticated {kdf} key derivation functions utilizing {key_length} cryptographic keys with automated {key_rotation} rotation intervals, ensuring continuous security posture and cryptographic freshness",
-                
-                "Enforce strict {supi_concealment} SUPI concealment policies and {location_privacy} location privacy protection mechanisms, safeguarding user identity and location information from unauthorized access",
-                
-                "Secure network infrastructure using {zero_trust_identity} continuous identity verification and {device_trust} hardware-based device attestation, implementing zero-trust security architecture principles",
-                
-                "Monitor security events using {anomaly_detection} behavioral anomaly detection with {escalation_l1}/{escalation_l2}/{escalation_l3} escalation policies, ensuring rapid response to security incidents",
-                
-                "Protect data integrity using {integrity} protection algorithms across {cloud_providers} multi-cloud infrastructure, maintaining data consistency and preventing unauthorized modifications",
-                
-                "Authenticate continuously using {zero_trust_identity} behavioral analysis and machine learning algorithms, detecting and preventing sophisticated security threats in real-time",
-                
-                "Implement hardware-based {device_trust} device attestation with {encryption} end-to-end encryption, ensuring device authenticity and communication security",
-                
-                "Enforce comprehensive {location_privacy} location privacy and {supi_concealment} identity concealment controls, protecting user privacy while maintaining service functionality",
-                
-                "Trace security events using {distributed_tracing} distributed tracing systems with {notification_channels} real-time alert mechanisms, providing comprehensive security visibility and incident response"
-            ],
-            
-            "edge_computing": [
-                "Deploy intelligent edge {slice_category} infrastructure with {edge_strategy} deployment strategy supporting {connection_density} device connectivity density, enabling ultra-low latency applications and local data processing",
-                
-                "Provision edge computing resources featuring {cpu_cores} processing cores and {memory_size} memory allocation, optimized for distributed computing workloads and real-time data analytics",
-                
-                "Implement edge artificial intelligence using {ai_prediction_model} machine learning models achieving {accuracy_level} prediction accuracy, enabling intelligent decision-making at the network edge",
-                
-                "Configure edge orchestration using {workflow_engine} workflow automation with {adaptation_speed} response time, ensuring rapid adaptation to changing network conditions and user demands",
-                
-                "Secure edge deployments using {device_trust} hardware attestation and {encryption} encryption protection, maintaining security posture in distributed edge environments",
-                
-                "Monitor edge performance using {distributed_tracing} distributed tracing and {predictive_analytics} predictive analytics, providing comprehensive visibility across edge infrastructure",
-                
-                "Scale edge resources dynamically using {auto_scaling_policy} scaling policies from {min_instances} to {max_instances} instances, ensuring optimal resource utilization and cost efficiency",
-                
-                "Optimize edge connectivity using {backhaul_type} backhaul technology at {backhaul_capacity} capacity, providing reliable connectivity between edge nodes and core infrastructure"
-            ],
-            
-            "cloud_native": [
-                "Deploy cloud-native {slice_category} services using {mesh_technology} service mesh architecture, enabling microservices communication and advanced traffic management capabilities",
-                
-                "Implement {circuit_breaker} circuit breaker patterns with {load_balancing} load balancing algorithms, providing resilient service architecture and fault tolerance mechanisms",
-                
-                "Configure {container_runtime} container runtime on {orchestration_platform} orchestration platform, enabling scalable and portable application deployment across cloud environments",
-                
-                "Automate deployment processes using {iac_tool} infrastructure-as-code with {automation_level} automation capabilities, ensuring consistent and repeatable infrastructure provisioning",
-                
-                "Monitor cloud-native services using {distributed_tracing} distributed tracing with {anomaly_detection} anomaly detection, providing comprehensive observability and performance insights",
-                
-                "Scale cloud-native applications using {auto_scaling_policy} auto-scaling policies, ensuring optimal resource utilization and cost management in dynamic cloud environments",
-                
-                "Secure microservices architecture using {auth_method} authentication and {encryption} encryption protocols, maintaining security boundaries in distributed service architectures",
-                
-                "Optimize cloud-native performance achieving {throughput_req} throughput targets and {latency_req} latency requirements through intelligent resource allocation and traffic optimization"
-            ]
-        }
-    
-    def _initialize_modification_templates(self) -> Dict[str, List[str]]:
-        """
-        Initialize comprehensive modification templates with enhanced readability and diversity.
-        
-        Returns:
-            Dict mapping modification strategies to template lists
-        """
-        return {
-            "orchestration_focused": [
-                "Scale {network_function} network function from {min_instances} minimum instances to {max_instances} maximum instances using intelligent {rollback_strategy} rollback mechanisms, ensuring seamless capacity adjustment without service disruption",
-                
-                "Adjust compute resources to {cpu_cores} processing cores and {memory_size} memory allocation with {execution_timeout} execution timeout constraints, optimizing performance while maintaining cost efficiency",
-                
-                "Update {vnf_version} software version through {workflow_engine} orchestration workflow while maintaining {availability_req} service availability requirements, ensuring zero-downtime upgrades",
-                
-                "Modify {deployment_flavor} deployment flavor configuration updating {guaranteed_bitrate} guaranteed bitrate and {packet_delay} packet delay parameters, enhancing service quality characteristics",
-                
-                "Reconfigure {antenna_type} antenna systems with {beamforming} beamforming optimization and {backhaul_capacity} backhaul capacity enhancement, improving coverage and performance",
-                
-                "Implement {circuit_breaker} circuit breaker patterns with {load_balancing} load balancing optimization, enhancing system resilience and traffic distribution efficiency",
-                
-                "Update security configuration using {auth_method} authentication methods and {key_rotation} key rotation policies, strengthening security posture and compliance requirements",
-                
-                "Optimize monitoring systems with {anomaly_detection} anomaly detection and {aggregation_interval} data aggregation intervals, improving operational visibility and incident response"
-            ],
-            
-            "performance_focused": [
-                "Optimize scaling parameters supporting {horizontal_scaling} horizontal scaling and {vertical_scaling} vertical scaling capabilities, ensuring optimal resource utilization under varying load conditions",
-                
-                "Adjust network capacity to {bandwidth_allocation} bandwidth allocation and {connection_density} connection density requirements, accommodating growing user demands and traffic patterns",
-                
-                "Update artificial intelligence models to {ai_prediction_model} achieving {accuracy_level} prediction accuracy with {optimization_algorithm} optimization algorithms, enhancing intelligent network operations",
-                
-                "Configure quality of service parameters including {jitter_tolerance} jitter tolerance with {reflective_qos} reflective QoS mechanisms, improving user experience and service consistency",
-                
-                "Monitor performance enhancements using {predictive_analytics} predictive analytics with {sampling_rate} data sampling rates, enabling proactive performance management and optimization",
-                
-                "Modify {sla_type} Service Level Agreement parameters ensuring {mttr} mean time to repair and {mtbf} mean time between failures targets, maintaining service quality commitments",
-                
-                "Update QoS flow {flow_id} configuration with {maximum_bitrate} maximum bitrate optimization, enhancing traffic handling and user experience quality",
-                
-                "Adjust {packet_error_rate} packet error rate tolerance and {preemption_capability} preemption capabilities, optimizing network reliability and priority handling"
-            ],
-            
-            "configuration_update": [
-                "Update network architecture configuration transitioning to {architecture} architecture with enhanced capabilities and improved performance characteristics",
-                
-                "Modify spectrum allocation across {low_band}, {mid_band}, and {high_band} frequency bands, optimizing spectral efficiency and coverage characteristics",
-                
-                "Reconfigure {sectorization} antenna sectorization optimized for {deployment_scenario} deployment scenarios, improving coverage patterns and interference management",
-                
-                "Update backhaul infrastructure from current configuration to {backhaul_type} technology at {backhaul_capacity} capacity, enhancing connectivity and performance",
-                
-                "Modify security policies implementing {integrity} integrity protection and {location_privacy} privacy controls, strengthening data protection and regulatory compliance",
-                
-                "Update orchestration workflow to {workflow_version} with improved {execution_timeout} execution parameters, enhancing automation efficiency and reliability",
-                
-                "Reconfigure monitoring systems using {compression_ratio} data compression and {retention_period} retention policies, optimizing storage utilization and analytics capabilities",
-                
-                "Update cloud strategy implementing {hybrid_strategy} approach across {cloud_providers} provider infrastructure, improving flexibility and cost optimization"
-            ],
-            
-            "capacity_adjustment": [
-                "Increase network capacity to support {connection_density} device connectivity density, accommodating IoT growth and massive machine-type communications requirements",
-                
-                "Adjust compute resources to {cpu_cores} processing cores operating at {cpu_frequency}, optimizing computational performance for demanding workloads",
-                
-                "Scale storage infrastructure to {storage_capacity} {storage_type} with enhanced performance characteristics, supporting growing data requirements and analytics workloads",
-                
-                "Update memory allocation to {memory_size} {memory_type} for optimal application performance, ensuring sufficient resources for memory-intensive network functions",
-                
-                "Modify bandwidth allocation to {bandwidth_allocation} with {latency_requirement} latency constraints, supporting high-throughput applications and services",
-                
-                "Scale instances dynamically using {auto_scaling_policy} scaling policies, ensuring optimal resource utilization and cost management",
-                
-                "Update throughput targets to {throughput_req} with {reliability_req} reliability requirements, meeting growing performance demands and service commitments",
-                
-                "Adjust availability requirements to {availability_req} with enhanced redundancy mechanisms, improving service resilience and fault tolerance"
-            ]
-        }
-    
-    def _initialize_performance_templates(self) -> Dict[str, List[str]]:
-        """
-        Initialize comprehensive performance templates with enhanced readability and diversity.
-        
-        Returns:
-            Dict mapping performance strategies to template lists
-        """
-        return {
-            "performance_focused": [
-                "Establish comprehensive {sla_type} Service Level Agreement with {availability_req} availability guarantee and {reliability_req} reliability commitment, implementing advanced monitoring and automated remediation capabilities",
-                
-                "Implement high-performance networking achieving {throughput_req} throughput capacity and {latency_req} ultra-low latency through {auto_scaling_policy} intelligent scaling mechanisms",
-                
-                "Deploy artificial intelligence-driven optimization using {ai_prediction_model} machine learning models achieving {accuracy_level} prediction accuracy within {adaptation_speed} response time",
-                
-                "Monitor network performance using {anomaly_detection} behavioral anomaly detection with {predictive_analytics} predictive analytics capabilities, enabling proactive performance management",
-                
-                "Secure high-performance infrastructure using {auth_method} authentication frameworks and {encryption} encryption protocols without compromising performance characteristics",
-                
-                "Optimize {slice_category} network slice with {flow_id} QoS flow management ensuring {guaranteed_bitrate} guaranteed bitrate delivery and consistent user experience",
-                
-                "Configure {packet_delay} packet delay budget with {packet_error_rate} error rate tolerance, implementing sophisticated traffic engineering and quality assurance mechanisms",
-                
-                "Support robust connectivity using {backhaul_type} backhaul infrastructure at {backhaul_capacity} capacity with {backhaul_latency} ultra-low latency characteristics"
-            ],
-            
-            "sla_focused": [
-                "Enforce stringent {sla_type} Service Level Agreement with {mttr} mean time to repair and {mtbf} mean time between failures commitments, implementing automated incident response and recovery procedures",
-                
-                "Guarantee {availability_req} service availability through {horizontal_scaling}/{vertical_scaling} dynamic scaling capabilities and intelligent resource management",
-                
-                "Implement {jitter_tolerance} jitter control with {averaging_window} performance averaging windows, ensuring consistent service quality and predictable performance characteristics",
-                
-                "Secure SLA compliance using {integrity} data integrity protection and {location_privacy} privacy controls, maintaining service quality while ensuring regulatory compliance",
-                
-                "Optimize SLA performance using {optimization_algo} optimization algorithms with {retention_period} data retention and {compression_ratio} compression efficiency",
-                
-                "Monitor SLA compliance using {predictive_analytics} predictive analytics and {anomaly_detection} anomaly detection, enabling proactive SLA violation prevention",
-                
-                "Ensure performance targets with {preemption_capability} preemption capabilities and priority {priority_level_num} resource allocation, maintaining service commitments",
-                
-                "Maintain {reliability_req} reliability standards through advanced monitoring, alerting, and automated remediation systems with comprehensive performance tracking"
-            ],
-            
-            "latency_optimization": [
-                "Optimize {slice_category} network slice for ultra-low {latency_req} latency performance, implementing advanced traffic engineering and edge computing capabilities",
-                
-                "Configure {packet_delay} packet delay budget with {jitter_tolerance} jitter control mechanisms, ensuring deterministic latency characteristics for time-sensitive applications",
-                
-                "Implement {beamforming} advanced beamforming with {sectorization} antenna sectorization, optimizing radio resource utilization and reducing propagation delays",
-                
-                "Deploy edge computing infrastructure with {edge_strategy} deployment strategy, bringing processing capabilities closer to users for reduced latency",
-                
-                "Optimize backhaul connectivity using {backhaul_type} technology with {backhaul_latency} ultra-low latency characteristics, minimizing end-to-end delay",
-                
-                "Configure priority {priority_level_num} traffic handling with {preemption_capability} preemption mechanisms, ensuring latency-sensitive traffic receives preferential treatment",
-                
-                "Monitor latency performance using {distributed_tracing} distributed tracing with real-time analytics, providing comprehensive latency visibility and optimization insights",
-                
-                "Implement {circuit_breaker} circuit breaker patterns optimized for latency-sensitive applications, ensuring rapid failure detection and recovery"
-            ],
-            
-            "throughput_optimization": [
-                "Maximize {slice_category} network slice throughput achieving {throughput_req} performance targets through advanced traffic optimization and resource allocation",
-                
-                "Configure {maximum_bitrate} maximum bitrate with {guaranteed_bitrate} guaranteed bitrate delivery, implementing sophisticated bandwidth management and traffic shaping",
-                
-                "Implement {antenna_type} advanced antenna systems with {beamforming} beamforming across multiple spectrum bands, maximizing spectral efficiency and capacity",
-                
-                "Optimize traffic management using {load_balancing} load balancing with {mesh_technology} service mesh architecture, ensuring efficient resource utilization",
-                
-                "Scale bandwidth capacity to {bandwidth_allocation} with {connection_density} device support, accommodating high-throughput applications and massive connectivity",
-                
-                "Configure {reflective_qos} reflective Quality of Service with {averaging_window} performance averaging, ensuring fair resource allocation and optimal throughput",
-                
-                "Monitor throughput performance using {sampling_rate} data sampling and {predictive_analytics} predictive analytics, enabling continuous optimization",
-                
-                "Implement advanced {optimization_algorithm} optimization algorithms for throughput maximization, balancing performance with resource efficiency and cost"
-            ]
-        }
-    
-    def _initialize_report_templates(self) -> Dict[str, List[str]]:
-        """
-        Initialize comprehensive report templates with enhanced readability and diversity.
-        
-        Returns:
-            Dict mapping report strategies to template lists
-        """
-        return {
-            "report_focused": [
-                "Generate comprehensive {network_function} performance analytics report analyzing {cpu_cores} core utilization and {memory_size} memory consumption patterns with detailed resource optimization recommendations",
-                
-                "Analyze network throughput performance comparing {throughput_req} target throughput against {latency_req} latency requirements, providing insights into performance bottlenecks and optimization opportunities",
-                
-                "Evaluate service availability metrics reporting {availability_req} availability achievement and {reliability_req} reliability performance with trend analysis and predictive insights",
-                
-                "Report dynamic scaling effectiveness analyzing {auto_scaling_policy} scaling behavior from {min_instances} to {max_instances} instances with cost-benefit analysis",
-                
-                "Review security posture assessment covering {auth_method} authentication effectiveness and {encryption} encryption performance with compliance status reporting",
-                
-                "Compile intelligent analytics insights using {anomaly_detection} anomaly detection with {sampling_rate} data sampling over {retention_period} retention period",
-                
-                "Assess {slice_category} network slice performance with detailed {flow_id} QoS flow analysis and user experience quality metrics",
-                
-                "Analyze bandwidth utilization comparing {guaranteed_bitrate} guaranteed versus {maximum_bitrate} maximum bitrate allocation with efficiency recommendations"
-            ],
-            
-            "analytics_focused": [
-                "Analyze network intelligence using {ai_prediction_model} machine learning models with {accuracy_level} prediction accuracy, providing actionable insights for network optimization",
-                
-                "Process performance data with {aggregation_interval} aggregation intervals and {compression_ratio} compression efficiency, generating comprehensive analytics dashboards",
-                
-                "Implement {distributed_tracing} distributed tracing across {cloud_providers} multi-cloud infrastructure, providing end-to-end visibility and performance correlation analysis",
-                
-                "Evaluate {mesh_technology} service mesh performance with {load_balancing} load balancing effectiveness and {circuit_breaker} resilience analysis",
-                
-                "Monitor system health using {escalation_l1}/{escalation_l2}/{escalation_l3} escalation analytics with {notification_channels} alert effectiveness reporting",
-                
-                "Generate predictive insights using {predictive_analytics} predictive analytics and {optimization_algorithm} optimization algorithms with trend forecasting",
-                
-                "Analyze spectrum efficiency across {low_band}, {mid_band}, {high_band} frequency bands with interference analysis and optimization recommendations",
-                
-                "Report {antenna_type} antenna effectiveness with {beamforming} beamforming performance analysis and coverage optimization insights"
-            ],
-            
-            "compliance_report": [
-                "Generate comprehensive compliance report for {sla_type} Service Level Agreement performance with detailed metrics and violation analysis",
-                
-                "Analyze security compliance using {auth_method} authentication standards and {encryption} encryption protocol adherence with regulatory assessment",
-                
-                "Report {availability_req} availability compliance against {reliability_req} reliability targets with gap analysis and remediation recommendations",
-                
-                "Evaluate privacy compliance with {supi_concealment} SUPI concealment and {location_privacy} location privacy implementation effectiveness",
-                
-                "Assess {zero_trust_identity} zero-trust implementation and {device_trust} device attestation compliance with security framework requirements",
-                
-                "Review key management compliance using {kdf} key derivation with {key_length} key strength and {key_rotation} rotation policy adherence",
-                
-                "Analyze monitoring compliance with {retention_period} data retention policies and regulatory data protection requirements",
-                
-                "Report escalation effectiveness through {escalation_l1}/{escalation_l2}/{escalation_l3} policy compliance and incident response performance"
-            ],
-            
-            "performance_report": [
-                "Report {slice_category} network slice performance achieving {throughput_req} throughput targets with comprehensive performance trend analysis",
-                
-                "Analyze latency performance with {packet_delay} delay characteristics and {jitter_tolerance} jitter control effectiveness",
-                
-                "Evaluate scaling efficiency from {min_instances} to {max_instances} instances with resource utilization optimization analysis",
-                
-                "Report QoS compliance for {flow_id} traffic flows with {packet_error_rate} error rate analysis and quality assurance metrics",
-                
-                "Analyze {backhaul_type} backhaul utilization at {backhaul_capacity} capacity with performance bottleneck identification",
-                
-                "Report {ai_prediction_model} artificial intelligence accuracy achieving {accuracy_level} performance with model effectiveness analysis",
-                
-                "Evaluate {optimization_algorithm} optimization effectiveness with {adaptation_speed} response time analysis and improvement recommendations",
-                
-                "Analyze resource utilization across {cpu_cores} processing cores and {memory_size} memory allocation with efficiency optimization insights"
-            ]
-        }
-    
-    def _initialize_feasibility_templates(self) -> Dict[str, List[str]]:
-        """
-        Initialize comprehensive feasibility templates with enhanced readability and diversity.
-        
-        Returns:
-            Dict mapping feasibility strategies to template lists
-        """
-        return {
-            "feasibility_focused": [
-                "Assess {network_function} deployment feasibility with {cpu_cores} {cpu_arch} processing cores at {cpu_frequency} considering computational requirements and performance constraints",
-                
-                "Evaluate memory and storage requirements for {memory_size} {memory_type} memory and {storage_capacity} {storage_type} storage with performance impact analysis",
-                
-                "Analyze {guaranteed_bitrate} bitrate delivery feasibility with {latency_requirement} latency constraints considering network topology and traffic patterns",
-                
-                "Consider {connection_density} device density support and {auth_method}/{encryption} security overhead impact on system performance and scalability",
-                
-                "Assess {backhaul_type} backhaul infrastructure at {backhaul_capacity} capacity with {backhaul_latency} latency requirements and reliability considerations",
-                
-                "Evaluate {auto_scaling_policy} scaling feasibility from {min_instances} to {max_instances} instances considering resource availability and cost implications",
-                
-                "Analyze {slice_category} network slice implementation using {architecture} architecture with deployment complexity and integration requirements",
-                
-                "Consider {antenna_type} antenna configuration with {beamforming} beamforming across {sectorization} sectorization patterns and coverage requirements"
-            ],
-            
-            "technical_feasibility": [
-                "Analyze {orchestration_platform} orchestration feasibility with {container_runtime} containers and {hypervisor} virtualization technology integration",
-                
-                "Evaluate {mesh_technology} service mesh implementation with {load_balancing} load balancing and {circuit_breaker} circuit breaker pattern feasibility",
-                
-                "Assess {iac_tool} infrastructure-as-code implementation with {automation_level} automation capabilities and operational complexity",
-                
-                "Consider {workflow_engine} workflow coordination with {distributed_tracing} observability implementation and monitoring overhead",
-                
-                "Analyze {zero_trust_identity} identity verification and {device_trust} device attestation implementation complexity and performance impact",
-                
-                "Evaluate {ai_prediction_model} artificial intelligence implementation achieving {accuracy_level} accuracy with computational and data requirements",
-                
-                "Assess multi-cloud deployment across {cloud_providers} platforms with {hybrid_strategy} strategy implementation challenges",
-                
-                "Consider {edge_strategy} edge deployment feasibility with {adaptation_speed} response requirements and distributed management complexity"
-            ],
-            
-            "resource_feasibility": [
-                "Evaluate compute resource feasibility with {cpu_cores} processing cores and {memory_size} memory allocation considering workload characteristics",
-                
-                "Assess network capacity requirements for {bandwidth_allocation} bandwidth and {connection_density} device connectivity with infrastructure limitations",
-                
-                "Analyze storage requirements for {storage_capacity} {storage_type} performance considering data throughput and latency requirements",
-                
-                "Consider {hypervisor} virtualization overhead with {container_runtime} container efficiency and resource sharing implications",
-                
-                "Evaluate {orchestration_platform} resource orchestration capabilities with scaling and management complexity assessment",
-                
-                "Assess {ai_prediction_model} computational requirements and {accuracy_level} target feasibility with available processing resources",
-                
-                "Analyze scaling feasibility from {min_instances} to {max_instances} instances considering resource constraints and cost implications",
-                
-                "Consider {workflow_engine} resource coordination and {optimization_algorithm} processing requirements with system capacity"
-            ],
-            
-            "deployment_feasibility": [
-                "Assess {deployment_scenario} deployment feasibility in {location_category} environment considering environmental and regulatory constraints",
-                
-                "Evaluate {architecture} architecture implementation with {vnf_provider} component integration and vendor ecosystem compatibility",
-                
-                "Analyze {sla_type} Service Level Agreement feasibility with {availability_req} and {reliability_req} targets considering infrastructure capabilities",
-                
-                "Consider {service_level} service requirements with {tenant_id} tenant isolation and multi-tenancy implementation complexity",
-                
-                "Assess {instantiation_timeout} deployment timeline with {rollback_strategy} rollback strategy implementation and risk mitigation",
-                
-                "Evaluate {anti_affinity} and {affinity} rule implementation feasibility with placement constraints and resource optimization",
-                
-                "Analyze {execution_timeout} workflow execution with {workflow_version} compatibility and integration requirements",
-                
-                "Consider {rollback_on_failure} failure handling and recovery mechanism implementation with operational complexity assessment"
-            ]
-        }
-    
-    def _initialize_notification_templates(self) -> Dict[str, List[str]]:
-        """
-        Initialize comprehensive notification templates with enhanced readability and diversity.
-        
-        Returns:
-            Dict mapping notification strategies to template lists
-        """
-        return {
-            "notification_focused": [
-                "Configure intelligent {slice_category} monitoring with {anomaly_detection} behavioral anomaly detection and proactive alerting for performance degradation",
-                
-                "Alert when {throughput_req} throughput performance drops below thresholds or {latency_req} latency exceeds acceptable limits with automated escalation",
-                
-                "Implement {escalation_l1}/{escalation_l2}/{escalation_l3} multi-tier escalation through {notification_channels} notification channels with intelligent routing",
-                
-                "Monitor {cpu_cores} core utilization and {memory_size} memory consumption with predictive alerting for resource exhaustion scenarios",
-                
-                "Alert on {auth_method} authentication failures or {encryption} security breaches with {key_rotation} key rotation event notifications",
-                
-                "Notify on {guaranteed_bitrate} bitrate shortfall or {packet_error_rate} error rate tolerance exceeded with impact assessment",
-                
-                "Monitor {availability_req} availability and {reliability_req} reliability metrics with SLA violation alerting and remediation recommendations",
-                
-                "Alert using {optimization_algo} intelligent insights with {retention_period} historical analysis for trend-based notifications"
-            ],
-            
-            "intelligent_alerting": [
-                "Deploy artificial intelligence alerting using {ai_prediction_model} machine learning models with {accuracy_level} prediction accuracy for proactive incident prevention",
-                
-                "Implement {circuit_breaker} circuit breaker alerts and {load_balancing} load balancing notifications with intelligent correlation and root cause analysis",
-                
-                "Monitor {mesh_technology} service mesh health using {distributed_tracing} distributed tracing with comprehensive service dependency alerting",
-                
-                "Trigger {escalation_l1}/{escalation_l2}/{escalation_l3} escalation based on {auto_scaling_policy} scaling events with contextual information",
-                
-                "Scale alerting from {min_instances} to {max_instances} instances with dynamic threshold adjustment and intelligent noise reduction",
-                
-                "Coordinate alerts using {workflow_engine} workflow automation with {iac_tool} infrastructure monitoring integration",
-                
-                "Predict issues using {predictive_analytics} predictive analytics with {optimization_algorithm} optimization for alert prioritization",
-                
-                "Monitor performance achieving {adaptation_speed} response time with intelligent alert correlation and automated remediation"
-            ],
-            
-            "security_alerts": [
-                "Alert on {auth_method} authentication failures and security breaches with comprehensive threat intelligence and impact assessment",
-                
-                "Monitor {zero_trust_identity} identity verification anomalies with behavioral analysis and risk scoring",
-                
-                "Detect {device_trust} device attestation failures and unauthorized access attempts with automated response procedures",
-                
-                "Alert on {encryption} encryption key compromise and {key_rotation} key management issues with security incident escalation",
-                
-                "Monitor {supi_concealment} SUPI concealment and {location_privacy} location privacy violations with regulatory compliance alerting",
-                
-                "Detect {integrity} data integrity protection failures across {cloud_providers} multi-cloud infrastructure with forensic capabilities",
-                
-                "Alert on security policy violations using {distributed_tracing} distributed tracing with comprehensive audit trail generation",
-                
-                "Monitor compliance with {kdf} key management and {key_length} cryptographic standards with automated compliance reporting"
-            ],
-            
-            "performance_alerts": [
-                "Alert when {slice_category} network slice performance degrades below {throughput_req} threshold with detailed performance analysis",
-                
-                "Monitor {latency_req} latency and {jitter_tolerance} jitter violations with real-time performance correlation and impact assessment",
-                
-                "Detect {sla_type} Service Level Agreement violations with {availability_req} availability breaches and automated remediation",
-                
-                "Alert on {packet_delay} delay budget and {packet_error_rate} error rate issues with quality of service impact analysis",
-                
-                "Monitor {backhaul_type} backhaul degradation at {backhaul_capacity} capacity with connectivity impact assessment",
-                
-                "Detect scaling issues with {auto_scaling_policy} policies from {min_instances} to {max_instances} with resource optimization alerts",
-                
-                "Alert on QoS violations for {flow_id} traffic flows with {maximum_bitrate} bitrate issues and user experience impact",
-                
-                "Monitor resource utilization across {cpu_cores} processing cores and {memory_size} memory with predictive capacity alerting"
-            ]
-        }
-    
-    def _initialize_scenario_templates(self) -> Dict[str, List[str]]:
-        """
-        Initialize comprehensive scenario-based templates with enhanced readability and diversity.
-        
-        Returns:
-            Dict mapping scenario types to template lists
-        """
-        return {
-            "Deployment Intent": [
-                "Execute mission-critical {slice_category} deployment with {architecture} network architecture and {antenna_type} MIMO antenna systems, ensuring ultra-reliable connectivity for critical applications",
-                
-                "Deploy intelligent edge infrastructure with {edge_strategy} deployment strategy across {cloud_providers} multi-cloud platforms, enabling distributed computing and local data processing",
-                
-                "Implement {zero_trust_identity} zero-trust authentication with {device_trust} hardware-based device attestation, ensuring comprehensive security for sensitive deployments",
-                
-                "Launch {workflow_engine} orchestration automation with {iac_tool} infrastructure-as-code achieving {automation_level} automation level for consistent deployments",
-                
-                "Provision high-performance compute resources with {cpu_cores} {cpu_arch} cores and {memory_size} {memory_type} memory for demanding network functions",
-                
-                "Secure deployment using {encryption} encryption with {key_rotation} key rotation and monitor using {ai_prediction_model} artificial intelligence for predictive maintenance",
-                
-                "Configure {mesh_technology} service mesh with {load_balancing} load balancing and {circuit_breaker} circuit breaker resilience patterns",
-                
-                "Ensure {flow_id} Quality of Service with {guaranteed_bitrate} guaranteed bitrate and {packet_delay} delay budget for premium services"
-            ],
-            
-            "Performance Assurance Intent": [
-                "Implement autonomous performance optimization using {ai_prediction_model} machine learning models with {accuracy_level} prediction accuracy for intelligent network management",
-                
-                "Maintain {sla_type} Service Level Agreement with {availability_req} availability guarantee and {mttr} mean time to repair commitment",
-                
-                "Scale dynamically from {min_instances} to {max_instances} instances using {auto_scaling_policy} intelligent scaling policies with predictive capacity management",
-                
-                "Monitor comprehensive performance using {anomaly_detection} anomaly detection with {distributed_tracing} end-to-end tracing capabilities",
-                
-                "Secure performance assurance using {auth_method} authentication and {encryption} encryption with {key_rotation} automated key management",
-                
-                "Optimize performance achieving {adaptation_speed} response time with predictive analytics and automated remediation capabilities",
-                
-                "Ensure {throughput_req} throughput delivery and {latency_req} latency targets through intelligent traffic engineering and resource optimization",
-                
-                "Implement cognitive performance assurance using {optimization_algorithm} optimization algorithms with continuous learning and adaptation"
-            ],
-            
-            "Smart_City_Scenario": [
-                "Deploy smart city {slice_category} infrastructure with {connection_density} IoT device connectivity supporting intelligent urban services and citizen applications",
-                
-                "Implement intelligent traffic management systems with {latency_req} ultra-low latency for real-time traffic optimization and safety applications",
-                
-                "Configure {antenna_type} antenna systems for urban {deployment_scenario} coverage with optimized propagation and interference management",
-                
-                "Secure citizen services using {zero_trust_identity} identity verification and {location_privacy} location privacy protection for data sovereignty",
-                
-                "Monitor city infrastructure using {distributed_tracing} distributed tracing and {predictive_analytics} predictive analytics for proactive maintenance",
-                
-                "Scale municipal services using {auto_scaling_policy} intelligent scaling policies to accommodate varying demand patterns",
-                
-                "Ensure {availability_req} service availability for critical city functions including emergency services and public safety applications",
-                
-                "Deploy edge intelligence with {ai_prediction_model} machine learning achieving {accuracy_level} accuracy for smart city analytics"
-            ],
-            
-            "Industrial_Automation": [
-                "Deploy industrial {slice_category} network with {latency_req} deterministic latency for time-sensitive manufacturing and automation applications",
-                
-                "Configure {antenna_type} antenna systems for factory {deployment_scenario} environment with industrial-grade reliability and interference immunity",
-                
-                "Implement {zero_trust_identity} zero-trust security for industrial device authentication and secure machine-to-machine communications",
-                
-                "Ensure {reliability_req} ultra-high reliability with {redundancy} redundancy configuration for mission-critical manufacturing processes",
-                
-                "Monitor production systems using {anomaly_detection} anomaly detection with {predictive_analytics} predictive maintenance capabilities",
-                
-                "Scale manufacturing processes using {ai_prediction_model} artificial intelligence for demand forecasting and capacity optimization",
-                
-                "Secure industrial networks with {encryption} encryption and {device_trust} hardware attestation for operational technology protection",
-                
-                "Optimize factory operations achieving {throughput_req} throughput targets with intelligent resource allocation and process optimization"
-            ]
-        }
-    
-    def _initialize_cross_domain_templates(self) -> Dict[str, List[str]]:
-        """
-        Initialize comprehensive cross-domain templates with enhanced readability and diversity.
-        
-        Returns:
-            Dict mapping cross-domain scenarios to template lists
-        """
-        return {
-            "Deployment Intent": [
-                "Execute comprehensive cross-domain {intent_type} spanning RAN-Core-Transport domains with coordinated resource allocation and performance optimization",
-                
-                "Coordinate {network_function} deployment through {nfvo_id} Network Function Virtualization Orchestrator and {vnfm_id} VNF Manager integration",
-                
-                "Implement {antenna_type} radio access network with {beamforming} beamforming across {low_band}/{mid_band}/{high_band} spectrum coordination",
-                
-                "Provision core network infrastructure with {cpu_cores} processing cores and {memory_size} memory allocation for network function virtualization",
-                
-                "Establish {backhaul_type} transport network at {backhaul_capacity} capacity with end-to-end quality of service guarantees",
-                
-                "Secure multi-domain deployment using {auth_method} authentication and {encryption} encryption with cross-domain key management",
-                
-                "Monitor cross-domain performance using {anomaly_detection} anomaly detection with {predictive_analytics} analytics spanning all domains",
-                
-                "Orchestrate multi-domain deployment with {workflow_engine} workflow coordination and automated lifecycle management"
-            ],
-            
-            "Modification Intent": [
-                "Orchestrate cross-domain modification affecting RAN-Core-Edge domains with coordinated change management and rollback capabilities",
-                
-                "Update {network_function} configuration with {deployment_flavor} flavor modifications across multiple network domains",
-                
-                "Adjust {antenna_type} radio parameters and {beamforming} beamforming configuration with core network coordination",
-                
-                "Modify core network {cpu_cores} processing cores and {memory_size} memory allocation with transport network optimization",
-                
-                "Optimize edge computing {connection_density} device density and {bandwidth_allocation} bandwidth allocation across domains",
-                
-                "Implement {rollback_strategy} rollback strategy with {execution_timeout} timeout coordination across all affected domains",
-                
-                "Monitor cross-domain changes using {distributed_tracing} distributed tracing with comprehensive impact analysis",
-                
-                "Coordinate modifications across {cloud_providers} multi-cloud infrastructure with unified management and monitoring"
-            ],
-            
-            "End_to_End_Orchestration": [
-                "Orchestrate end-to-end service delivery across all network domains with comprehensive resource coordination and optimization",
-                
-                "Coordinate radio access {antenna_type} systems with core {network_function} deployment and transport network integration",
-                
-                "Implement transport {backhaul_type} infrastructure with edge {edge_strategy} deployment strategy for optimal service delivery",
-                
-                "Secure multi-domain architecture using {zero_trust_identity} identity verification and {encryption} end-to-end encryption",
-                
-                "Monitor cross-domain performance using {distributed_tracing} distributed tracing with comprehensive service correlation",
-                
-                "Scale services spanning {min_instances} to {max_instances} instances across multiple domains with intelligent coordination",
-                
-                "Optimize end-to-end performance using {ai_prediction_model} machine learning and {optimization_algorithm} optimization algorithms",
-                
-                "Ensure {sla_type} Service Level Agreement compliance across all network domains with unified performance management"
-            ],
-            
-            "Multi_Vendor_Integration": [
-                "Integrate multi-vendor deployment with {vnf_provider} primary vendor and ecosystem partner coordination for interoperability",
-                
-                "Coordinate {orchestration_platform} orchestration across vendor boundaries with standardized interfaces and protocols",
-                
-                "Implement unified {mesh_technology} service mesh spanning multiple vendor solutions with consistent policy enforcement",
-                
-                "Secure multi-vendor environment using {auth_method} authentication standards and vendor-agnostic security frameworks",
-                
-                "Monitor integrated solution using {distributed_tracing} distributed tracing and vendor-neutral analytics platforms",
-                
-                "Scale vendor-agnostic services using {auto_scaling_policy} standardized scaling policies across different platforms",
-                
-                "Optimize multi-vendor performance achieving {accuracy_level} targets with unified optimization and management",
-                
-                "Ensure interoperability across {cloud_providers} platforms with standardized APIs and integration frameworks"
-            ]
-        }
-    
-    def _initialize_ai_driven_templates(self) -> Dict[str, List[str]]:
-        """
-        Initialize comprehensive AI-driven templates with enhanced readability and diversity.
-        
-        Returns:
-            Dict mapping AI-driven scenarios to template lists
-        """
-        return {
-            "Deployment Intent": [
-                "Deploy AI-native {slice_category} network slice with {ai_prediction_model} machine learning achieving {accuracy_level} prediction accuracy for intelligent network operations",
-                
-                "Implement autonomous {auto_scaling_policy} scaling from {min_instances} to {max_instances} instances with predictive capacity management and cost optimization",
-                
-                "Configure {mesh_technology} intelligent service mesh with {load_balancing} load balancing and predictive {circuit_breaker} circuit breaker patterns",
-                
-                "Orchestrate deployment using {workflow_engine} AI-enhanced workflows with {iac_tool} infrastructure-as-code and intelligent automation",
-                
-                "Monitor using {anomaly_detection} behavioral anomaly detection with {predictive_analytics} predictive analytics and {distributed_tracing} intelligent tracing",
-                
-                "Secure through {zero_trust_identity} continuous identity verification and {device_trust} AI-enhanced device attestation",
-                
-                "Optimize performance achieving {adaptation_speed} response time with machine learning-driven resource allocation and traffic engineering",
-                
-                "Deploy cognitive infrastructure with self-healing capabilities and autonomous optimization for zero-touch operations"
-            ],
-            
-            "Performance Assurance Intent": [
-                "Establish cognitive performance assurance using {ai_prediction_model} neural networks with deep learning for intelligent network optimization",
-                
-                "Implement {optimization_algorithm} multi-objective optimization with genetic algorithms for complex performance trade-off management",
-                
-                "Deploy self-healing {auto_scaling_policy} scaling policies with reinforcement learning for adaptive resource management",
-                
-                "Utilize {predictive_analytics} predictive analytics with {anomaly_detection} anomaly detection achieving {accuracy_level} prediction accuracy",
-                
-                "Coordinate using {workflow_engine} intelligent orchestration with machine learning-driven decision making and automation",
-                
-                "Monitor through {distributed_tracing} AI-enhanced tracing with intelligent correlation and root cause analysis",
-                
-                "Optimize using {optimization_algo} optimization algorithms with {retention_period} historical analysis for continuous improvement",
-                
-                "Achieve autonomous performance management with minimal human intervention and intelligent self-optimization"
-            ],
-            
-            "Feasibility Check": [
-                "Analyze AI deployment feasibility using {ai_prediction_model} machine learning models with computational requirement assessment",
-                
-                "Evaluate {optimization_algorithm} optimization feasibility within {adaptation_speed} response time constraints and resource limitations",
-                
-                "Assess {predictive_analytics} capabilities with {anomaly_detection} detection accuracy and data requirement analysis",
-                
-                "Consider {workflow_engine} intelligent orchestration with {distributed_tracing} observability implementation complexity",
-                
-                "Analyze {optimization_algo} optimization potential with {compression_ratio} efficiency and computational overhead assessment",
-                
-                "Evaluate cognitive capabilities achieving {accuracy_level} accuracy with training data and model complexity requirements",
-                
-                "Assess AI infrastructure requirements including GPU acceleration, memory bandwidth, and specialized hardware needs",
-                
-                "Consider machine learning model deployment, scaling, and continuous learning requirements with operational complexity"
-            ],
-            
-            "Autonomous_Operations": [
-                "Deploy autonomous network operations using {ai_prediction_model} machine learning with continuous learning and adaptation capabilities",
-                
-                "Implement self-optimizing {optimization_algorithm} optimization achieving {accuracy_level} accuracy with minimal human intervention",
-                
-                "Configure autonomous scaling using {auto_scaling_policy} policies with predictive demand forecasting and resource optimization",
-                
-                "Monitor autonomously using {predictive_analytics} and {anomaly_detection} with intelligent incident prediction and prevention",
-                
-                "Heal automatically with {adaptation_speed} response time using AI-driven root cause analysis and automated remediation",
-                
-                "Optimize continuously using {optimization_algo} algorithms with reinforcement learning and performance feedback loops",
-                
-                "Adapt dynamically to changing network conditions, traffic patterns, and user requirements with intelligent decision making",
-                
-                "Achieve zero-touch operations with intelligent automation, self-healing, and autonomous optimization capabilities"
-            ]
         }
