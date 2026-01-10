@@ -3,9 +3,13 @@ import random
 from typing import Dict, Any, List
 from dataclasses import dataclass
 from typing import Dict, Any
-from .Constants_Enums import NETWORK_FUNCTIONS
+from .Constants_Enums import (
+    NETWORK_FUNCTIONS, TELECOM_VENDORS, CLOUD_PROVIDERS, 
+    CONTAINER_RUNTIMES, IMAGE_REGISTRIES, SERVICE_MESHES,
+    ORCHESTRATION_TOOLS, CONFIG_MANAGEMENT_TOOLS
+)
 from .Parameter_Generator import ParameterGenerator
-from .utilis_generator import current_timestamp, generate_unique_id, random_choice, random_int, random_float
+from .utils_generator import current_timestamp, generate_unique_id, random_choice, random_int, random_float
 
 class DeploymentIntentGenerator:
     """Generator for deployment intent records."""
@@ -69,7 +73,7 @@ class DeploymentIntentGenerator:
                 "vnf_descriptor": {
                     "vnfd_id": f"vnfd_{uuid.uuid4().hex[:12]}",
                     "vnfd_version": f"{random_int(1, 5)}.{random_int(0, 9)}.{random_int(0, 99)}",
-                    "vnf_provider": random_choice(['Ericsson', 'Nokia', 'Huawei', 'Samsung', 'ZTE', 'Cisco']),
+                    "vnf_provider": random_choice(TELECOM_VENDORS),
                     "vnf_product_name": f"{random_choice(NETWORK_FUNCTIONS)}_Advanced_{random_int(1000, 9999)}",
                     "vnf_software_version": f"SW_{random_int(1, 10)}.{random_int(0, 99)}.{random_int(0, 999)}",
                     "vnfd_invariant_id": f"invariant_{uuid.uuid4().hex[:16]}"
@@ -141,8 +145,8 @@ class DeploymentIntentGenerator:
         extensive_params = {
             "advanced_deployment_specification": {
                 "multi_vendor_support": {
-                    "primary_vendor": random.choice(['Ericsson', 'Nokia', 'Huawei', 'Samsung', 'ZTE']),
-                    "secondary_vendor": random.choice(['Cisco', 'Juniper', 'Dell', 'HPE']),
+                    "primary_vendor": random.choice(TELECOM_VENDORS),
+                    "secondary_vendor": random.choice(TELECOM_VENDORS),
                     "vendor_interoperability": random.choice(['FULL', 'PARTIAL', 'LIMITED']),
                     "vendor_lock_in_mitigation": random.choice(['ENABLED', 'DISABLED']),
                     "multi_vendor_orchestration": {
@@ -174,8 +178,8 @@ class DeploymentIntentGenerator:
                         }
                     },
                     "infrastructure_as_code": {
-                        "iac_tool": random.choice(['Terraform', 'Ansible', 'CloudFormation', 'Pulumi']),
-                        "configuration_management": random.choice(['Puppet', 'Chef', 'SaltStack', 'Ansible']),
+                        "iac_tool": random.choice(ORCHESTRATION_TOOLS),
+                        "configuration_management": random.choice(CONFIG_MANAGEMENT_TOOLS),
                         "version_control": {
                             "repository_type": random.choice(['Git', 'SVN', 'Mercurial']),
                             "branching_strategy": random.choice(['GitFlow', 'GitHub Flow', 'GitLab Flow']),
@@ -185,8 +189,8 @@ class DeploymentIntentGenerator:
                 },
                 "cloud_native_features": {
                     "containerization": {
-                        "container_runtime": random.choice(['Docker', 'Containerd', 'CRI-O', 'Podman']),
-                        "image_registry": random.choice(['Docker Hub', 'Harbor', 'Quay', 'ECR', 'GCR']),
+                        "container_runtime": random.choice(CONTAINER_RUNTIMES),
+                        "image_registry": random.choice(IMAGE_REGISTRIES),
                         "image_scanning": {
                             "vulnerability_scanning": random.choice(['ENABLED', 'DISABLED']),
                             "compliance_scanning": random.choice(['ENABLED', 'DISABLED']),
@@ -200,7 +204,7 @@ class DeploymentIntentGenerator:
                         }
                     },
                     "service_mesh": {
-                        "mesh_technology": random.choice(['Istio', 'Linkerd', 'Consul Connect', 'Envoy']),
+                        "mesh_technology": random.choice(SERVICE_MESHES),
                         "traffic_management": {
                             "load_balancing": random.choice(['ROUND_ROBIN', 'LEAST_CONN', 'WEIGHTED', 'CONSISTENT_HASH']),
                             "circuit_breaker": random.choice(['ENABLED', 'DISABLED']),
@@ -229,7 +233,7 @@ class DeploymentIntentGenerator:
             },
             "advanced_orchestration_parameters": {
                 "multi_cloud_orchestration": {
-                    "cloud_providers": random.sample(['AWS', 'Azure', 'GCP', 'IBM Cloud', 'Oracle Cloud'], random.randint(1, 3)),
+                    "cloud_providers": random.sample(CLOUD_PROVIDERS, random.randint(1, 3)),
                     "hybrid_cloud_strategy": random.choice(['CLOUD_FIRST', 'ON_PREMISE_FIRST', 'BALANCED']),
                     "cloud_bursting": {
                         "enabled": random.choice(['true', 'false']),
@@ -534,7 +538,7 @@ class DeploymentIntentGenerator:
         version_minor = random_int(0, 9)
         version_patch = random_int(0, 99)
         
-        providers = ['Ericsson', 'Nokia', 'Huawei', 'Samsung', 'ZTE', 'Cisco']
+        providers = TELECOM_VENDORS
         if priority in ['CRITICAL', 'EMERGENCY']:
             # Prefer established vendors for critical deployments
             providers = ['Ericsson', 'Nokia', 'Cisco']

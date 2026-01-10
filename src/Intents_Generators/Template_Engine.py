@@ -642,6 +642,9 @@ class AdvancedTemplateEngine:
                 Extracted value or default
             """
             try:
+                from ..validation import get_validator
+                validator = get_validator()
+                
                 keys = path.split('.')
                 current = data
                 for key in keys:
@@ -649,10 +652,19 @@ class AdvancedTemplateEngine:
                         current = current[key]
                     else:
                         logger.debug(f"Path {path} not found, using default: {default}")
+                        # Log default usage for data quality tracking
+                        validator.log_default_usage(path, default, "Path not found in parameters")
                         return default
                 return current
             except Exception as e:
                 logger.warning(f"Error extracting {path}: {str(e)}, using default: {default}")
+                # Log default usage for data quality tracking
+                try:
+                    from ..validation import get_validator
+                    validator = get_validator()
+                    validator.log_default_usage(path, default, f"Exception: {str(e)}")
+                except:
+                    pass  # Don't fail if validator import fails
                 return default
         
         # Extract network topology and infrastructure parameters

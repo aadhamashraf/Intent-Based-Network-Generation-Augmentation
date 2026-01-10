@@ -34,62 +34,153 @@ import uuid
 import json
 import csv
 import logging
-import torch
-import spacy
-from faker import Faker
-from deep_translator import GoogleTranslator
-from transformers import AutoTokenizer, pipeline, T5Tokenizer, GPT2Tokenizer, GPTNeoForCausalLM, BertTokenizer, BertForMaskedLM
-from nltk.corpus import wordnet
-import nltk
+try:
+    import torch
+except ImportError:
+    torch = None
 
 try:
-    nltk.download('wordnet', quiet=True)
-    nltk.download('punkt', quiet=True)
-    nltk.download('averaged_perceptron_tagger', quiet=True)
+    import spacy
+except ImportError:
+    nlp = None
+    spacy = None
+
+try:
+    from faker import Faker
+except ImportError:
+    Faker = None
+
+try:
+    from deep_translator import GoogleTranslator
+except ImportError:
+    GoogleTranslator = None
+
+try:
+    from transformers import AutoTokenizer, pipeline, T5Tokenizer, GPT2Tokenizer, GPTNeoForCausalLM, BertTokenizer, BertForMaskedLM
+except ImportError:
+    AutoTokenizer = None
+    pipeline = None
+    T5Tokenizer = None
+    GPT2Tokenizer = None
+    GPTNeoForCausalLM = None
+    BertTokenizer = None
+    BertForMaskedLM = None
+
+try:
+    from nltk.corpus import wordnet
+    import nltk
+except ImportError:
+    nltk = None
+    wordnet = None
+
+try:
+    if nltk:
+        nltk.download('wordnet', quiet=True)
+        nltk.download('punkt', quiet=True)
+        nltk.download('averaged_perceptron_tagger', quiet=True)
 except:
     pass
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch and torch.cuda.is_available() else "cpu"
 
-fake = Faker()
+fake = Faker() if Faker else None
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 logger.info(f"Device set to use {device}")
 
-try:
-    bert_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-    bert_model = BertForMaskedLM.from_pretrained("bert-base-uncased").to(device)
-except Exception as e:
-    logger.warning(f"Failed to load BERT model: {e}")
-    bert_tokenizer = None
-    bert_model = None
+# Global model cache for lazy loading
+_model_cache = {}
 
-try:
-    nlp = spacy.load("en_core_web_md")
-except Exception as e:
-    logger.warning(f"Failed to load spaCy model: {e}")
-    nlp = None
+def _get_bert_model():
+    """Lazy load BERT model."""
+    if 'bert' not in _model_cache:
+        try:
+            if BertTokenizer is None or BertForMaskedLM is None:
+                logger.warning("BERT dependencies not available")
+                _model_cache['bert'] = (None, None)
+                return None, None
+            
+            bert_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+            bert_model = BertForMaskedLM.from_pretrained("bert-base-uncased").to(device)
+            _model_cache['bert'] = (bert_tokenizer, bert_model)
+            logger.info("BERT model loaded successfully")
+        except Exception as e:
+            logger.warning(f"Failed to load BERT model: {e}")
+            _model_cache['bert'] = (None, None)
+    
+    return _model_cache['bert']
 
-try:
-    gpt2_tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-125M")
-    gpt2_tokenizer.pad_token = gpt2_tokenizer.eos_token
-    gpt2_model = GPTNeoForCausalLM.from_pretrained("EleutherAI/gpt-neo-125M").to(device)
-except Exception as e:
-    logger.warning(f"Failed to load GPT-Neo model: {e}")
-    gpt2_tokenizer = None
-    gpt2_model = None
+def _get_spacy_model():
+    """Lazy load spaCy model."""
+    if 'spacy' not in _model_cache:
+        try:
+            if spacy is None:
+                logger.warning("spaCy not available")
+                _model_cache['spacy'] = None
+                return None
+            
+            nlp = spacy.load("en_core_web_md")
+            _model_cache['spacy'] = nlp
+            logger.info("spaCy model loaded successfully")
+        except Exception as e:
+            logger.warning(f"Failed to load spaCy model: {e}")
+            _model_cache['spacy'] = None
+    
+    return _model_cache['spacy']
 
-try:
-    paraphraser = pipeline(
-        "text2text-generation",
-        model="Vamsi/T5_Paraphrase_Paws",
-        tokenizer=T5Tokenizer.from_pretrained("Vamsi/T5_Paraphrase_Paws", legacy=False),
-        device=0 if device == "cuda" else -1
-    )
-except Exception as e:
-    logger.warning(f"Failed to load T5 paraphraser: {e}")
-    paraphraser = None
+def _get_gpt2_model():
+    """Lazy load GPT-2/GPT-Neo model."""
+    if 'gpt2' not in _model_cache:
+        try:
+            if AutoTokenizer is None or GPTNeoForCausalLM is None:
+                logger.warning("GPT-Neo dependencies not available")
+                _model_cache['gpt2'] = (None, None)
+                return None, None
+            
+            gpt2_tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-125M")
+            gpt2_tokenizer.pad_token = gpt2_tokenizer.eos_token
+            gpt2_model = GPTNeoForCausalLM.from_pretrained("EleutherAI/gpt-neo-125M").to(device)
+            _model_cache['gpt2'] = (gpt2_tokenizer, gpt2_model)
+            logger.info("GPT-Neo model loaded successfully")
+        except Exception as e:
+            logger.warning(f"Failed to load GPT-Neo model: {e}")
+            _model_cache['gpt2'] = (None, None)
+    
+    return _model_cache['gpt2']
+
+def _get_paraphraser():
+    """Lazy load T5 paraphraser model."""
+    if 'paraphraser' not in _model_cache:
+        try:
+            if pipeline is None or T5Tokenizer is None:
+                logger.warning("T5 paraphraser dependencies not available")
+                _model_cache['paraphraser'] = None
+                return None
+            
+            paraphraser = pipeline(
+                "text2text-generation",
+                model="Vamsi/T5_Paraphrase_Paws",
+                tokenizer=T5Tokenizer.from_pretrained("Vamsi/T5_Paraphrase_Paws", legacy=False),
+                device=0 if device == "cuda" else -1
+            )
+            _model_cache['paraphraser'] = paraphraser
+            logger.info("T5 paraphraser loaded successfully")
+        except Exception as e:
+            logger.warning(f"Failed to load T5 paraphraser: {e}")
+            _model_cache['paraphraser'] = None
+    
+    return _model_cache['paraphraser']
+
+def get_augmentation_status():
+    """Return status of all augmentation models."""
+    return {
+        "BERT": bert_model is not None,
+        "spaCy": nlp is not None,
+        "GPT-Neo": gpt2_model is not None,
+        "T5": paraphraser is not None,
+        "Device": device
+    }
 
 
 def back_translate(text, retries=3):
@@ -105,6 +196,10 @@ def back_translate(text, retries=3):
 
 def synonym_augment(text):
     """Replace a random word with a synonym using WordNet."""
+    if not wordnet:
+        logger.warning("WordNet not available, returning original text")
+        return text
+        
     words = text.split()
     if not words:
         return text
@@ -129,39 +224,25 @@ def entity_shuffle(text):
     random.shuffle(words)
     return ' '.join(words)
 
-def gpt2_synthesize(text, max_new_tokens=50):
-    if not gpt2_model or not gpt2_tokenizer:
-        logger.warning("GPT-2 model not available, returning original text")
+def gpt2_synthesize(text, max_length=100):
+    """Generate a continuation using GPT-Neo."""
+    gpt2_tokenizer, gpt2_model = _get_gpt2_model()
+    
+    if gpt2_tokenizer is None or gpt2_model is None:
+        logger.warning("GPT-Neo model not available, returning original text")
         return text
-        
+    
     try:
-        prompt = f"Extend this network intent logically: {text}\nIntent:"
-
-        encoded = gpt2_tokenizer(
-            prompt,
-            return_tensors='pt',
-            truncation=True,
-            padding=True
-        ).to(device)
-
-        output_ids = gpt2_model.generate(
-            input_ids=encoded["input_ids"],
-            attention_mask=encoded["attention_mask"],
-            max_new_tokens=max_new_tokens,
-            do_sample=True,
-            top_k=50,
-            top_p=0.95,
-            temperature=0.9,
+        inputs = gpt2_tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(device)
+        outputs = gpt2_model.generate(
+            inputs["input_ids"],
+            max_length=max_length,
+            num_return_sequences=1,
             pad_token_id=gpt2_tokenizer.eos_token_id
         )
-
-        generated = gpt2_tokenizer.decode(output_ids[0], skip_special_tokens=True)
-        continuation = generated.replace(prompt, "").strip()
-
-        return text + " " + continuation if continuation else text
-
+        return gpt2_tokenizer.decode(outputs[0], skip_special_tokens=True)
     except Exception as e:
-        logger.warning(f"GPT generation failed: {e}")
+        logger.warning(f"GPT-Neo generation failed: {e}")
         return text
 
 # Add missing augmentation functions referenced in main.py
@@ -182,31 +263,75 @@ def entity_shuffle_augment(text):
     return entity_shuffle(text)
 
 def contextual_synonym_augment(text):
-    """Replace one word with a contextually similar one using spaCy word vectors."""
-    if not nlp:
+    """Replace a word with a contextually similar word using spaCy and WordNet."""
+    nlp = _get_spacy_model()
+    
+    if nlp is None:
         logger.warning("spaCy model not available, returning original text")
         return text
-        
+    
     doc = nlp(text)
-    words = [token.text for token in doc if token.has_vector and not token.is_stop and token.is_alpha]
+    words = [token.text for token in doc if not token.is_punct and not token.is_space]
+    
     if not words:
         return text
 
     target_word = random.choice(words)
-    similar_words = sorted(
-        [(w.text, doc.vocab[target_word].similarity(w.vector)) for w in nlp.vocab if w.has_vector and w.is_lower and w.is_alpha],
-        key=lambda x: -x[1]
-    )
+    
+    if not wordnet:
+        logger.warning("WordNet not available for contextual augmentation, returning original text")
+        return text
 
-    for new_word, _ in similar_words:
-        if new_word != target_word and len(new_word) > 2:
-            return text.replace(target_word, new_word, 1)
-    return text
+    # Efficiently find synonyms using WordNet first, then filter/rank if needed
+    # Full vocab scan in spaCy is too slow (O(V)). 
+    # Fallback to WordNet synonyms but check vector similarity if available
+    synsets = wordnet.synsets(target_word)
+    if not synsets:
+        return text
+    
+    synonyms = set()
+    for syn in synsets:
+        for lemma in syn.lemmas():
+            if lemma.name() != target_word:
+                synonyms.add(lemma.name().replace('_', ' '))
+    
+    if not synonyms:
+        return text
+    
+    # If we have spaCy vectors, rank by similarity
+    target_token = None
+    for token in doc:
+        if token.text == target_word:
+            target_token = token
+            break
+    
+    if target_token and target_token.has_vector:
+        # Rank synonyms by vector similarity
+        synonym_scores = []
+        for syn in synonyms:
+            syn_doc = nlp(syn)
+            if syn_doc and syn_doc[0].has_vector:
+                similarity = target_token.similarity(syn_doc[0])
+                synonym_scores.append((syn, similarity))
+        
+        if synonym_scores:
+            # Pick from top 3 most similar
+            synonym_scores.sort(key=lambda x: x[1], reverse=True)
+            top_syns = [s[0] for s in synonym_scores[:3]]
+            replacement = random.choice(top_syns)
+        else:
+            replacement = random.choice(list(synonyms))
+    else:
+        replacement = random.choice(list(synonyms))
+    
+    return text.replace(target_word, replacement, 1)
 
 
 def mask_fill_augment(text):
     """Randomly mask a word and let BERT predict a replacement."""
-    if not bert_model or not bert_tokenizer:
+    bert_tokenizer, bert_model = _get_bert_model()
+    
+    if bert_tokenizer is None or bert_model is None:
         logger.warning("BERT model not available, returning original text")
         return text
         
@@ -248,7 +373,9 @@ def adversarial_noise(text):
 
 def paraphrase(text, retries=2):
     """Paraphrase text using a T5 transformer with retries."""
-    if not paraphraser:
+    paraphraser = _get_paraphraser()
+    
+    if paraphraser is None:
         logger.warning("T5 paraphraser not available, returning original text")
         return text
         
@@ -258,5 +385,7 @@ def paraphrase(text, retries=2):
                                  top_k=120, top_p=0.95, num_return_sequences=1)
             return result[0]['generated_text']
         except Exception as e:
-            logger.warning(f"Paraphrasing failed (attempt {attempt+1}): {e}")
+            logger.warning(f"Paraphrasing attempt {attempt + 1} failed: {e}")
+            if attempt == retries - 1:
+                return text
     return text

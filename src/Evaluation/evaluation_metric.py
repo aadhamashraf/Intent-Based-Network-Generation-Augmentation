@@ -68,6 +68,27 @@ class DataEvaluator:
             'overall_quality': 4.0
         }
 
+    def check_dependencies(self) -> Dict[str, bool]:
+        """Check availability of external dependencies (Ollama)."""
+        status = {"ollama_installed": False, "mistral_model_available": False}
+        
+        # Check Ollama executable
+        try:
+            subprocess.run(['ollama', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            status["ollama_installed"] = True
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return status
+
+        # Check for Mistral model
+        try:
+            result = subprocess.run(['ollama', 'list'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            if b'mistral' in result.stdout:
+                status["mistral_model_available"] = True
+        except subprocess.CalledProcessError:
+            pass
+            
+        return status
+
     def _log(self, message: str):
         print(f"[DataEvaluator] {message}")
 

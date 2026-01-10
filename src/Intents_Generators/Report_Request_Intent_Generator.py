@@ -1,9 +1,10 @@
+
 import uuid
 import random
 from typing import Dict, Any
 from .Constants_Enums import NETWORK_FUNCTIONS, ADVANCED_SLICE_TYPES, PERFORMANCE_METRICS
 from .Parameter_Generator import ParameterGenerator
-from .utilis_generator import current_timestamp, generate_unique_id, random_choice, random_int, random_float, random_timestamp_within_days
+from .utils_generator import current_timestamp, generate_unique_id, random_choice, random_int, random_float, random_timestamp_within_days
 
 class ReportRequestIntentGenerator:
     """Generator for report request intent records."""

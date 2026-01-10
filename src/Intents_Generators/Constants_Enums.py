@@ -92,3 +92,12 @@ PERFORMANCE_METRICS = [
     'End_to_End_Latency', 'Jitter_Variation', 'Packet_Loss_Rate',
     'Throughput_Capacity', 'Connection_Density', 'Mobility_Success_Rate',
     'Service_Availability', 'Network_Efficiency', 'Resource_Utilization']
+
+# Vendor and Infrastructure Constants
+TELECOM_VENDORS = ['Ericsson', 'Nokia', 'Huawei', 'Samsung', 'ZTE', 'Cisco', 'Juniper', 'Dell', 'HPE']
+CLOUD_PROVIDERS = ['AWS', 'Azure', 'GCP', 'IBM Cloud', 'Oracle Cloud']
+CONTAINER_RUNTIMES = ['Docker', 'Containerd', 'CRI-O', 'Podman']
+IMAGE_REGISTRIES = ['Docker Hub', 'Harbor', 'Quay', 'ECR', 'GCR']
+SERVICE_MESHES = ['Istio', 'Linkerd', 'Consul Connect', 'Envoy']
+ORCHESTRATION_TOOLS = ['Terraform', 'Ansible', 'CloudFormation', 'Pulumi']
+CONFIG_MANAGEMENT_TOOLS = ['Puppet', 'Chef', 'SaltStack', 'Ansible']

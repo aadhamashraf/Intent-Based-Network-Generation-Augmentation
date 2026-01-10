@@ -2,14 +2,19 @@ import uuid
 import random
 from typing import Dict, Any
 from .Parameter_Generator import ParameterGenerator
-from .utilis_generator import current_timestamp, generate_unique_id, random_choice, random_int, random_float
+from .utils_generator import current_timestamp, generate_unique_id, random_choice, random_int, random_timestamp_within_days
 
 class ModificationIntentGenerator:
     """Generator for modification intent records."""
     
-    def __init__(self):
-        # Remove old constraint engine dependency - now handled by main generator
-        pass
+    def __init__(self, template_engine=None):
+        """
+        Initialize the modification intent generator.
+        
+        Args:
+            template_engine: Optional AdvancedTemplateEngine instance for description generation
+        """
+        self.template_engine = template_engine
     
     def generate_constrained_parameters(self, slice_type: str, priority: str, location: str, complexity: int) -> Dict[str, Any]:
         """Generate modification parameters with realistic constraints."""
@@ -93,19 +98,35 @@ class ModificationIntentGenerator:
                     'Integration_Testing'
                 ],
                 "performance_validation": {
-                    "latency_threshold": f"{random_float(1, 100)}ms",
+                    "latency_threshold": f"{random.uniform(1, 100):.2f}ms",
                     "throughput_threshold": f"{random_int(10, 10000)}Mbps",
-                    "error_rate_threshold": f"{random_float(0.01, 1)}%",
-                    "availability_threshold": f"{random_float(99, 99.99)}%"
+                    "error_rate_threshold": f"{random.uniform(0.01, 1):.2f}%",
+                    "availability_threshold": f"{random.uniform(99, 99.99):.2f}%"
                 }
             }
         }
         
         return {**base_params, **modification_params}
     
-    @staticmethod
-    def generate_description(params: Dict[str, Any], location: str, slice_type: str) -> str:
-        """Generate sophisticated modification intent description."""
+    def generate_description(self, params: Dict[str, Any], location: str, slice_type: str, context=None) -> str:
+        """
+        Generate sophisticated modification intent description.
+        
+        Args:
+            params: Generated parameters
+            location: Location category
+            slice_type: Slice type
+            context: Optional TemplateContext for advanced template generation
+            
+        Returns:
+            Generated description string
+        """
+        # Use AdvancedTemplateEngine if available and context provided
+        if self.template_engine is not None and context is not None:
+            description, _ = self.template_engine.generate_description(context)
+            return description
+        
+        # Fallback to simple generation if template engine not available
         target = params.get("modification_specification", {}).get("target_resource", {}).get("resource_type", "VNF_INSTANCE")
         operation = params.get("modification_specification", {}).get("modification_operations", [{}])[0].get("operation_type", "MODIFY_INFO")
         complexity = random_choice(['sophisticated', 'advanced', 'comprehensive', 'intelligent', 'adaptive'])

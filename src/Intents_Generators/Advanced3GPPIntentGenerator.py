@@ -9,7 +9,7 @@ from typing import List, Dict, Any
 
 from .Constants_Enums import IntentType, Priority, ADVANCED_LOCATIONS, ADVANCED_SLICE_TYPES, COMPLIANCE_STANDARDS, RESEARCH_CONTEXTS
 from .Data_Structures import NetworkIntent
-from .utilis_generator import generate_unique_id, random_choice, random_int, random_float, current_timestamp
+from .utils_generator import generate_unique_id, random_choice, random_int, random_float, current_timestamp
 from .Template_Engine import AdvancedTemplateEngine, TemplateContext
 from .Enhanced_Constraint_Engine import EnhancedConstraintEngine
 from .Deployment_Intent_Generator import DeploymentIntentGenerator
@@ -438,9 +438,4 @@ class Advanced3GPPIntentGenerator:
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(research_data, f, indent=2, ensure_ascii=False)
     
-    def reset_session(self):
-        """Reset the generator session and clear used IDs."""
-        self.used_ids.clear()
-        self.used_descriptions.clear()
-        self.intent_counter = 0
-        self.research_session_id = f"RESEARCH_{int(time.time())}_{uuid.uuid4().hex[:12]}"
+

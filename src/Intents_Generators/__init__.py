@@ -17,7 +17,7 @@ from .Enhanced_Constraint_Engine import EnhancedConstraintEngine
 from .Data_Structures import NetworkIntent, EvaluationMetrics, ValidationResult, SynthesisResult
 from .Constants_Enums import IntentType, Priority, NETWORK_FUNCTIONS, ADVANCED_SLICE_TYPES
 from .Parameter_Generator import ParameterGenerator
-from .utilis_generator import *
+from .utils_generator import *
 from .Deployment_Intent_Generator import DeploymentIntentGenerator
 from .Modification_Intent_Generator import ModificationIntentGenerator
 from .Performance_Assurance_Intent_Generator import PerformanceAssuranceIntentGenerator

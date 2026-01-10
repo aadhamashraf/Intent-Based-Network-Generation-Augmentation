@@ -28,10 +28,11 @@ sys.path.insert(0, src_path)
 
 from Intents_Generators.Advanced3GPPIntentGenerator import Advanced3GPPIntentGenerator
 from Intents_Generators.Constants_Enums import IntentType
-from Intents_Generators.utilis_generator import generate_unique_id
+from Intents_Generators.utils_generator import generate_unique_id
 from Evaluation.evaluation_metric import DataEvaluator
 from config import parse_args
 from augmentation_utils import *
+from health_check import get_health_check
 
 def main():
     """Main execution function with command-line argument support."""
@@ -39,6 +40,21 @@ def main():
     
     print("Advanced 3GPP Intent-Based Networking Data Generator")
     print("=" * 60)
+    
+    # Run health check
+    print("\nRunning system health check...")
+    health_check = get_health_check()
+    all_critical_ok, statuses = health_check.run_full_health_check()
+    
+    if not all_critical_ok:
+        print("\n⚠️  WARNING: Some critical dependencies are missing!")
+        print("The system may not function correctly.")
+        print("\nFor full functionality, please install:")
+        for name, status in statuses.items():
+            if not status.available and name in ['numpy', 'pandas']:
+                print(f"  - {name}")
+    
+    print("\n" + "=" * 60)
     print(f"Configuration:")
     print(f"  - Records to generate: {args.num_records}")
     print(f"  - Random seed: {args.random_seed}")
